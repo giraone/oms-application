@@ -1,0 +1,38 @@
+{
+  "omsApp": {
+    "documentObject": {
+      "home": {
+        "title": "Document Objects",
+        "createLabel": "Document Object erstellen",
+        "createOrEditLabel": "Document Object erstellen oder bearbeiten",
+        "notFound": "No Document Objects found"
+      },
+      "created": "Document Object erstellt mit ID {{ param }}",
+      "updated": "Document Object aktualisiert mit ID {{ param }}",
+      "deleted": "Document Object gelöscht mit ID {{ param }}",
+      "delete": {
+        "question": "Soll Document Object {{ id }} wirklich dauerhaft gelöscht werden?"
+      },
+      "detail": {
+        "title": "Document Object"
+      },
+      "path": "Path",
+      "name": "Name",
+      "mimeType": "Mime Type",
+      "objectUrl": "Object Url",
+      "thumbnailUrl": "Thumbnail Url",
+      "byteSize": "Byte Size",
+      "numberOfPages": "Number Of Pages",
+      "owner": "Owner",
+      "help": {
+        "path": "A string with slashes for creating a primary folder structure",
+        "name": "The name of the document, used by the author",
+        "mimeType": "The MIME type of the document",
+        "objectUrl": "The URL of the document",
+        "thumbnailUrl": "The URL to access a thumbnail of the document",
+        "byteSize": "Size in bytes of the document",
+        "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented"
+      }
+    }
+  }
+}

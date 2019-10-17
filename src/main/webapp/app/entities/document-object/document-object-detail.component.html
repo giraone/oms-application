@@ -1,0 +1,55 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="documentObject">
+            <h2><span jhiTranslate="omsApp.documentObject.detail.title">Document Object</span> {{documentObject.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="omsApp.documentObject.path" [ngbTooltip]="'omsApp.documentObject.help.path' | translate">Path</span></dt>
+                <dd>
+                    <span>{{documentObject.path}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.name" [ngbTooltip]="'omsApp.documentObject.help.name' | translate">Name</span></dt>
+                <dd>
+                    <span>{{documentObject.name}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.mimeType" [ngbTooltip]="'omsApp.documentObject.help.mimeType' | translate">Mime Type</span></dt>
+                <dd>
+                    <span>{{documentObject.mimeType}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.objectUrl" [ngbTooltip]="'omsApp.documentObject.help.objectUrl' | translate">Object Url</span></dt>
+                <dd>
+                    <span>{{documentObject.objectUrl}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.thumbnailUrl" [ngbTooltip]="'omsApp.documentObject.help.thumbnailUrl' | translate">Thumbnail Url</span></dt>
+                <dd>
+                    <span>{{documentObject.thumbnailUrl}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.byteSize" [ngbTooltip]="'omsApp.documentObject.help.byteSize' | translate">Byte Size</span></dt>
+                <dd>
+                    <span>{{documentObject.byteSize}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.numberOfPages" [ngbTooltip]="'omsApp.documentObject.help.numberOfPages' | translate">Number Of Pages</span></dt>
+                <dd>
+                    <span>{{documentObject.numberOfPages}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.owner">Owner</span></dt>
+                <dd>
+                    {{documentObject.ownerId}}
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/document-object', documentObject.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

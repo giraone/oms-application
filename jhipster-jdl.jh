@@ -1,0 +1,62 @@
+
+// LAYOUT
+
+#arrowSize: 2
+#lineWidth: 4
+
+// ENUMERATIONS
+
+enum AccessType {
+    READ_CONTENT, READ_METADATA, CHANGE_CONTENT
+}
+
+// ENITIES
+
+/**
+ * A document entity.
+ */
+@paginate(pager)
+@dto(mapstruct)
+entity DocumentObject {
+    /** The relative path to the object including folder structures */
+    path String required,
+    /** The name of the document, used by the author */
+    name String required,
+    /** The MIME type of the document */
+    mimeType String,
+    /** The URL of the document */
+    objectUrl String,
+    /** The URL to access a thumbnail of the document */
+    thumbnailUrl String,
+    /** Size in bytes of the document */
+    byteSize Integer,
+    /** Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented */
+    numberOfPages Integer
+}
+
+/**
+ * A document access entry (access control entry)
+ */
+@paginate(pager)
+@dto(mapstruct)
+entity DocumentAccessEntry {
+    access AccessType required,
+    until Instant 
+}
+
+// RELATIONSHIPS
+
+relationship ManyToOne {
+    DocumentObject{owner required} to User{id}
+}
+
+relationship ManyToOne {
+    DocumentAccessEntry{document required} to DocumentObject
+    DocumentAccessEntry{grantee required} to User
+}
+
+// MISC
+
+// Set service options to all
+service all with serviceImpl
+

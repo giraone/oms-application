@@ -42,6 +42,8 @@ public class CacheConfiguration {
             createCache(cm, com.giraone.oms.domain.User.class.getName());
             createCache(cm, com.giraone.oms.domain.Authority.class.getName());
             createCache(cm, com.giraone.oms.domain.User.class.getName() + ".authorities");
+            createCache(cm, com.giraone.oms.domain.DocumentObject.class.getName());
+            createCache(cm, com.giraone.oms.domain.DocumentAccessEntry.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

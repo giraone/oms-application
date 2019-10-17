@@ -1,0 +1,25 @@
+{
+  "omsApp": {
+    "documentAccessEntry": {
+      "home": {
+        "title": "Document Access Entries",
+        "createLabel": "Create a new Document Access Entry",
+        "createOrEditLabel": "Create or edit a Document Access Entry",
+        "notFound": "No Document Access Entries found"
+      },
+      "created": "A new Document Access Entry is created with identifier {{ param }}",
+      "updated": "A Document Access Entry is updated with identifier {{ param }}",
+      "deleted": "A Document Access Entry is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Document Access Entry {{ id }}?"
+      },
+      "detail": {
+        "title": "Document Access Entry"
+      },
+      "access": "Access",
+      "until": "Until",
+      "document": "Document",
+      "grantee": "Grantee"
+    }
+  }
+}
