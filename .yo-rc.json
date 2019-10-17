@@ -1,0 +1,45 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.giraone.oms",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "6.4.1",
+    "applicationType": "monolith",
+    "baseName": "oms",
+    "packageName": "com.giraone.oms",
+    "packageFolder": "com/giraone/oms",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true,
+    "websocket": "spring-websocket",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "ZTkwNTc4MDUxZDhkYzc2NWMyY2YxMTU1OGRkMDZiM2ZhZDk0MGM2OGE1NDI1MjEzYzdkNWE4MzM2YTk1ZGY2ZDI0NmM3Njc4MmEwNGQzZGQxZmM5NjBmNGFlMWEzMjFkZTI0Y2NkY2U1YmY1M2M3YzUzYjEzOWE2MWQ0ODA0NDc=",
+    "embeddableLaunchScript": false,
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "clientFramework": "angularX",
+    "clientTheme": "none",
+    "clientThemeVariant": "",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": true,
+    "nativeLanguage": "en",
+    "languages": [
+      "en",
+      "de"
+    ],
+    "blueprints": []
+  }
+}
