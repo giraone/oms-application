@@ -64,6 +64,12 @@
         <jaxb-runtime.version>2.3.2</jaxb-runtime.version>
         <archunit-junit5.version>0.11.0</archunit-junit5.version>
         <mapstruct.version>1.3.1.Final</mapstruct.version>
+
+        <!-- (HS) ADAPTED -->
+        <aws-sdk.version>1.11.642</aws-sdk.version>
+        <s3-mock.version>0.2.5</s3-mock.version>
+        <giraone.imagingkit.version>1.0.2</giraone.imagingkit.version>
+
         <!-- Plugin versions -->
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -130,6 +136,26 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-afterburner</artifactId>
         </dependency>
+
+
+        <!-- (HS) ADAPTED -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <!-- Mocking S3 for tests or if configuration wants it-->
+        <dependency>
+            <groupId>io.findify</groupId>
+            <artifactId>s3mock_2.12</artifactId>
+            <version>${s3-mock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.giraone.imaging</groupId>
+            <artifactId>imaging-kit</artifactId>
+            <version>${giraone.imagingkit.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

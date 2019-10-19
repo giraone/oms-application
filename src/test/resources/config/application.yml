@@ -113,3 +113,14 @@ jhipster:
 # ===================================================================
 
 # application:
+
+# S3 Connection properties (here we use S3Mock on port 9876)
+s3-properties:
+  mock: true
+  log-configuration-on-startup: true
+  endpoint-url: http://127.0.0.1:9876
+  access-key: "any-key-but-not-null"
+  secret-key: "any-key-but-not-null"
+  client-region: default
+  bucket-name: bucket-unit-test
+  path-style-access-enabled: true

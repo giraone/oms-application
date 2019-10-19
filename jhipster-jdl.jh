@@ -18,16 +18,20 @@ enum AccessType {
 @paginate(pager)
 @dto(mapstruct)
 entity DocumentObject {
-    /** The relative path to the object including folder structures */
+    /** The folder structure of the object using human readable path components */
     path String required,
-    /** The name of the document, used by the author */
+    /** The human readable name of the document */
     name String required,
+    /** The folder structure as an internal UUID */
+    pathUuid String required,
+    /** The name of the document as an internal UUID */
+    nameUuid String required,
     /** The MIME type of the document */
     mimeType String,
-    /** The URL of the document */
-    objectUrl String,
-    /** The URL to access a thumbnail of the document */
-    thumbnailUrl String,
+    /** The S3 object key to access the document */
+    objectUrl String maxlength(1024),
+    /** The S3 object key to access a thumbnail of the document */
+    thumbnailUrl String maxlength(1024),
     /** Size in bytes of the document */
     byteSize Integer,
     /** Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented */
@@ -41,7 +45,7 @@ entity DocumentObject {
 @dto(mapstruct)
 entity DocumentAccessEntry {
     access AccessType required,
-    until Instant 
+    until Instant
 }
 
 // RELATIONSHIPS

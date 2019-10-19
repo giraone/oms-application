@@ -24,6 +24,10 @@ const LAYOUT_ROUTES = [navbarRoute, ...errorRoute];
           path: 'account',
           loadChildren: () => import('./account/account.module').then(m => m.OmsAccountModule)
         },
+        {
+          path: 'documents',
+          loadChildren: () => import('./documents/documents-view/documents-view.module').then(m => m.OmsDocumentsViewModule)
+        },
         ...LAYOUT_ROUTES
       ],
       { enableTracing: DEBUG_INFO_ENABLED }

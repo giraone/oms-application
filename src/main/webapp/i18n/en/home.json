@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Welcome to OMS!",
+    "title": "Welcome to OMS",
     "subtitle": "Document storage based on S3",
     "logged": {
       "message": "You are logged in as user \"{{username}}\"."

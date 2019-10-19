@@ -1,0 +1,12 @@
+{
+  "documents": {
+    "menu": {
+      "storage": "Storage",
+      "documents": "Documents"
+    },
+    "titles": {
+      "documents": "Documents",
+      "upload": "Upload"
+    }
+  }
+}

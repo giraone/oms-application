@@ -1,0 +1,35 @@
+<div>
+    <h2 id="page-heading">
+        <span>Documents ({{documentObjects.length}})</span>
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity"
+            [routerLink]="['../documents-upload']">
+            <fa-icon [icon]="'plus'"></fa-icon>
+            <span>Upload new document ...</span>
+        </button>
+    </h2>
+
+    <jhi-alert-error></jhi-alert-error>
+    <jhi-alert></jhi-alert>
+
+    <div class="container" *ngIf="documentObjects?.length === 0">
+        <div class="alert alert-warning" >
+            <span>No documents found</span>
+        </div>
+    </div>
+
+    <div class="container" *ngIf="documentObjects?.length > 0"></div>
+        <div class="card-columns" *ngFor="let document of documentObjects">
+            <div class="card" style="width: 12rem;">
+                <img class="card-img-top" src="{{ document.thumbnailUrl }}" alt="Image of {{ document.name }}"
+                    (click)="display(document)">
+                <div class="card-body">
+                    <h5 class="card-title">{{ document.name }}</h5>
+                    <p class="card-text">{{ document.path }}</p>
+                    <a class="btn btn-primary" style="font-size: 80%" (click)="rename(document)">Rename</a>
+                    <a class="btn btn-secondary" style="font-size: 80%" (click)="delete(document)">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
