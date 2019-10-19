@@ -22,7 +22,6 @@ export class DocumentsUploadComponent implements OnInit {
   users: IUser[];
 
   editForm = this.fb.group({
-    path: [null, [Validators.required]],
     name: [null, [Validators.required]]
   });
 
@@ -37,10 +36,6 @@ export class DocumentsUploadComponent implements OnInit {
 
   ngOnInit() {
     this.isSaving = false;
-
-    this.editForm.patchValue({
-      path: "folder-001"
-    });
 
     this.activatedRoute.data.subscribe(({ documentObject }) => {
       this.updateForm(documentObject);
@@ -100,7 +95,6 @@ export class DocumentsUploadComponent implements OnInit {
 
   updateForm(documentObject: IDocumentObject) {
     this.editForm.patchValue({
-      path: documentObject.path,
       name: documentObject.name
     });
   }
@@ -113,7 +107,7 @@ export class DocumentsUploadComponent implements OnInit {
   private createFromForm(): IDocumentObject {
     return {
       ...new DocumentObject(),
-      path: this.editForm.get(['path']).value,
+      path: '/',
       name: this.editForm.get(['name']).value
     };
   }

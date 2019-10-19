@@ -15,19 +15,25 @@
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="path" type="varchar(255)" remarks="A string with slashes for creating a primary folder structure">
+            <column name="path" type="varchar(255)" remarks="The folder structure of the object using human readable path components">
                 <constraints nullable="false" />
             </column>
-            <column name="name" type="varchar(255)" remarks="The name of the document, used by the author">
+            <column name="name" type="varchar(255)" remarks="The human readable name of the document">
+                <constraints nullable="false" />
+            </column>
+            <column name="path_uuid" type="varchar(255)" remarks="The folder structure as an internal UUID">
+                <constraints nullable="false" />
+            </column>
+            <column name="name_uuid" type="varchar(255)" remarks="The name of the document as an internal UUID">
                 <constraints nullable="false" />
             </column>
             <column name="mime_type" type="varchar(255)" remarks="The MIME type of the document">
                 <constraints nullable="true" />
             </column>
-            <column name="object_url" type="varchar(255)" remarks="The URL of the document">
+            <column name="object_url" type="varchar(1024)" remarks="The S3 object key to access the document">
                 <constraints nullable="true" />
             </column>
-            <column name="thumbnail_url" type="varchar(255)" remarks="The URL to access a thumbnail of the document">
+            <column name="thumbnail_url" type="varchar(1024)" remarks="The S3 object key to access a thumbnail of the document">
                 <constraints nullable="true" />
             </column>
             <column name="byte_size" type="integer" remarks="Size in bytes of the document">
@@ -64,6 +70,8 @@
             <column name="id" type="numeric"/>
             <column name="path" type="string"/>
             <column name="name" type="string"/>
+            <column name="path_uuid" type="string"/>
+            <column name="name_uuid" type="string"/>
             <column name="mime_type" type="string"/>
             <column name="object_url" type="string"/>
             <column name="thumbnail_url" type="string"/>

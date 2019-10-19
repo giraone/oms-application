@@ -5,17 +5,6 @@
             <div>
                 <jhi-alert-error></jhi-alert-error>
                 <div class="form-group">
-                    <label class="form-control-label" for="field_path">Folder</label>
-                    <input type="text" class="form-control" name="path" id="field_path"
-                           formControlName="path"/>
-                    <div *ngIf="editForm.get('path').invalid && (editForm.get('path').dirty || editForm.get('path').touched)">
-                        <small class="form-text text-danger"
-                               *ngIf="editForm.get('path').errors.required" jhiTranslate="entity.validation.required">
-                        This field is required.
-                        </small>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label class="form-control-label" for="field_name">Name of document</label>
                     <input type="text" class="form-control" name="name" id="field_name"
                            formControlName="name"/>

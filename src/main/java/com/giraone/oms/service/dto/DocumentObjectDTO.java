@@ -14,18 +14,32 @@ public class DocumentObjectDTO implements Serializable {
     private Long id;
 
     /**
-     * A string with slashes for creating a primary folder structure
+     * The folder structure of the object using human readable path components
      */
     @NotNull
-    @ApiModelProperty(value = "A string with slashes for creating a primary folder structure", required = true)
+    @ApiModelProperty(value = "The folder structure of the object using human readable path components", required = true)
     private String path;
 
     /**
-     * The name of the document, used by the author
+     * The human readable name of the document
      */
     @NotNull
-    @ApiModelProperty(value = "The name of the document, used by the author", required = true)
+    @ApiModelProperty(value = "The human readable name of the document", required = true)
     private String name;
+
+    /**
+     * The folder structure as an internal UUID
+     */
+    @NotNull
+    @ApiModelProperty(value = "The folder structure as an internal UUID", required = true)
+    private String pathUuid;
+
+    /**
+     * The name of the document as an internal UUID
+     */
+    @NotNull
+    @ApiModelProperty(value = "The name of the document as an internal UUID", required = true)
+    private String nameUuid;
 
     /**
      * The MIME type of the document
@@ -34,15 +48,17 @@ public class DocumentObjectDTO implements Serializable {
     private String mimeType;
 
     /**
-     * The URL of the document
+     * The S3 object key to access the document
      */
-    @ApiModelProperty(value = "The URL of the document")
+    @Size(max = 1024)
+    @ApiModelProperty(value = "The S3 object key to access the document")
     private String objectUrl;
 
     /**
-     * The URL to access a thumbnail of the document
+     * The S3 object key to access a thumbnail of the document
      */
-    @ApiModelProperty(value = "The URL to access a thumbnail of the document")
+    @Size(max = 1024)
+    @ApiModelProperty(value = "The S3 object key to access a thumbnail of the document")
     private String thumbnailUrl;
 
     /**
@@ -82,6 +98,22 @@ public class DocumentObjectDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPathUuid() {
+        return pathUuid;
+    }
+
+    public void setPathUuid(String pathUuid) {
+        this.pathUuid = pathUuid;
+    }
+
+    public String getNameUuid() {
+        return nameUuid;
+    }
+
+    public void setNameUuid(String nameUuid) {
+        this.nameUuid = nameUuid;
     }
 
     public String getMimeType() {
@@ -159,6 +191,8 @@ public class DocumentObjectDTO implements Serializable {
             "id=" + getId() +
             ", path='" + getPath() + "'" +
             ", name='" + getName() + "'" +
+            ", pathUuid='" + getPathUuid() + "'" +
+            ", nameUuid='" + getNameUuid() + "'" +
             ", mimeType='" + getMimeType() + "'" +
             ", objectUrl='" + getObjectUrl() + "'" +
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +

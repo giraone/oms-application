@@ -43,6 +43,12 @@ public class DocumentObjectResourceIT {
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
 
+    private static final String DEFAULT_PATH_UUID = "AAAAAAAAAA";
+    private static final String UPDATED_PATH_UUID = "BBBBBBBBBB";
+
+    private static final String DEFAULT_NAME_UUID = "AAAAAAAAAA";
+    private static final String UPDATED_NAME_UUID = "BBBBBBBBBB";
+
     private static final String DEFAULT_MIME_TYPE = "AAAAAAAAAA";
     private static final String UPDATED_MIME_TYPE = "BBBBBBBBBB";
 
@@ -108,6 +114,8 @@ public class DocumentObjectResourceIT {
         DocumentObject documentObject = new DocumentObject()
             .path(DEFAULT_PATH)
             .name(DEFAULT_NAME)
+            .pathUuid(DEFAULT_PATH_UUID)
+            .nameUuid(DEFAULT_NAME_UUID)
             .mimeType(DEFAULT_MIME_TYPE)
             .objectUrl(DEFAULT_OBJECT_URL)
             .thumbnailUrl(DEFAULT_THUMBNAIL_URL)
@@ -130,6 +138,8 @@ public class DocumentObjectResourceIT {
         DocumentObject documentObject = new DocumentObject()
             .path(UPDATED_PATH)
             .name(UPDATED_NAME)
+            .pathUuid(UPDATED_PATH_UUID)
+            .nameUuid(UPDATED_NAME_UUID)
             .mimeType(UPDATED_MIME_TYPE)
             .objectUrl(UPDATED_OBJECT_URL)
             .thumbnailUrl(UPDATED_THUMBNAIL_URL)
@@ -166,6 +176,8 @@ public class DocumentObjectResourceIT {
         DocumentObject testDocumentObject = documentObjectList.get(documentObjectList.size() - 1);
         assertThat(testDocumentObject.getPath()).isEqualTo(DEFAULT_PATH);
         assertThat(testDocumentObject.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testDocumentObject.getPathUuid()).isEqualTo(DEFAULT_PATH_UUID);
+        assertThat(testDocumentObject.getNameUuid()).isEqualTo(DEFAULT_NAME_UUID);
         assertThat(testDocumentObject.getMimeType()).isEqualTo(DEFAULT_MIME_TYPE);
         assertThat(testDocumentObject.getObjectUrl()).isEqualTo(DEFAULT_OBJECT_URL);
         assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(DEFAULT_THUMBNAIL_URL);
@@ -234,6 +246,44 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
+    public void checkPathUuidIsRequired() throws Exception {
+        int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
+        // set the field null
+        documentObject.setPathUuid(null);
+
+        // Create the DocumentObject, which fails.
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        restDocumentObjectMockMvc.perform(post("/api/document-objects")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkNameUuidIsRequired() throws Exception {
+        int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
+        // set the field null
+        documentObject.setNameUuid(null);
+
+        // Create the DocumentObject, which fails.
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        restDocumentObjectMockMvc.perform(post("/api/document-objects")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllDocumentObjects() throws Exception {
         // Initialize the database
         documentObjectRepository.saveAndFlush(documentObject);
@@ -245,6 +295,8 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(documentObject.getId().intValue())))
             .andExpect(jsonPath("$.[*].path").value(hasItem(DEFAULT_PATH)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+            .andExpect(jsonPath("$.[*].pathUuid").value(hasItem(DEFAULT_PATH_UUID)))
+            .andExpect(jsonPath("$.[*].nameUuid").value(hasItem(DEFAULT_NAME_UUID)))
             .andExpect(jsonPath("$.[*].mimeType").value(hasItem(DEFAULT_MIME_TYPE)))
             .andExpect(jsonPath("$.[*].objectUrl").value(hasItem(DEFAULT_OBJECT_URL)))
             .andExpect(jsonPath("$.[*].thumbnailUrl").value(hasItem(DEFAULT_THUMBNAIL_URL)))
@@ -265,6 +317,8 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.id").value(documentObject.getId().intValue()))
             .andExpect(jsonPath("$.path").value(DEFAULT_PATH))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
+            .andExpect(jsonPath("$.pathUuid").value(DEFAULT_PATH_UUID))
+            .andExpect(jsonPath("$.nameUuid").value(DEFAULT_NAME_UUID))
             .andExpect(jsonPath("$.mimeType").value(DEFAULT_MIME_TYPE))
             .andExpect(jsonPath("$.objectUrl").value(DEFAULT_OBJECT_URL))
             .andExpect(jsonPath("$.thumbnailUrl").value(DEFAULT_THUMBNAIL_URL))
@@ -295,6 +349,8 @@ public class DocumentObjectResourceIT {
         updatedDocumentObject
             .path(UPDATED_PATH)
             .name(UPDATED_NAME)
+            .pathUuid(UPDATED_PATH_UUID)
+            .nameUuid(UPDATED_NAME_UUID)
             .mimeType(UPDATED_MIME_TYPE)
             .objectUrl(UPDATED_OBJECT_URL)
             .thumbnailUrl(UPDATED_THUMBNAIL_URL)
@@ -313,6 +369,8 @@ public class DocumentObjectResourceIT {
         DocumentObject testDocumentObject = documentObjectList.get(documentObjectList.size() - 1);
         assertThat(testDocumentObject.getPath()).isEqualTo(UPDATED_PATH);
         assertThat(testDocumentObject.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testDocumentObject.getPathUuid()).isEqualTo(UPDATED_PATH_UUID);
+        assertThat(testDocumentObject.getNameUuid()).isEqualTo(UPDATED_NAME_UUID);
         assertThat(testDocumentObject.getMimeType()).isEqualTo(UPDATED_MIME_TYPE);
         assertThat(testDocumentObject.getObjectUrl()).isEqualTo(UPDATED_OBJECT_URL);
         assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(UPDATED_THUMBNAIL_URL);

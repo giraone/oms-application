@@ -20,7 +20,7 @@ describe('Service Tests', () => {
       service = injector.get(DocumentObjectService);
       httpMock = injector.get(HttpTestingController);
 
-      elemDefault = new DocumentObject(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 0, 0);
+      elemDefault = new DocumentObject(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 0, 0);
     });
 
     describe('Service methods', () => {
@@ -58,6 +58,8 @@ describe('Service Tests', () => {
           {
             path: 'BBBBBB',
             name: 'BBBBBB',
+            pathUuid: 'BBBBBB',
+            nameUuid: 'BBBBBB',
             mimeType: 'BBBBBB',
             objectUrl: 'BBBBBB',
             thumbnailUrl: 'BBBBBB',
@@ -82,6 +84,8 @@ describe('Service Tests', () => {
           {
             path: 'BBBBBB',
             name: 'BBBBBB',
+            pathUuid: 'BBBBBB',
+            nameUuid: 'BBBBBB',
             mimeType: 'BBBBBB',
             objectUrl: 'BBBBBB',
             thumbnailUrl: 'BBBBBB',

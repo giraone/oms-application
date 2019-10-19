@@ -21,6 +21,8 @@
             <th scope="col"  jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="path"><span jhiTranslate="omsApp.documentObject.path">Path</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="name"><span jhiTranslate="omsApp.documentObject.name">Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th scope="col"  jhiSortBy="pathUuid"><span jhiTranslate="omsApp.documentObject.pathUuid">Path Uuid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th scope="col"  jhiSortBy="nameUuid"><span jhiTranslate="omsApp.documentObject.nameUuid">Name Uuid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="mimeType"><span jhiTranslate="omsApp.documentObject.mimeType">Mime Type</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="objectUrl"><span jhiTranslate="omsApp.documentObject.objectUrl">Object Url</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="thumbnailUrl"><span jhiTranslate="omsApp.documentObject.thumbnailUrl">Thumbnail Url</span> <fa-icon [icon]="'sort'"></fa-icon></th>
@@ -35,6 +37,8 @@
                 <td><a [routerLink]="['/document-object', documentObject.id, 'view' ]">{{documentObject.id}}</a></td>
                 <td>{{documentObject.path}}</td>
                 <td>{{documentObject.name}}</td>
+                <td>{{documentObject.pathUuid}}</td>
+                <td>{{documentObject.nameUuid}}</td>
                 <td>{{documentObject.mimeType}}</td>
                 <td>{{documentObject.objectUrl}}</td>
                 <td>{{documentObject.thumbnailUrl}}</td>

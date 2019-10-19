@@ -24,18 +24,32 @@ public class DocumentObject implements Serializable {
     private Long id;
 
     /**
-     * A string with slashes for creating a primary folder structure
+     * The folder structure of the object using human readable path components
      */
     @NotNull
     @Column(name = "path", nullable = false)
     private String path;
 
     /**
-     * The name of the document, used by the author
+     * The human readable name of the document
      */
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
+
+    /**
+     * The folder structure as an internal UUID
+     */
+    @NotNull
+    @Column(name = "path_uuid", nullable = false)
+    private String pathUuid;
+
+    /**
+     * The name of the document as an internal UUID
+     */
+    @NotNull
+    @Column(name = "name_uuid", nullable = false)
+    private String nameUuid;
 
     /**
      * The MIME type of the document
@@ -44,15 +58,17 @@ public class DocumentObject implements Serializable {
     private String mimeType;
 
     /**
-     * The URL of the document
+     * The S3 object key to access the document
      */
-    @Column(name = "object_url")
+    @Size(max = 1024)
+    @Column(name = "object_url", length = 1024)
     private String objectUrl;
 
     /**
-     * The URL to access a thumbnail of the document
+     * The S3 object key to access a thumbnail of the document
      */
-    @Column(name = "thumbnail_url")
+    @Size(max = 1024)
+    @Column(name = "thumbnail_url", length = 1024)
     private String thumbnailUrl;
 
     /**
@@ -105,6 +121,32 @@ public class DocumentObject implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPathUuid() {
+        return pathUuid;
+    }
+
+    public DocumentObject pathUuid(String pathUuid) {
+        this.pathUuid = pathUuid;
+        return this;
+    }
+
+    public void setPathUuid(String pathUuid) {
+        this.pathUuid = pathUuid;
+    }
+
+    public String getNameUuid() {
+        return nameUuid;
+    }
+
+    public DocumentObject nameUuid(String nameUuid) {
+        this.nameUuid = nameUuid;
+        return this;
+    }
+
+    public void setNameUuid(String nameUuid) {
+        this.nameUuid = nameUuid;
     }
 
     public String getMimeType() {
@@ -208,6 +250,8 @@ public class DocumentObject implements Serializable {
             "id=" + getId() +
             ", path='" + getPath() + "'" +
             ", name='" + getName() + "'" +
+            ", pathUuid='" + getPathUuid() + "'" +
+            ", nameUuid='" + getNameUuid() + "'" +
             ", mimeType='" + getMimeType() + "'" +
             ", objectUrl='" + getObjectUrl() + "'" +
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +

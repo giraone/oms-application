@@ -3,7 +3,7 @@
     "fields": [
         {
             "fieldName": "path",
-            "javadoc": "A string with slashes for creating a primary folder structure",
+            "javadoc": "The folder structure of the object using human readable path components",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
@@ -11,7 +11,23 @@
         },
         {
             "fieldName": "name",
-            "javadoc": "The name of the document, used by the author",
+            "javadoc": "The human readable name of the document",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "pathUuid",
+            "javadoc": "The folder structure as an internal UUID",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "nameUuid",
+            "javadoc": "The name of the document as an internal UUID",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
@@ -24,13 +40,21 @@
         },
         {
             "fieldName": "objectUrl",
-            "javadoc": "The URL of the document",
-            "fieldType": "String"
+            "javadoc": "The S3 object key to access the document",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 1024
         },
         {
             "fieldName": "thumbnailUrl",
-            "javadoc": "The URL to access a thumbnail of the document",
-            "fieldType": "String"
+            "javadoc": "The S3 object key to access a thumbnail of the document",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 1024
         },
         {
             "fieldName": "byteSize",

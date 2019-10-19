@@ -2,6 +2,8 @@ export interface IDocumentObject {
   id?: number;
   path?: string;
   name?: string;
+  pathUuid?: string;
+  nameUuid?: string;
   mimeType?: string;
   objectUrl?: string;
   thumbnailUrl?: string;
@@ -15,6 +17,8 @@ export class DocumentObject implements IDocumentObject {
     public id?: number,
     public path?: string,
     public name?: string,
+    public pathUuid?: string,
+    public nameUuid?: string,
     public mimeType?: string,
     public objectUrl?: string,
     public thumbnailUrl?: string,
