@@ -33,9 +33,13 @@ entity DocumentObject {
     /** The S3 object key to access a thumbnail of the document */
     thumbnailUrl String maxlength(1024),
     /** Size in bytes of the document */
-    byteSize Integer,
+    byteSize Long,
     /** Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented */
-    numberOfPages Integer
+    numberOfPages Integer,
+    /** Timestamp of creation */
+    creation Instant,
+    /** Timestamp of last content modification */
+    lastContentModification Instant
 }
 
 /**

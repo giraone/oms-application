@@ -1,10 +1,15 @@
 <div>
     <h2 id="page-heading">
         <span>Documents ({{documentObjects.length}})</span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity"
+        <button id="jh-new-document" class="btn btn-primary float-right" style="margin-right: 4px"
             [routerLink]="['../documents-upload']">
             <fa-icon [icon]="'plus'"></fa-icon>
             <span>Upload new document ...</span>
+        </button>
+        <button id="jh-document-refresh" class="btn btn-primary float-right" style="margin-right: 4px"
+            (click)="loadAll()">
+            <fa-icon [icon]="'sync'"></fa-icon>
+            <span>Refresh</span>
         </button>
     </h2>
 
@@ -16,15 +21,22 @@
             <span>No documents found</span>
         </div>
     </div>
-
-    <div class="container" *ngIf="documentObjects?.length > 0"></div>
-        <div class="card-columns" *ngFor="let document of documentObjects">
-            <div class="card" style="width: 12rem;">
-                <img class="card-img-top" src="{{ document.thumbnailUrl }}" alt="Image of {{ document.name }}"
-                    (click)="display(document)">
-                <div class="card-body">
-                    <h5 class="card-title">{{ document.name }}</h5>
-                    <p class="card-text">{{ document.path }}</p>
+    <div class="row" *ngIf="documentObjects?.length > 0">
+        <div class="col-sm-2" *ngFor="let document of documentObjects">
+            <div class="card" style="width: 188px; margin-top: 4px;">
+                <div style="height: 240px; padding: 4px; background-color: darkgrey;">
+                    <img class="card-img-top" src="{{ document.thumbnailUrl }}" alt="Thumbnail image of {{ document.name }}"
+                        style="font-size: 70%" (click)="display(document)">
+                </div>
+                <div class="card-body" style="background-color: lightgrey;">
+                    <h6 class="card-title" style="height: 32px;">{{ document.name }}</h6>
+                    <p class="card-text" style="font-size: 70%">
+                        MIME type: {{ document.mimeType }}</br />
+                        Bytes: {{ document.byteSize }}</br />
+                        Pages: {{ document.numberOfPages }}</br />
+                        Created: {{ document.creation | date:'dd.MM.yy HH:mm:ss' }}<br />
+                        Modified: {{ document.lastContentModification | date:'dd.MM.yy HH:mm:ss' }}
+                    </p>
                     <a class="btn btn-primary" style="font-size: 80%" (click)="rename(document)">Rename</a>
                     <a class="btn btn-secondary" style="font-size: 80%" (click)="delete(document)">Delete</a>
                 </div>

@@ -132,7 +132,8 @@
     "userexists": "Login name already used!",
     "emailexists": "Email is already in use!",
     "idexists": "A new {{ entityName }} cannot already have an ID",
-    "idnull": "Invalid ID"
+    "idnull": "Invalid ID",
+    "not.found": "Not found"
   },
-  "footer": "This is your footer"
+  "footer": "Made with &#x1F9E0 by giraone &#x1F60E"
 }

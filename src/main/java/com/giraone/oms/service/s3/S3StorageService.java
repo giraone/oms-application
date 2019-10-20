@@ -4,7 +4,6 @@ package com.giraone.oms.service.s3;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.giraone.oms.config.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class S3StorageService {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
     private static final String PATH_REGEX = "^[a-zA-Z0-9_.-][a-zA-Z0-9_. -/]*[a-zA-Z0-9]+$";
 
-    private static final Logger logger = LoggerFactory.getLogger(S3StorageService.class);
+    private static final Logger log= LoggerFactory.getLogger(S3StorageService.class);
 
     @Autowired
     private AmazonClient amazonClient;
@@ -50,14 +49,26 @@ public class S3StorageService {
         }
     }
 
-    public void transferToStream(String path, OutputStream outputStream) {
+    public void transferToStreamUsingPreSignedUrl(String path, OutputStream outputStream) {
         Date expiration = new Date(System.currentTimeMillis() + 1000 * 60);
         URL url = this.amazonClient.getS3Client().generatePresignedUrl(this.amazonClient.getBucketName(), path, expiration);
+        log.debug("S3StorageService.transferToStreamUsingPreSignedUrl {} {}", path, url);
         try {
             URLConnection uc = url.openConnection();
             try (InputStream in = uc.getInputStream()) {
-                copyLarge(in, outputStream);
+                long count = copyLarge(in, outputStream);
+                log.debug("S3StorageService.transferToStreamUsingPreSignedUrl {}: {} bytes copied", path, count);
             }
+        } catch (IOException e) {
+            throw new StorageException("Cannot stream from S3 path " + path, e);
+        }
+    }
+
+    public void transferToStream(String path, OutputStream outputStream) {
+        S3Object s3Object = this.amazonClient.getS3Client().getObject(this.amazonClient.getBucketName(), path);
+        try (S3ObjectInputStream in = s3Object.getObjectContent()) {
+            long count = copyLarge(in, outputStream);
+            log.debug("S3StorageService.transferToStream {}: {} bytes copied", path, count);
         } catch (IOException e) {
             throw new StorageException("Cannot stream from S3 path " + path, e);
         }
@@ -76,7 +87,7 @@ public class S3StorageService {
 
         ContentLengthCalculator cc = null;
         if (contentLength == null || contentLength < 0) {
-            logger.warn("Content-length not given! Must calculate content-length of " + path);
+            log.warn("Content-length not given! Must calculate content-length of " + path);
             cc = new ContentLengthCalculator(inputStream);
             inputStream = cc.getInputStream();
             contentLength = cc.getContentLength();
@@ -148,7 +159,7 @@ public class S3StorageService {
                 .withResponseHeaders(responseHeaders)
                 .withExpiration(expiration);
         URL url = this.amazonClient.getS3Client().generatePresignedUrl(generatePresignedUrlRequest);
-        logger.debug("S3StorageService.createPreSignedUrl: {} {} {} -> {}", bucketName, objectKey, httpMethod.name(), url.toString());
+        log.debug("S3StorageService.createPreSignedUrl: {} {} {} -> {}", bucketName, objectKey, httpMethod.name(), url.toString());
         return url;
     }
 

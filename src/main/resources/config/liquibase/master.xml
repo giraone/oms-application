@@ -20,4 +20,7 @@
     <include file="config/liquibase/changelog/20191017090802_added_entity_constraints_DocumentObject.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191017090803_added_entity_constraints_DocumentAccessEntry.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
+
+    <include file="config/liquibase/changelog/20191020220000_added_constraint_DocumentObject.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>

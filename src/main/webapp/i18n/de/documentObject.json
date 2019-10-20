@@ -25,6 +25,8 @@
       "thumbnailUrl": "Thumbnail Url",
       "byteSize": "Byte Size",
       "numberOfPages": "Number Of Pages",
+      "creation": "Creation",
+      "lastContentModification": "Last Content Modification",
       "owner": "Owner",
       "help": {
         "path": "The folder structure of the object using human readable path components",
@@ -35,7 +37,9 @@
         "objectUrl": "The S3 object key to access the document",
         "thumbnailUrl": "The S3 object key to access a thumbnail of the document",
         "byteSize": "Size in bytes of the document",
-        "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented"
+        "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
+        "creation": "Timestamp of creation",
+        "lastContentModification": "Timestamp of last content modification"
       }
     }
   }

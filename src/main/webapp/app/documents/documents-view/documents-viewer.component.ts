@@ -8,7 +8,6 @@ import { JhiEventManager, JhiParseLinks } from 'ng-jhipster';
 import { IDocumentObject } from 'app/shared/model/document-object.model';
 import { AccountService } from 'app/core/auth/account.service';
 
-import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
 import { DocumentsService } from './documents.service';
 
 @Component({
@@ -40,11 +39,11 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   ) {
     // eslint-disable-next-line no-console
     console.log('CTOR DocumentsViewerComponent');
-    this.itemsPerPage = ITEMS_PER_PAGE;
+    this.itemsPerPage = 100;
     this.routeData = this.activatedRoute.data.subscribe(data => {
       this.page = data.pagingParams.page;
       this.previousPage = data.pagingParams.page;
-      this.reverse = data.pagingParams.ascending;
+      this.reverse = true;
       this.predicate = data.pagingParams.predicate;
     });
   }
@@ -54,17 +53,27 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       .query({
         page: this.page - 1,
         size: this.itemsPerPage,
-        sort: this.sort()
+        sort: ['id,desc']
       })
-      .subscribe((res: HttpResponse<IDocumentObject[]>) => this.paginateDocumentObjects(res.body, res.headers));
+      .subscribe((res: HttpResponse<IDocumentObject[]>) => this.useResponse(res.body, res.headers));
   }
 
   display(document: IDocumentObject) {
-
+    window.open(document.objectUrl, '_new');
   }
 
   rename(document: IDocumentObject) {
-
+    const promptText = 'New name of document:';
+    const newName = window.prompt(promptText, document.name);
+    if (!newName) return;
+    this.documentsService
+      .update({
+        id: document.id,
+        name: newName,
+        path: document.path, // TODO: use new model
+        pathUuid: document.pathUuid,
+        nameUuid: document.nameUuid,
+      }).subscribe(() => { this.loadAll(); });
   }
 
   delete(document: IDocumentObject) {
@@ -73,65 +82,21 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadPage(page: number) {
-    if (page !== this.previousPage) {
-      this.previousPage = page;
-      this.transition();
-    }
-  }
-
-  transition() {
-    this.router.navigate(['/document-object'], {
-      queryParams: {
-        page: this.page,
-        size: this.itemsPerPage,
-        sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
-      }
-    });
-    this.loadAll();
-  }
-
-  clear() {
-    this.page = 0;
-    this.router.navigate([
-      '/document-object',
-      {
-        page: this.page,
-        sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
-      }
-    ]);
-    this.loadAll();
-  }
-
   ngOnInit() {
     this.loadAll();
     this.accountService.identity().subscribe(account => {
       this.currentAccount = account;
     });
-    this.registerChangeInDocumentObjects();
   }
 
   ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
   }
 
   trackId(index: number, item: IDocumentObject) {
     return item.id;
   }
 
-  registerChangeInDocumentObjects() {
-    this.eventSubscriber = this.eventManager.subscribe('documentObjectListModification', response => this.loadAll());
-  }
-
-  sort() {
-    const result = [this.predicate + ',' + (this.reverse ? 'asc' : 'desc')];
-    if (this.predicate !== 'id') {
-      result.push('id');
-    }
-    return result;
-  }
-
-  protected paginateDocumentObjects(data: IDocumentObject[], headers: HttpHeaders) {
+  protected useResponse(data: IDocumentObject[], headers: HttpHeaders) {
     this.links = this.parseLinks.parse(headers.get('link'));
     this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
     this.documentObjects = data;

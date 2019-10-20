@@ -90,6 +90,18 @@
                     <input type="number" class="form-control" name="numberOfPages" id="field_numberOfPages"
                            formControlName="numberOfPages"/>
                 </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="omsApp.documentObject.creation" for="field_creation" [ngbTooltip]="'omsApp.documentObject.help.creation' | translate">Creation</label>
+                    <div class="d-flex">
+                        <input id="field_creation" type="datetime-local" class="form-control" name="creation" formControlName="creation" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="omsApp.documentObject.lastContentModification" for="field_lastContentModification" [ngbTooltip]="'omsApp.documentObject.help.lastContentModification' | translate">Last Content Modification</label>
+                    <div class="d-flex">
+                        <input id="field_lastContentModification" type="datetime-local" class="form-control" name="lastContentModification" formControlName="lastContentModification" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="omsApp.documentObject.owner" for="field_owner">Owner</label>

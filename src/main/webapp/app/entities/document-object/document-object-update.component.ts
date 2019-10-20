@@ -6,6 +6,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import * as moment from 'moment';
+import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { JhiAlertService } from 'ng-jhipster';
 import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
 import { DocumentObjectService } from './document-object.service';
@@ -32,6 +34,8 @@ export class DocumentObjectUpdateComponent implements OnInit {
     thumbnailUrl: [null, [Validators.maxLength(1024)]],
     byteSize: [],
     numberOfPages: [],
+    creation: [],
+    lastContentModification: [],
     ownerId: [null, Validators.required]
   });
 
@@ -69,6 +73,9 @@ export class DocumentObjectUpdateComponent implements OnInit {
       thumbnailUrl: documentObject.thumbnailUrl,
       byteSize: documentObject.byteSize,
       numberOfPages: documentObject.numberOfPages,
+      creation: documentObject.creation != null ? documentObject.creation.format(DATE_TIME_FORMAT) : null,
+      lastContentModification:
+        documentObject.lastContentModification != null ? documentObject.lastContentModification.format(DATE_TIME_FORMAT) : null,
       ownerId: documentObject.ownerId
     });
   }
@@ -100,6 +107,11 @@ export class DocumentObjectUpdateComponent implements OnInit {
       thumbnailUrl: this.editForm.get(['thumbnailUrl']).value,
       byteSize: this.editForm.get(['byteSize']).value,
       numberOfPages: this.editForm.get(['numberOfPages']).value,
+      creation: this.editForm.get(['creation']).value != null ? moment(this.editForm.get(['creation']).value, DATE_TIME_FORMAT) : undefined,
+      lastContentModification:
+        this.editForm.get(['lastContentModification']).value != null
+          ? moment(this.editForm.get(['lastContentModification']).value, DATE_TIME_FORMAT)
+          : undefined,
       ownerId: this.editForm.get(['ownerId']).value
     };
   }

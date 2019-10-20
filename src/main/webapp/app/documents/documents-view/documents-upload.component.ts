@@ -51,8 +51,14 @@ export class DocumentsUploadComponent implements OnInit {
 
   handleFileInput(files: FileList) {
     this.fileToUpload = files.item(0);
+    let documentName = this.fileToUpload.name;
+    const index = documentName.lastIndexOf('.');
+    if (index > 0) {
+      documentName = documentName.substring(0, index);
+    }
+    documentName = documentName.replace(/_/g, ' ');
     this.editForm.patchValue({
-      name: this.fileToUpload.name
+      name: documentName
     });
   }
 
@@ -73,6 +79,8 @@ export class DocumentsUploadComponent implements OnInit {
     } else {
       documentObject.mimeType = this.fileToUpload.type;
     }
+    // eslint-disable-next-line no-console
+    console.log('documentObject.mimeType = ' + documentObject.mimeType);
 
     this.documentsService.reservePostUrl(documentObject)
       .subscribe((data) => {
@@ -83,6 +91,9 @@ export class DocumentsUploadComponent implements OnInit {
             // eslint-disable-next-line no-console
             console.log('DocumentsUploadComponent.save uploadToS3 ' + s3Data);
             this.isSaving = false;
+            setTimeout(() => {
+              this.previousState();
+            }, 1000);
           }, (error) => {
             this.isSaving = false;
             this.jhiAlertService.error("ERROR in uploadToS3: " + error, null, null);

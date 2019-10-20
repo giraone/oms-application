@@ -13,7 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing {@link DocumentObject}.
@@ -48,6 +51,21 @@ public class DocumentObjectServiceImpl implements DocumentObjectService {
     }
 
     /**
+     * Save multiple documentObjects.
+     *
+     * @param documentObjectDTOs the collection to save.
+     * @return the persisted entities.
+     */
+    @Override
+    public List<DocumentObjectDTO> save(Collection<DocumentObjectDTO> documentObjectDTOs) {
+        log.debug("Request to save DocumentObjects : #={}", documentObjectDTOs.size());
+        List<DocumentObject> entities = documentObjectDTOs.stream()
+            .map(d -> documentObjectMapper.toEntity(d)).collect(Collectors.toList());
+        entities = documentObjectRepository.saveAll(entities);
+        return documentObjectMapper.toDto(entities);
+    }
+
+    /**
      * Get all the documentObjects.
      *
      * @param pageable the pagination information.
@@ -73,6 +91,30 @@ public class DocumentObjectServiceImpl implements DocumentObjectService {
     public Optional<DocumentObjectDTO> findOne(Long id) {
         log.debug("Request to get DocumentObject : {}", id);
         return documentObjectRepository.findById(id)
+            .map(documentObjectMapper::toDto);
+    }
+
+    /**
+     * Get the documentObject by its S3 objectKey
+     *
+     * @param objectKey the S3 objectKey of the entity.
+     * @return the entity.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<DocumentObjectDTO> findByObjectKey(String objectKey) {
+        log.debug("Request to get DocumentObject by objectKey: {}", objectKey);
+
+        int slash = objectKey.indexOf('/');
+        if (slash == -1) {
+            log.error("Object key mismatch: No / in objectKey {}", objectKey);
+            return Optional.empty();
+        }
+        String pathUuid = objectKey.substring(0, slash);
+        String nameUuid = objectKey.substring(slash + 1);
+        slash = nameUuid.indexOf('/');
+        nameUuid = nameUuid.substring(0, slash);
+        return documentObjectRepository.findByPathUuidAndNameUuid(pathUuid, nameUuid)
             .map(documentObjectMapper::toDto);
     }
 

@@ -1,4 +1,11 @@
 {
+  "omsApp": {
+    "document": {
+      "created": "A new document was created with identifier {{ param }}",
+      "updated": "A document was updated with identifier {{ param }}",
+      "deleted": "A document was deleted with identifier {{ param }}"
+    }
+  },
   "documents": {
     "menu": {
       "storage": "Storage",

@@ -36,10 +36,16 @@
             <column name="thumbnail_url" type="varchar(1024)" remarks="The S3 object key to access a thumbnail of the document">
                 <constraints nullable="true" />
             </column>
-            <column name="byte_size" type="integer" remarks="Size in bytes of the document">
+            <column name="byte_size" type="bigint" remarks="Size in bytes of the document">
                 <constraints nullable="true" />
             </column>
             <column name="number_of_pages" type="integer" remarks="Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented">
+                <constraints nullable="true" />
+            </column>
+            <column name="creation" type="datetime" remarks="Timestamp of creation">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_content_modification" type="datetime" remarks="Timestamp of last content modification">
                 <constraints nullable="true" />
             </column>
             <column name="owner_id" type="bigint">
@@ -47,6 +53,8 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
+        <dropDefaultValue tableName="document_object" columnName="creation" columnDataType="datetime"/>
+        <dropDefaultValue tableName="document_object" columnName="last_content_modification" columnDataType="datetime"/>
     </changeSet>
 
     <changeSet id="20191017090802-1-relations" author="jhipster">
@@ -77,6 +85,8 @@
             <column name="thumbnail_url" type="string"/>
             <column name="byte_size" type="numeric"/>
             <column name="number_of_pages" type="numeric"/>
+            <column name="creation" type="datetime"/>
+            <column name="last_content_modification" type="datetime"/>
             <column name="owner_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here, do not remove-->
         </loadData>

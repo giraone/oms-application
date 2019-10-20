@@ -7,9 +7,9 @@
         "createOrEditLabel": "Create or edit a Document Object",
         "notFound": "No Document Objects found"
       },
-      "created": "A new Document Object is created with identifier {{ param }}",
-      "updated": "A Document Object is updated with identifier {{ param }}",
-      "deleted": "A Document Object is deleted with identifier {{ param }}",
+      "created": "A new document was created with identifier {{ param }}",
+      "updated": "A document was updated with identifier {{ param }}",
+      "deleted": "A document was deleted with identifier {{ param }}",
       "delete": {
         "question": "Are you sure you want to delete Document Object {{ id }}?"
       },
@@ -25,6 +25,8 @@
       "thumbnailUrl": "Thumbnail Url",
       "byteSize": "Byte Size",
       "numberOfPages": "Number Of Pages",
+      "creation": "Creation",
+      "lastContentModification": "Last Content Modification",
       "owner": "Owner",
       "help": {
         "path": "The folder structure of the object using human readable path components",
@@ -35,7 +37,9 @@
         "objectUrl": "The S3 object key to access the document",
         "thumbnailUrl": "The S3 object key to access a thumbnail of the document",
         "byteSize": "Size in bytes of the document",
-        "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented"
+        "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
+        "creation": "Timestamp of creation",
+        "lastContentModification": "Timestamp of last content modification"
       }
     }
   }

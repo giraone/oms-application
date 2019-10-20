@@ -59,12 +59,22 @@
         {
             "fieldName": "byteSize",
             "javadoc": "Size in bytes of the document",
-            "fieldType": "Integer"
+            "fieldType": "Long"
         },
         {
             "fieldName": "numberOfPages",
             "javadoc": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
             "fieldType": "Integer"
+        },
+        {
+            "fieldName": "creation",
+            "javadoc": "Timestamp of creation",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "lastContentModification",
+            "javadoc": "Timestamp of last content modification",
+            "fieldType": "Instant"
         }
     ],
     "relationships": [

@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static com.giraone.oms.web.rest.TestUtil.createFormattingConversionService;
@@ -58,11 +60,17 @@ public class DocumentObjectResourceIT {
     private static final String DEFAULT_THUMBNAIL_URL = "AAAAAAAAAA";
     private static final String UPDATED_THUMBNAIL_URL = "BBBBBBBBBB";
 
-    private static final Integer DEFAULT_BYTE_SIZE = 1;
-    private static final Integer UPDATED_BYTE_SIZE = 2;
+    private static final Long DEFAULT_BYTE_SIZE = 1L;
+    private static final Long UPDATED_BYTE_SIZE = 2L;
 
     private static final Integer DEFAULT_NUMBER_OF_PAGES = 1;
     private static final Integer UPDATED_NUMBER_OF_PAGES = 2;
+
+    private static final Instant DEFAULT_CREATION = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_CREATION = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final Instant DEFAULT_LAST_CONTENT_MODIFICATION = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_LAST_CONTENT_MODIFICATION = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     @Autowired
     private DocumentObjectRepository documentObjectRepository;
@@ -120,7 +128,9 @@ public class DocumentObjectResourceIT {
             .objectUrl(DEFAULT_OBJECT_URL)
             .thumbnailUrl(DEFAULT_THUMBNAIL_URL)
             .byteSize(DEFAULT_BYTE_SIZE)
-            .numberOfPages(DEFAULT_NUMBER_OF_PAGES);
+            .numberOfPages(DEFAULT_NUMBER_OF_PAGES)
+            .creation(DEFAULT_CREATION)
+            .lastContentModification(DEFAULT_LAST_CONTENT_MODIFICATION);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -144,7 +154,9 @@ public class DocumentObjectResourceIT {
             .objectUrl(UPDATED_OBJECT_URL)
             .thumbnailUrl(UPDATED_THUMBNAIL_URL)
             .byteSize(UPDATED_BYTE_SIZE)
-            .numberOfPages(UPDATED_NUMBER_OF_PAGES);
+            .numberOfPages(UPDATED_NUMBER_OF_PAGES)
+            .creation(UPDATED_CREATION)
+            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -183,6 +195,8 @@ public class DocumentObjectResourceIT {
         assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(DEFAULT_THUMBNAIL_URL);
         assertThat(testDocumentObject.getByteSize()).isEqualTo(DEFAULT_BYTE_SIZE);
         assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(DEFAULT_NUMBER_OF_PAGES);
+        assertThat(testDocumentObject.getCreation()).isEqualTo(DEFAULT_CREATION);
+        assertThat(testDocumentObject.getLastContentModification()).isEqualTo(DEFAULT_LAST_CONTENT_MODIFICATION);
     }
 
     @Test
@@ -300,8 +314,10 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.[*].mimeType").value(hasItem(DEFAULT_MIME_TYPE)))
             .andExpect(jsonPath("$.[*].objectUrl").value(hasItem(DEFAULT_OBJECT_URL)))
             .andExpect(jsonPath("$.[*].thumbnailUrl").value(hasItem(DEFAULT_THUMBNAIL_URL)))
-            .andExpect(jsonPath("$.[*].byteSize").value(hasItem(DEFAULT_BYTE_SIZE)))
-            .andExpect(jsonPath("$.[*].numberOfPages").value(hasItem(DEFAULT_NUMBER_OF_PAGES)));
+            .andExpect(jsonPath("$.[*].byteSize").value(hasItem(DEFAULT_BYTE_SIZE.intValue())))
+            .andExpect(jsonPath("$.[*].numberOfPages").value(hasItem(DEFAULT_NUMBER_OF_PAGES)))
+            .andExpect(jsonPath("$.[*].creation").value(hasItem(DEFAULT_CREATION.toString())))
+            .andExpect(jsonPath("$.[*].lastContentModification").value(hasItem(DEFAULT_LAST_CONTENT_MODIFICATION.toString())));
     }
     
     @Test
@@ -322,8 +338,10 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.mimeType").value(DEFAULT_MIME_TYPE))
             .andExpect(jsonPath("$.objectUrl").value(DEFAULT_OBJECT_URL))
             .andExpect(jsonPath("$.thumbnailUrl").value(DEFAULT_THUMBNAIL_URL))
-            .andExpect(jsonPath("$.byteSize").value(DEFAULT_BYTE_SIZE))
-            .andExpect(jsonPath("$.numberOfPages").value(DEFAULT_NUMBER_OF_PAGES));
+            .andExpect(jsonPath("$.byteSize").value(DEFAULT_BYTE_SIZE.intValue()))
+            .andExpect(jsonPath("$.numberOfPages").value(DEFAULT_NUMBER_OF_PAGES))
+            .andExpect(jsonPath("$.creation").value(DEFAULT_CREATION.toString()))
+            .andExpect(jsonPath("$.lastContentModification").value(DEFAULT_LAST_CONTENT_MODIFICATION.toString()));
     }
 
     @Test
@@ -355,7 +373,9 @@ public class DocumentObjectResourceIT {
             .objectUrl(UPDATED_OBJECT_URL)
             .thumbnailUrl(UPDATED_THUMBNAIL_URL)
             .byteSize(UPDATED_BYTE_SIZE)
-            .numberOfPages(UPDATED_NUMBER_OF_PAGES);
+            .numberOfPages(UPDATED_NUMBER_OF_PAGES)
+            .creation(UPDATED_CREATION)
+            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION);
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(updatedDocumentObject);
 
         restDocumentObjectMockMvc.perform(put("/api/document-objects")
@@ -376,6 +396,8 @@ public class DocumentObjectResourceIT {
         assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(UPDATED_THUMBNAIL_URL);
         assertThat(testDocumentObject.getByteSize()).isEqualTo(UPDATED_BYTE_SIZE);
         assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(UPDATED_NUMBER_OF_PAGES);
+        assertThat(testDocumentObject.getCreation()).isEqualTo(UPDATED_CREATION);
+        assertThat(testDocumentObject.getLastContentModification()).isEqualTo(UPDATED_LAST_CONTENT_MODIFICATION);
     }
 
     @Test

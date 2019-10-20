@@ -1,13 +1,10 @@
 package com.giraone.oms.web.rest;
 
 import com.amazonaws.HttpMethod;
-import com.giraone.imaging.ConversionCommand;
-import com.giraone.imaging.ImagingProvider;
-import com.giraone.imaging.java2.ProviderJava2D;
-import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.domain.User;
 import com.giraone.oms.security.SecurityUtils;
 import com.giraone.oms.service.DocumentObjectService;
+import com.giraone.oms.service.ImagingService;
 import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.service.s3.S3StorageService;
@@ -26,16 +23,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
@@ -46,26 +42,23 @@ public class DocumentsResource {
 
     private final Logger log = LoggerFactory.getLogger(DocumentsResource.class);
 
-    private static final String MIME_TYPE_THUMBNAIL = "image/jpeg";
-    private static final String ENTITY_NAME = "documentObject";
+    private static final String ROOT_UUID = "adef7792-f275-11e9-ab54-bf6dab9bc95c";
+    private static final String ENTITY_NAME = "document";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-
-    private final ApplicationProperties applicationProperties;
     private final DocumentObjectService documentObjectService;
     private final S3StorageService s3StorageService;
     private final UserService userService;
+    private final ImagingService imagingService;
 
-    private ImagingProvider provider = new ProviderJava2D();
-
-    public DocumentsResource(ApplicationProperties applicationProperties, DocumentObjectService documentObjectService,
-                             S3StorageService s3StorageService, UserService userService) {
-        this.applicationProperties = applicationProperties;
+    public DocumentsResource(DocumentObjectService documentObjectService, S3StorageService s3StorageService,
+                             UserService userService, ImagingService imagingService) {
         this.documentObjectService = documentObjectService;
         this.s3StorageService = s3StorageService;
         this.userService = userService;
+        this.imagingService = imagingService;
     }
 
     /**
@@ -112,18 +105,22 @@ public class DocumentsResource {
             throw new BadRequestAlertException("A new documentObject cannot already have an ID", ENTITY_NAME, "idexists");
         }
 
-        Optional<User> user = getUser();
+        final Instant now = Instant.now();
+        final Optional<User> user = getUser();
 
         // path and name are kept untouched - this is the view of the creator
         // TODO => UUID also for folder
 
-        final String rootPath = documentObjectDTO.getPath() + "/" + UUID.randomUUID().toString();
-        final String objectPath = rootPath + "/content";
         documentObjectDTO.setOwnerId(user.get().getId());
-        documentObjectDTO.setObjectUrl(objectPath);
+        documentObjectDTO.setPath("/");
+        documentObjectDTO.setPathUuid(ROOT_UUID);
+        documentObjectDTO.setNameUuid(UUID.randomUUID().toString());
+        documentObjectDTO.setCreation(now);
+        documentObjectDTO.setNumberOfPages(0);
+        documentObjectDTO.buildObjectUrl();
 
         // Reserve a pre-signed URL for a POST upload
-        URL url = s3StorageService.createPreSignedUrl(objectPath, HttpMethod.PUT, 1, 0);
+        URL url = s3StorageService.createPreSignedUrl(documentObjectDTO.getObjectUrl(), HttpMethod.PUT, 1, 0);
         System.err.println(url.toExternalForm());
 
         // Save the meta-data
@@ -137,6 +134,66 @@ public class DocumentsResource {
             .body(result);
     }
 
+    /**
+     * {@code PUT  /documents} : Change meta-data of an existing document.
+     *
+     * @param documentObjectDTO the documentObjectDTO to update (currently only name is updated)
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentObjectDTO,
+     * or with status {@code 400 (Bad Request)} if the documentObjectDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the documentObjectDTO couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PutMapping("/documents")
+    public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectDTO documentObjectDTO)  {
+        log.debug("REST request to update document : {}", documentObjectDTO);
+        if (documentObjectDTO.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectDTO.getId());
+        if (!existingDocumentObject.isPresent()) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
+        }
+        existingDocumentObject.get().setName(documentObjectDTO.getName());
+        DocumentObjectDTO result = documentObjectService.save(existingDocumentObject.get());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * {@code DELETE  /documents/:id} : delete a document
+     *
+     * @param id the id of the documentObjectDTO to delete.
+     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+     */
+    @DeleteMapping("/documents/{id}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+
+        log.debug("REST request to delete document : {}", id);
+
+        Optional<DocumentObjectDTO> document = documentObjectService.findOne(id);
+        if (!document.isPresent()) {
+            log.warn("Attempt to delete non-existing document {}", id);
+            return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Document not found!", null)).build();
+        }
+
+        final String objectKey = document.get().getObjectUrl();
+        if (s3StorageService.exists(objectKey)) {
+            log.debug("Try to delete object with object key {} in S3", objectKey);
+            boolean success = s3StorageService.delete(objectKey);
+            log.info("Delete object with object key {} in S3: success = {}", objectKey, success);
+        } else {
+            log.debug("No document with object key {} in S3", objectKey);
+        }
+
+        documentObjectService.delete(id);
+
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(
+            applicationName, true, ENTITY_NAME, id.toString())).build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
     @GetMapping("/maintenance/thumbnails")
     public ResponseEntity<List<DocumentObjectDTO>> reCreateThumbnails() {
 
@@ -144,20 +201,28 @@ public class DocumentsResource {
 
         Pageable pageable = PageRequest.of(0, 100);
         Page<DocumentObjectDTO> page = documentObjectService.findAll(pageable);
+        Stream<DocumentObjectDTO> allDocuments = page.get();
+        page.get().forEach(documentObject -> {
 
-        page.get().forEach(d -> {
-
-            final String thumbnailPath = d.getObjectUrl().replace("/content", "thumb-0001.jpg");
-            try {
-                this.createThumbnail(d.getPath(), thumbnailPath);
-                d.setThumbnailUrl(thumbnailPath);
-            } catch (Exception e) {
-                log.error("Error creating thumbnail for {}", d.getPath(), e);
+            if (documentObject.hasObject() && !documentObject.hasThumbnail()) {
+                documentObject.buildThumbnailUrl();
+                try {
+                    ImagingService.ObjectMetaDataInfo metaData = imagingService.createThumbnail(
+                        documentObject.getObjectUrl(), documentObject.getThumbnailUrl());
+                    documentObject.setMimeType(metaData.getMimeType());
+                    documentObject.setByteSize(metaData.getByteSizeOriginal());
+                    documentObject.setNumberOfPages(metaData.getNumberOfPages());
+                } catch (Exception e) {
+                    log.error("Error creating thumbnail for {}", documentObject.dump(), e);
+                    documentObject.setThumbnailUrl(null);
+                }
             }
         });
 
+        List<DocumentObjectDTO> ret = documentObjectService.save(allDocuments.collect(Collectors.toList()));
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(ret);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -173,30 +238,5 @@ public class DocumentsResource {
             throw new BadRequestAlertException("Cannot get user account", ENTITY_NAME, "no_user_account");
         }
         return user;
-    }
-
-    // TODO: Test
-    private void createThumbnail(String urlOriginal, String urlThumbnail) throws Exception {
-
-        File tmpFileOriginal = File.createTempFile("thumb-", ".jpg");
-        File tmpFileThumbnail = File.createTempFile("thumb-", ".jpg");
-
-        try {
-            try (FileOutputStream outputStreamOriginal = new FileOutputStream(tmpFileOriginal)) {
-                s3StorageService.transferToStream(urlOriginal, outputStreamOriginal);
-            }
-            try (FileOutputStream outputStreamThumbnail = new FileOutputStream(tmpFileThumbnail)) {
-                provider.createThumbNail(tmpFileOriginal, outputStreamThumbnail, MIME_TYPE_THUMBNAIL,
-                    applicationProperties.getThumbWidthAndHeight(), applicationProperties.getThumbWidthAndHeight(),
-                    ConversionCommand.CompressionQuality.LOSSY_BEST, ConversionCommand.SpeedHint.ULTRA_QUALITY);
-            }
-            try (FileInputStream inputStreamThumbnail = new FileInputStream(tmpFileThumbnail)) {
-                s3StorageService.storeFromStream(inputStreamThumbnail, MIME_TYPE_THUMBNAIL, tmpFileThumbnail.length(), urlThumbnail);
-            }
-        }
-        finally {
-            tmpFileOriginal.delete();
-            tmpFileThumbnail.delete();
-        }
     }
 }

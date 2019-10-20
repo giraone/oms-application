@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * A document entity.
@@ -75,13 +76,25 @@ public class DocumentObject implements Serializable {
      * Size in bytes of the document
      */
     @Column(name = "byte_size")
-    private Integer byteSize;
+    private Long byteSize;
 
     /**
      * Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented
      */
     @Column(name = "number_of_pages")
     private Integer numberOfPages;
+
+    /**
+     * Timestamp of creation
+     */
+    @Column(name = "creation")
+    private Instant creation;
+
+    /**
+     * Timestamp of last content modification
+     */
+    @Column(name = "last_content_modification")
+    private Instant lastContentModification;
 
     @ManyToOne(optional = false)
     @NotNull
@@ -188,16 +201,16 @@ public class DocumentObject implements Serializable {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public Integer getByteSize() {
+    public Long getByteSize() {
         return byteSize;
     }
 
-    public DocumentObject byteSize(Integer byteSize) {
+    public DocumentObject byteSize(Long byteSize) {
         this.byteSize = byteSize;
         return this;
     }
 
-    public void setByteSize(Integer byteSize) {
+    public void setByteSize(Long byteSize) {
         this.byteSize = byteSize;
     }
 
@@ -212,6 +225,32 @@ public class DocumentObject implements Serializable {
 
     public void setNumberOfPages(Integer numberOfPages) {
         this.numberOfPages = numberOfPages;
+    }
+
+    public Instant getCreation() {
+        return creation;
+    }
+
+    public DocumentObject creation(Instant creation) {
+        this.creation = creation;
+        return this;
+    }
+
+    public void setCreation(Instant creation) {
+        this.creation = creation;
+    }
+
+    public Instant getLastContentModification() {
+        return lastContentModification;
+    }
+
+    public DocumentObject lastContentModification(Instant lastContentModification) {
+        this.lastContentModification = lastContentModification;
+        return this;
+    }
+
+    public void setLastContentModification(Instant lastContentModification) {
+        this.lastContentModification = lastContentModification;
     }
 
     public User getOwner() {
@@ -257,6 +296,8 @@ public class DocumentObject implements Serializable {
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +
             ", byteSize=" + getByteSize() +
             ", numberOfPages=" + getNumberOfPages() +
+            ", creation='" + getCreation() + "'" +
+            ", lastContentModification='" + getLastContentModification() + "'" +
             "}";
     }
 }

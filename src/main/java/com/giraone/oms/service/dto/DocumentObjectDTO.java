@@ -1,6 +1,7 @@
 package com.giraone.oms.service.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.time.Instant;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -65,13 +66,25 @@ public class DocumentObjectDTO implements Serializable {
      * Size in bytes of the document
      */
     @ApiModelProperty(value = "Size in bytes of the document")
-    private Integer byteSize;
+    private Long byteSize;
 
     /**
      * Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented
      */
     @ApiModelProperty(value = "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented")
     private Integer numberOfPages;
+
+    /**
+     * Timestamp of creation
+     */
+    @ApiModelProperty(value = "Timestamp of creation")
+    private Instant creation;
+
+    /**
+     * Timestamp of last content modification
+     */
+    @ApiModelProperty(value = "Timestamp of last content modification")
+    private Instant lastContentModification;
 
 
     private Long ownerId;
@@ -140,11 +153,11 @@ public class DocumentObjectDTO implements Serializable {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public Integer getByteSize() {
+    public Long getByteSize() {
         return byteSize;
     }
 
-    public void setByteSize(Integer byteSize) {
+    public void setByteSize(Long byteSize) {
         this.byteSize = byteSize;
     }
 
@@ -154,6 +167,22 @@ public class DocumentObjectDTO implements Serializable {
 
     public void setNumberOfPages(Integer numberOfPages) {
         this.numberOfPages = numberOfPages;
+    }
+
+    public Instant getCreation() {
+        return creation;
+    }
+
+    public void setCreation(Instant creation) {
+        this.creation = creation;
+    }
+
+    public Instant getLastContentModification() {
+        return lastContentModification;
+    }
+
+    public void setLastContentModification(Instant lastContentModification) {
+        this.lastContentModification = lastContentModification;
     }
 
     public Long getOwnerId() {
@@ -198,6 +227,39 @@ public class DocumentObjectDTO implements Serializable {
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +
             ", byteSize=" + getByteSize() +
             ", numberOfPages=" + getNumberOfPages() +
+            ", creation='" + getCreation() + "'" +
+            ", lastContentModification='" + getLastContentModification() + "'" +
+            ", owner=" + getOwnerId() +
+            "}";
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public boolean hasObject() {
+        return this.getNumberOfPages() > 0;
+    }
+
+    public boolean hasThumbnail() {
+        return this.getThumbnailUrl() != null || this.getThumbnailUrl().trim().length() > 0;
+    }
+
+    public void buildObjectUrl() {
+        this.setObjectUrl(this.getPathUuid() + "/" + this.getNameUuid() + "/content");
+    }
+
+    public void buildThumbnailUrl() {
+        this.setThumbnailUrl(this.getPathUuid() + "/" + this.getNameUuid() + "/thumb-0001.jpg");
+    }
+
+    public String dump() {
+        return "{" +
+            "id=" + getId() +
+            ", path='" + getPath() + "'" +
+            ", name='" + getName() + "'" +
+            ", pathUuid='" + getPathUuid() + "'" +
+            ", nameUuid='" + getNameUuid() + "'" +
+            ", objectUrl='" + getObjectUrl() + "'" +
+            ", thumbnailUrl='" + getThumbnailUrl() + "'" +
             ", owner=" + getOwnerId() +
             "}";
     }

@@ -131,7 +131,8 @@
     "userexists": "Benutzername bereits vergeben!",
     "emailexists": "Email wird bereits verwendet!",
     "idexists": "Ein neuer {{entityName}} kann noch keine ID haben",
-    "idnull": "Ungültige ID"
+    "idnull": "Ungültige ID",
+    "not.found": "Nicht gefunden"
   },
-  "footer": "Dies ist Ihre Fußzeile"
+  "footer": "Made with &#x1F9E0 by giraone &#x1F60E"
 }

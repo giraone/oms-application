@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data  repository for the DocumentObject entity.
@@ -15,4 +16,6 @@ public interface DocumentObjectRepository extends JpaRepository<DocumentObject, 
     @Query("select documentObject from DocumentObject documentObject where documentObject.owner.login = ?#{principal.username}")
     List<DocumentObject> findByOwnerIsCurrentUser();
 
+    @Query("select documentObject from DocumentObject documentObject where documentObject.pathUuid = ?1 and documentObject.nameUuid = ?2")
+    Optional<DocumentObject> findByPathUuidAndNameUuid(String pathUuid, String nameUuid);
 }

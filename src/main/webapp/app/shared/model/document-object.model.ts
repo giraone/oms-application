@@ -1,3 +1,5 @@
+import { Moment } from 'moment';
+
 export interface IDocumentObject {
   id?: number;
   path?: string;
@@ -9,6 +11,8 @@ export interface IDocumentObject {
   thumbnailUrl?: string;
   byteSize?: number;
   numberOfPages?: number;
+  creation?: Moment;
+  lastContentModification?: Moment;
   ownerId?: number;
 }
 
@@ -24,6 +28,8 @@ export class DocumentObject implements IDocumentObject {
     public thumbnailUrl?: string,
     public byteSize?: number,
     public numberOfPages?: number,
+    public creation?: Moment,
+    public lastContentModification?: Moment,
     public ownerId?: number
   ) {}
 }

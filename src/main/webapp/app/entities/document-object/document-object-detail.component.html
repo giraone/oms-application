@@ -41,6 +41,14 @@
                 <dd>
                     <span>{{documentObject.numberOfPages}}</span>
                 </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.creation" [ngbTooltip]="'omsApp.documentObject.help.creation' | translate">Creation</span></dt>
+                <dd>
+                    <span>{{documentObject.creation}}</span>
+                </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.lastContentModification" [ngbTooltip]="'omsApp.documentObject.help.lastContentModification' | translate">Last Content Modification</span></dt>
+                <dd>
+                    <span>{{documentObject.lastContentModification}}</span>
+                </dd>
                 <dt><span jhiTranslate="omsApp.documentObject.owner">Owner</span></dt>
                 <dd>
                     {{documentObject.ownerId}}

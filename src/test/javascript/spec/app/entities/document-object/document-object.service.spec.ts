@@ -1,6 +1,8 @@
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { take, map } from 'rxjs/operators';
+import * as moment from 'moment';
+import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { DocumentObjectService } from 'app/entities/document-object/document-object.service';
 import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
 
@@ -11,6 +13,7 @@ describe('Service Tests', () => {
     let httpMock: HttpTestingController;
     let elemDefault: IDocumentObject;
     let expectedResult;
+    let currentDate: moment.Moment;
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [HttpClientTestingModule]
@@ -19,13 +22,33 @@ describe('Service Tests', () => {
       injector = getTestBed();
       service = injector.get(DocumentObjectService);
       httpMock = injector.get(HttpTestingController);
+      currentDate = moment();
 
-      elemDefault = new DocumentObject(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 0, 0);
+      elemDefault = new DocumentObject(
+        0,
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        0,
+        0,
+        currentDate,
+        currentDate
+      );
     });
 
     describe('Service methods', () => {
       it('should find an element', () => {
-        const returnedFromService = Object.assign({}, elemDefault);
+        const returnedFromService = Object.assign(
+          {
+            creation: currentDate.format(DATE_TIME_FORMAT),
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
+          },
+          elemDefault
+        );
         service
           .find(123)
           .pipe(take(1))
@@ -39,11 +62,19 @@ describe('Service Tests', () => {
       it('should create a DocumentObject', () => {
         const returnedFromService = Object.assign(
           {
-            id: 0
+            id: 0,
+            creation: currentDate.format(DATE_TIME_FORMAT),
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            creation: currentDate,
+            lastContentModification: currentDate
+          },
+          returnedFromService
+        );
         service
           .create(new DocumentObject(null))
           .pipe(take(1))
@@ -64,12 +95,20 @@ describe('Service Tests', () => {
             objectUrl: 'BBBBBB',
             thumbnailUrl: 'BBBBBB',
             byteSize: 1,
-            numberOfPages: 1
+            numberOfPages: 1,
+            creation: currentDate.format(DATE_TIME_FORMAT),
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
 
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            creation: currentDate,
+            lastContentModification: currentDate
+          },
+          returnedFromService
+        );
         service
           .update(expected)
           .pipe(take(1))
@@ -90,11 +129,19 @@ describe('Service Tests', () => {
             objectUrl: 'BBBBBB',
             thumbnailUrl: 'BBBBBB',
             byteSize: 1,
-            numberOfPages: 1
+            numberOfPages: 1,
+            creation: currentDate.format(DATE_TIME_FORMAT),
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            creation: currentDate,
+            lastContentModification: currentDate
+          },
+          returnedFromService
+        );
         service
           .query(expected)
           .pipe(
