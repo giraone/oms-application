@@ -1,6 +1,7 @@
 package com.giraone.oms.web.rest;
 
 import com.amazonaws.HttpMethod;
+import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.domain.User;
 import com.giraone.oms.security.SecurityUtils;
 import com.giraone.oms.service.DocumentObjectService;
@@ -52,38 +53,44 @@ public class DocumentsResource {
     private final S3StorageService s3StorageService;
     private final UserService userService;
     private final ImagingService imagingService;
+    private final ApplicationProperties applicationProperties;
 
     public DocumentsResource(DocumentObjectService documentObjectService, S3StorageService s3StorageService,
-                             UserService userService, ImagingService imagingService) {
+                             UserService userService, ImagingService imagingService, ApplicationProperties applicationProperties) {
         this.documentObjectService = documentObjectService;
         this.s3StorageService = s3StorageService;
         this.userService = userService;
         this.imagingService = imagingService;
+        this.applicationProperties = applicationProperties;
     }
 
     /**
      * {@code GET  /documents} : get all documents
      *
-
      * @param pageable the pagination information.
-
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of documentObjects in body.
      */
     @GetMapping("/documents")
     public ResponseEntity<List<DocumentObjectDTO>> getAllDocuments(Pageable pageable) {
 
-        log.debug("REST request to get documents list");
+        log.debug("REST request to get document list by user={}", SecurityUtils.getCurrentUserLogin());
 
         Optional<User> user = getUser();
+        if (!user.isPresent()) {
+            throw new BadRequestAlertException("Invalid user", ENTITY_NAME, "user.invalid");
+        }
 
-        // TODO: Access Control
-        Page<DocumentObjectDTO> page = documentObjectService.findAll(pageable);
+        Page<DocumentObjectDTO> page = documentObjectService.findAll(user.get(), pageable);
 
         page.get().forEach(d -> {
 
-            d.setObjectUrl(s3StorageService.createPreSignedUrl(d.getObjectUrl(), HttpMethod.GET, 1, 0).toExternalForm());
+            d.setObjectUrl(s3StorageService.createPreSignedUrl(
+                d.getObjectUrl(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead()).toExternalForm());
+            d.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
+                d.getObjectUrl(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite()).toExternalForm());
             if (d.getThumbnailUrl() != null) {
-                d.setThumbnailUrl(s3StorageService.createPreSignedUrl(d.getThumbnailUrl(), HttpMethod.GET, 1, 0).toExternalForm());
+                d.setThumbnailUrl(s3StorageService.createPreSignedUrl(
+                    d.getThumbnailUrl(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail()).toExternalForm());
             }
         });
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
@@ -100,13 +107,16 @@ public class DocumentsResource {
     @PostMapping("/documents")
     public ResponseEntity<DocumentObjectDTO> createDocument(@Valid @RequestBody DocumentObjectDTO documentObjectDTO) throws URISyntaxException {
 
-        log.debug("REST request to save document : {}", documentObjectDTO);
+        log.debug("REST request to save document : {} by user {}", documentObjectDTO, SecurityUtils.getCurrentUserLogin());
         if (documentObjectDTO.getId() != null) {
             throw new BadRequestAlertException("A new documentObject cannot already have an ID", ENTITY_NAME, "idexists");
         }
 
         final Instant now = Instant.now();
-        final Optional<User> user = getUser();
+        Optional<User> user = getUser();
+        if (!user.isPresent()) {
+            throw new BadRequestAlertException("Invalid user", ENTITY_NAME, "user.invalid");
+        }
 
         // path and name are kept untouched - this is the view of the creator
         // TODO => UUID also for folder

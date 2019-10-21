@@ -31,14 +31,12 @@ public class DocumentObjectDTO implements Serializable {
     /**
      * The folder structure as an internal UUID
      */
-    @NotNull
     @ApiModelProperty(value = "The folder structure as an internal UUID", required = true)
     private String pathUuid;
 
     /**
      * The name of the document as an internal UUID
      */
-    @NotNull
     @ApiModelProperty(value = "The name of the document as an internal UUID", required = true)
     private String nameUuid;
 
@@ -49,11 +47,18 @@ public class DocumentObjectDTO implements Serializable {
     private String mimeType;
 
     /**
-     * The S3 object key to access the document
+     * The S3 object key to access the document (read access)
      */
     @Size(max = 1024)
     @ApiModelProperty(value = "The S3 object key to access the document")
     private String objectUrl;
+
+    /**
+     * The S3 object key to create/update the document (write access)
+     */
+    @Size(max = 1024)
+    @ApiModelProperty(value = "The S3 object key to update the document")
+    private String objectWriteUrl;
 
     /**
      * The S3 object key to access a thumbnail of the document
@@ -145,6 +150,14 @@ public class DocumentObjectDTO implements Serializable {
         this.objectUrl = objectUrl;
     }
 
+    public String getObjectWriteUrl() {
+        return objectWriteUrl;
+    }
+
+    public void setObjectWriteUrl(String objectWriteUrl) {
+        this.objectWriteUrl = objectWriteUrl;
+    }
+
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
@@ -224,6 +237,7 @@ public class DocumentObjectDTO implements Serializable {
             ", nameUuid='" + getNameUuid() + "'" +
             ", mimeType='" + getMimeType() + "'" +
             ", objectUrl='" + getObjectUrl() + "'" +
+            ", objectUpdateUrl='" + getObjectWriteUrl() + "'" +
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +
             ", byteSize=" + getByteSize() +
             ", numberOfPages=" + getNumberOfPages() +

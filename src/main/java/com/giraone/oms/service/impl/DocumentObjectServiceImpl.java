@@ -1,13 +1,13 @@
 package com.giraone.oms.service.impl;
 
-import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.domain.DocumentObject;
+import com.giraone.oms.domain.User;
 import com.giraone.oms.repository.DocumentObjectRepository;
+import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.service.mapper.DocumentObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -60,7 +60,7 @@ public class DocumentObjectServiceImpl implements DocumentObjectService {
     public List<DocumentObjectDTO> save(Collection<DocumentObjectDTO> documentObjectDTOs) {
         log.debug("Request to save DocumentObjects : #={}", documentObjectDTOs.size());
         List<DocumentObject> entities = documentObjectDTOs.stream()
-            .map(d -> documentObjectMapper.toEntity(d)).collect(Collectors.toList());
+            .map(documentObjectMapper::toEntity).collect(Collectors.toList());
         entities = documentObjectRepository.saveAll(entities);
         return documentObjectMapper.toDto(entities);
     }
@@ -79,6 +79,20 @@ public class DocumentObjectServiceImpl implements DocumentObjectService {
             .map(documentObjectMapper::toDto);
     }
 
+    /**
+     * Get all the documentObjects of a user
+     *
+     * @param user the for which the documents are fetched
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DocumentObjectDTO> findAll(User user, Pageable pageable) {
+        log.debug("Request to get all DocumentObjects of user {}", user.getLogin());
+        return documentObjectRepository.findByAllowedAccess(user.getId(), pageable)
+            .map(documentObjectMapper::toDto);
+    }
 
     /**
      * Get one documentObject by id.

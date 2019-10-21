@@ -1,5 +1,6 @@
 package com.giraone.oms.service;
 
+import com.giraone.oms.domain.User;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 
 import org.springframework.data.domain.Page;
@@ -38,6 +39,14 @@ public interface DocumentObjectService {
      */
     Page<DocumentObjectDTO> findAll(Pageable pageable);
 
+    /**
+     * Get all the documentObjects of a user
+     *
+     * @param user the for which the documents are fetched
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    Page<DocumentObjectDTO> findAll(User user, Pageable pageable);
 
     /**
      * Get the "id" documentObject.
