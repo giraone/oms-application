@@ -144,10 +144,16 @@ public class UserService {
         } else {
             user.setLangKey(userDTO.getLangKey());
         }
+        /* ADAPTED-START */
+        /*
         String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
+        */
+        String encryptedPassword = passwordEncoder.encode(userDTO.getLogin());
+        user.setPassword(encryptedPassword);
+        /* ADAPTED-END */
         user.setActivated(true);
         if (userDTO.getAuthorities() != null) {
             Set<Authority> authorities = userDTO.getAuthorities().stream()

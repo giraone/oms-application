@@ -42,6 +42,8 @@ export class DocumentsService {
   uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<Object> {
     let httpHeaders = new HttpHeaders();
     httpHeaders = httpHeaders.append('content-type', mimeType);
+    // eslint-disable-next-line no-console
+    console.log('uploadToS3UsingPut ' + targetUrl + ' ' + mimeType);
     return this.http
       .put(targetUrl, bytes, { headers : httpHeaders });
   }
@@ -55,6 +57,10 @@ export class DocumentsService {
 
   delete(id: number): Observable<HttpResponse<any>> {
     return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  }
+
+  maintenanceThumbnails(req?: any): Observable<EntityArrayResponseType> {
+    return this.http.get<IDocumentObject[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
   }
 
 

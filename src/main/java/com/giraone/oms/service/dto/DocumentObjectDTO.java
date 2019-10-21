@@ -32,14 +32,12 @@ public class DocumentObjectDTO implements Serializable {
     /**
      * The folder structure as an internal UUID
      */
-    @NotNull
     @ApiModelProperty(value = "The folder structure as an internal UUID", required = true)
     private String pathUuid;
 
     /**
      * The name of the document as an internal UUID
      */
-    @NotNull
     @ApiModelProperty(value = "The name of the document as an internal UUID", required = true)
     private String nameUuid;
 
@@ -274,12 +272,20 @@ public class DocumentObjectDTO implements Serializable {
         return this.getThumbnailUrl() != null || this.getThumbnailUrl().trim().length() > 0;
     }
 
+    public String getObjectKey() {
+        return this.getPathUuid() + "/" + this.getNameUuid() + "/content";
+    }
+
+    public String getThumbnailKey() {
+        return this.getPathUuid() + "/" + this.getNameUuid() + "/thumb-0001.jpg";
+    }
+
     public void buildObjectUrl() {
-        this.setObjectUrl(this.getPathUuid() + "/" + this.getNameUuid() + "/content");
+        this.setObjectUrl(this.getObjectKey());
     }
 
     public void buildThumbnailUrl() {
-        this.setThumbnailUrl(this.getPathUuid() + "/" + this.getNameUuid() + "/thumb-0001.jpg");
+        this.setThumbnailUrl(this.getThumbnailKey());
     }
 
     public String dump() {

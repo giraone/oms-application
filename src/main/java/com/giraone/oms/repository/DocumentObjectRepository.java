@@ -18,7 +18,7 @@ public interface DocumentObjectRepository extends JpaRepository<DocumentObject, 
     @Query("select documentObject from DocumentObject documentObject where documentObject.owner.login = ?#{principal.username}")
     List<DocumentObject> findByOwnerIsCurrentUser();
 
-    @Query("select documentObject from DocumentObject documentObject where documentObject.owner.id = ?1")
+    @Query("select documentObject from DocumentObject documentObject where documentObject.owner.id = ?1 or documentObject.documentPolicy = 'PUBLIC'")
     Page<DocumentObject> findByAllowedAccess(long userId, Pageable pageable);
 
     @Query("select documentObject from DocumentObject documentObject where documentObject.pathUuid = ?1 and documentObject.nameUuid = ?2")

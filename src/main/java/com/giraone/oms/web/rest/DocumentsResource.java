@@ -3,6 +3,7 @@ package com.giraone.oms.web.rest;
 import com.amazonaws.HttpMethod;
 import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.domain.User;
+import com.giraone.oms.domain.enumeration.DocumentPolicy;
 import com.giraone.oms.security.SecurityUtils;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
@@ -26,7 +27,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -75,24 +75,10 @@ public class DocumentsResource {
 
         log.debug("REST request to get document list by user={}", SecurityUtils.getCurrentUserLogin());
 
-        Optional<User> user = getUser();
-        if (!user.isPresent()) {
-            throw new BadRequestAlertException("Invalid user", ENTITY_NAME, "user.invalid");
-        }
-
-        Page<DocumentObjectDTO> page = documentObjectService.findAll(user.get(), pageable);
-
-        page.get().forEach(d -> {
-
-            d.setObjectUrl(s3StorageService.createPreSignedUrl(
-                d.getObjectUrl(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead()).toExternalForm());
-            d.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
-                d.getObjectUrl(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite()).toExternalForm());
-            if (d.getThumbnailUrl() != null) {
-                d.setThumbnailUrl(s3StorageService.createPreSignedUrl(
-                    d.getThumbnailUrl(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail()).toExternalForm());
-            }
-        });
+        User user = getUser();
+        Page<DocumentObjectDTO> page = documentObjectService.findAll(user, pageable);
+        // prepare the possible pre-signed URLs based on the access policy
+        page.get().forEach(d -> preparePolicyBasedUrls(d, user));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -113,31 +99,24 @@ public class DocumentsResource {
         }
 
         final Instant now = Instant.now();
-        Optional<User> user = getUser();
-        if (!user.isPresent()) {
-            throw new BadRequestAlertException("Invalid user", ENTITY_NAME, "user.invalid");
-        }
+        User user = getUser();
 
         // path and name are kept untouched - this is the view of the creator
-        // TODO => UUID also for folder
-
-        documentObjectDTO.setOwnerId(user.get().getId());
+        documentObjectDTO.setOwnerId(user.getId());
         documentObjectDTO.setPath("/");
         documentObjectDTO.setPathUuid(ROOT_UUID);
         documentObjectDTO.setNameUuid(UUID.randomUUID().toString());
         documentObjectDTO.setCreation(now);
         documentObjectDTO.setNumberOfPages(0);
+        documentObjectDTO.setDocumentPolicy(DocumentPolicy.PRIVATE);
         documentObjectDTO.buildObjectUrl();
-
-        // Reserve a pre-signed URL for a POST upload
-        URL url = s3StorageService.createPreSignedUrl(documentObjectDTO.getObjectUrl(), HttpMethod.PUT, 1, 0);
-        System.err.println(url.toExternalForm());
 
         // Save the meta-data
         DocumentObjectDTO result = documentObjectService.save(documentObjectDTO);
 
-        // Patch the objectUrl for the browser client
-        result.setObjectUrl(url.toExternalForm());
+        // Reserve a pre-signed URL for a POST upload and patch the objectWriteUrl for the browser client
+        result.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
+            documentObjectDTO.getObjectKey(), HttpMethod.PUT, 1, 0).toExternalForm());
 
         return ResponseEntity.created(new URI("/api/document-objects/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -151,7 +130,6 @@ public class DocumentsResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentObjectDTO,
      * or with status {@code 400 (Bad Request)} if the documentObjectDTO is not valid,
      * or with status {@code 500 (Internal Server Error)} if the documentObjectDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/documents")
     public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectDTO documentObjectDTO)  {
@@ -163,7 +141,12 @@ public class DocumentsResource {
         if (!existingDocumentObject.isPresent()) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
         }
+
         existingDocumentObject.get().setName(documentObjectDTO.getName());
+        if (documentObjectDTO.getDocumentPolicy() != null) {
+            existingDocumentObject.get().setDocumentPolicy(documentObjectDTO.getDocumentPolicy());
+        }
+
         DocumentObjectDTO result = documentObjectService.save(existingDocumentObject.get());
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
@@ -237,7 +220,7 @@ public class DocumentsResource {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private Optional<User> getUser() {
+    private User getUser() {
         Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
         if (!userLogin.isPresent()) {
             throw new BadRequestAlertException("Cannot get user login", ENTITY_NAME, "no_user");
@@ -247,6 +230,23 @@ public class DocumentsResource {
         if (!user.isPresent()) {
             throw new BadRequestAlertException("Cannot get user account", ENTITY_NAME, "no_user_account");
         }
-        return user;
+        return user.get();
+    }
+
+    private void preparePolicyBasedUrls(DocumentObjectDTO d, User user) {
+
+        // everybody, who has access can read the content
+        d.setObjectUrl(s3StorageService.createPreSignedUrl(
+            d.getObjectKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead()).toExternalForm());
+        // everybody, who has access can read the thumbnail
+        if (d.getThumbnailUrl() != null) {
+            d.setThumbnailUrl(s3StorageService.createPreSignedUrl(
+                d.getThumbnailKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail()).toExternalForm());
+        }
+        // if the document is not locked and if the caller is the owner write access is possible
+        if (d.getDocumentPolicy() != DocumentPolicy.LOCKED && d.getOwnerId().longValue() == user.getId().longValue()) {
+            d.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
+                d.getObjectKey(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite()).toExternalForm());
+        }
     }
 }

@@ -41,7 +41,7 @@
         "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
         "creation": "Timestamp of creation",
         "lastContentModification": "Timestamp of last content modification",
-        "documentPolicy": "Simple policy to show attribute based access control"
+        "documentPolicy": "Simple policy to show attribute based access controls"
       }
     }
   }

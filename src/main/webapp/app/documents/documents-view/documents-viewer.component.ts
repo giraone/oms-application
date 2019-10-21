@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { JhiEventManager, JhiParseLinks } from 'ng-jhipster';
 import { IDocumentObject } from 'app/shared/model/document-object.model';
+import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.model';
 import { AccountService } from 'app/core/auth/account.service';
 
 import { DocumentsService } from './documents.service';
@@ -60,6 +61,36 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
 
   display(document: IDocumentObject) {
     window.open(document.objectUrl, '_new');
+  }
+
+  publishDocument(document: IDocumentObject) {
+    this.documentsService
+    .update({
+      id: document.id,
+      name: document.name,
+      path: document.path,
+      documentPolicy: DocumentPolicy.PUBLIC
+    }).subscribe(() => { this.loadAll(); });
+  }
+
+  unPublishDocument(document: IDocumentObject) {
+    this.documentsService
+    .update({
+      id: document.id,
+      name: document.name,
+      path: document.path,
+      documentPolicy: DocumentPolicy.PRIVATE
+    }).subscribe(() => { this.loadAll(); });
+  }
+
+  lockDocument(document: IDocumentObject) {
+    this.documentsService
+    .update({
+      id: document.id,
+      name: document.name,
+      path: document.path,
+      documentPolicy: DocumentPolicy.LOCKED
+    }).subscribe(() => { this.loadAll(); });
   }
 
   rename(document: IDocumentObject) {

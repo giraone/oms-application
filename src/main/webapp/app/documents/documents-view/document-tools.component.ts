@@ -4,8 +4,6 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { JhiAlertService } from 'ng-jhipster';
-import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
-import { DocumentObjectService } from '../../entities/document-object/document-object.service';
 import { DocumentsService } from './documents.service';
 import { IUser } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
@@ -20,7 +18,6 @@ export class DocumentToolsComponent implements OnInit {
 
   constructor(
     protected jhiAlertService: JhiAlertService,
-    protected documentObjectService: DocumentObjectService,
     protected documentsService: DocumentsService,
     protected userService: UserService,
     protected activatedRoute: ActivatedRoute
@@ -35,6 +32,17 @@ export class DocumentToolsComponent implements OnInit {
         map((response: HttpResponse<IUser[]>) => response.body)
       )
       .subscribe((res: IUser[]) => (this.users = res), (res: HttpErrorResponse) => this.onError(res.message));
+  }
+
+  recreateThumbnails() {
+
+    this.documentsService.maintenanceThumbnails()
+    .subscribe((data) => {
+      // eslint-disable-next-line no-console
+      console.log('DocumentToolsComponent.recreateThumbnails OK');
+    }, (error) => {
+      this.jhiAlertService.error("ERROR in recreateThumbnails: " + error, null, null);
+    });
   }
 
   protected onError(errorMessage: string) {

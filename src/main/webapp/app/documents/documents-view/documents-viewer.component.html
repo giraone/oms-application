@@ -29,7 +29,7 @@
                         style="font-size: 70%" (click)="display(document)">
                 </div>
                 <div class="card-body" style="background-color: lightgrey;">
-                    <h6 class="card-title" style="height: 32px;">{{ document.name }}</h6>
+                    <h6 class="card-title" style="height: 32px;">{{ document.name }} [{{ document.documentPolicy }}]</h6>
                     <p class="card-text" style="font-size: 70%">
                         MIME type: {{ document.mimeType }}</br />
                         Bytes/Pages: {{ document.byteSize }} / {{ document.numberOfPages }}</br />
@@ -41,9 +41,11 @@
                         <button class="btn btn-primary" ngbDropdownToggle>Action</button>
                         <div ngbDropdownMenu>
                             <button ngbDropdownItem (click)="display(document)">Display</button>
-                            <button ngbDropdownItem (click)="rename(document)">Rename</button>
+                            <button *ngIf="document.objectWriteUrl" ngbDropdownItem (click)="rename(document)">Rename</button>
                             <button *ngIf="document.objectWriteUrl" ngbDropdownItem [routerLink]="['/documents/document', document.id, 'update']">Update content</button>
                             <button *ngIf="document.objectWriteUrl" ngbDropdownItem (click)="lockDocument(document)">Lock document</button>
+                            <button *ngIf="document.objectWriteUrl && document.documentPolicy == 'PRIVATE'" ngbDropdownItem (click)="publishDocument(document)">Make document public</button>
+                            <button *ngIf="document.objectWriteUrl && document.documentPolicy == 'PUBLIC'" ngbDropdownItem (click)="unPublishDocument(document)">Make document private</button>
                             <button *ngIf="document.objectWriteUrl" ngbDropdownItem (click)="delete(document)">Delete</button>
                         </div>
                     </div>

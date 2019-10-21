@@ -40,11 +40,11 @@ public class WebHooksResource {
     @PostMapping("/s3")
     public ResponseEntity<String> receiveEventPost(@RequestBody String eventString) {
 
-        log.info("################### RECEIVED S3 EVENT by POST: {}", eventString);
+        log.info("# # # # # # # # # # # # # # # # # # # RECEIVED S3 EVENT by POST: {}", eventString);
 
         final S3EventNotification eventNotification = S3EventNotification.parseJson(eventString);
 
-        log.info("################### CONVERTED EVENT: {}", eventNotification);
+        log.info("# # # # # # # # # # # # # # # # # # # CONVERTED EVENT: {}", eventNotification);
 
         eventNotification.getRecords().forEach(this::processOneEvent);
 
@@ -59,7 +59,7 @@ public class WebHooksResource {
             log.error("Received event for objectKey {}, but cannot decode", objectKey);
         }
 
-        log.info("################### OBJECT-KEY: {}", objectKey);
+        log.info("# # # # # # # # # # # # # # # # # # # OBJECT-KEY: {}", objectKey);
 
         if (!objectKey.endsWith("/content")) {
             log.warn("Received event for objectKey {} no ending in /content", objectKey);

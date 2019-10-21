@@ -44,7 +44,7 @@ entity DocumentObject {
     creation Instant,
     /** Timestamp of last content modification */
     lastContentModification Instant
-    /** Simple policy to show attribute based access control */
+    /** Simple policy to show attribute based access controls */
     documentPolicy DocumentPolicy
 }
 

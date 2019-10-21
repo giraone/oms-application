@@ -85,18 +85,18 @@ export class DocumentsUploadComponent implements OnInit {
     this.documentsService.reservePostUrl(documentObject)
       .subscribe((data) => {
         // eslint-disable-next-line no-console
-        console.log('DocumentsUploadComponent.save reservePostUrl ' + data.body);
+        console.log('DocumentsUploadComponent.save reservePostUrl ' + JSON.stringify(data.body));
         this.documentsService.uploadToS3UsingPut(byteArray, documentObject.mimeType, data.body.objectWriteUrl)
           .subscribe((s3Data) => {
             // eslint-disable-next-line no-console
-            console.log('DocumentsUploadComponent.save uploadToS3 ' + s3Data);
+            console.log('DocumentsUploadComponent.save uploadToS3UsingPut ' + s3Data);
             this.isSaving = false;
             setTimeout(() => {
               this.previousState();
             }, 1000);
           }, (error) => {
             this.isSaving = false;
-            this.jhiAlertService.error("ERROR in uploadToS3: " + error, null, null);
+            this.jhiAlertService.error("ERROR in uploadToS3UsingPut: " + error, null, null);
           });
       }, (error) => {
         this.isSaving = false;

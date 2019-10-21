@@ -78,7 +78,7 @@
         },
         {
             "fieldName": "documentPolicy",
-            "javadoc": "Simple policy to show attribute based access control",
+            "javadoc": "Simple policy to show attribute based access controls",
             "fieldType": "DocumentPolicy",
             "fieldValues": "PRIVATE,PUBLIC,LOCKED"
         }
