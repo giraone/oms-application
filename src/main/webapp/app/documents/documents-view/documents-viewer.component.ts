@@ -71,8 +71,6 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
         id: document.id,
         name: newName,
         path: document.path, // TODO: use new model
-        pathUuid: document.pathUuid,
-        nameUuid: document.nameUuid,
       }).subscribe(() => { this.loadAll(); });
   }
 

@@ -10,6 +10,9 @@ import { DocumentObjectService } from '../../entities/document-object/document-o
 import { IDocumentObject } from 'app/shared/model/document-object.model';
 import { DocumentsViewerComponent } from './documents-viewer.component';
 import { DocumentsUploadComponent } from './documents-upload.component';
+import { DocumentUpdateComponent } from './document-update.component';
+
+import { DocumentToolsComponent } from './document-tools.component';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentsViewerResolve implements Resolve<IDocumentObject> {
@@ -54,5 +57,26 @@ export const documentsViewerRoute: Routes = [
     },
     canActivate: [UserRouteAccessService]
   },
+  {
+    path: 'tools',
+    component: DocumentToolsComponent,
+    data: {
+      authorities: ['ROLE_ADMIN'],
+      pageTitle: 'documents.titles.tools'
+    },
+    canActivate: [UserRouteAccessService]
+  },
+  {
+    path: 'document/:id/update',
+    component: DocumentUpdateComponent,
+    resolve: {
+      documentObject: DocumentsViewerResolve
+    },
+    data: {
+      authorities: ['ROLE_USER'],
+      pageTitle: 'documents.titles.upload'
+    },
+    canActivate: [UserRouteAccessService]
+  }
 ];
 

@@ -1,45 +1,39 @@
 import { Component, OnInit } from '@angular/core';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { JhiAlertService } from 'ng-jhipster';
-import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
+import { IDocumentObject } from 'app/shared/model/document-object.model';
 import { DocumentObjectService } from '../../entities/document-object/document-object.service';
 import { DocumentsService } from './documents.service';
 import { IUser } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
 
 @Component({
-  selector: 'jhi-documents-upload',
-  templateUrl: './documents-upload.component.html'
+  selector: 'jhi-document-update',
+  templateUrl: './document-update.component.html'
 })
-export class DocumentsUploadComponent implements OnInit {
+export class DocumentUpdateComponent implements OnInit {
+
+  documentObject: IDocumentObject;
   isSaving: boolean;
   fileToUpload: File = null;
   users: IUser[];
-
-  editForm = this.fb.group({
-    name: [null, [Validators.required]]
-  });
 
   constructor(
     protected jhiAlertService: JhiAlertService,
     protected documentObjectService: DocumentObjectService,
     protected documentsService: DocumentsService,
     protected userService: UserService,
-    protected activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
+    protected activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    this.isSaving = false;
-
     this.activatedRoute.data.subscribe(({ documentObject }) => {
-      this.updateForm(documentObject);
+      this.documentObject = documentObject;
     });
+
     this.userService
       .query()
       .pipe(
@@ -51,15 +45,6 @@ export class DocumentsUploadComponent implements OnInit {
 
   handleFileInput(files: FileList) {
     this.fileToUpload = files.item(0);
-    let documentName = this.fileToUpload.name;
-    const index = documentName.lastIndexOf('.');
-    if (index > 0) {
-      documentName = documentName.substring(0, index);
-    }
-    documentName = documentName.replace(/_/g, ' ');
-    this.editForm.patchValue({
-      name: documentName
-    });
   }
 
   save() {
@@ -73,20 +58,19 @@ export class DocumentsUploadComponent implements OnInit {
 
   saveBytes(byteArray: string | ArrayBuffer) {
 
-    const documentObject = this.createFromForm();
     if (!this.fileToUpload.type || this.fileToUpload.type === '') {
-      documentObject.mimeType = 'application/octet-stream';
+      this.documentObject.mimeType = 'application/octet-stream';
     } else {
-      documentObject.mimeType = this.fileToUpload.type;
+      this.documentObject.mimeType = this.fileToUpload.type;
     }
     // eslint-disable-next-line no-console
-    console.log('documentObject.mimeType = ' + documentObject.mimeType);
+    console.log('documentObject.mimeType = ' + this.documentObject.mimeType);
 
-    this.documentsService.reservePostUrl(documentObject)
+    this.documentsService.reservePostUrl(this.documentObject)
       .subscribe((data) => {
         // eslint-disable-next-line no-console
         console.log('DocumentsUploadComponent.save reservePostUrl ' + data.body);
-        this.documentsService.uploadToS3UsingPut(byteArray, documentObject.mimeType, data.body.objectWriteUrl)
+        this.documentsService.uploadToS3UsingPut(byteArray, this.documentObject.mimeType, data.body.objectWriteUrl)
           .subscribe((s3Data) => {
             // eslint-disable-next-line no-console
             console.log('DocumentsUploadComponent.save uploadToS3 ' + s3Data);
@@ -104,23 +88,8 @@ export class DocumentsUploadComponent implements OnInit {
       });
   }
 
-  updateForm(documentObject: IDocumentObject) {
-    this.editForm.patchValue({
-      name: documentObject.name
-    });
-  }
-
   previousState() {
     window.history.back();
-  }
-
-
-  private createFromForm(): IDocumentObject {
-    return {
-      ...new DocumentObject(),
-      path: '/',
-      name: this.editForm.get(['name']).value
-    };
   }
 
   protected onError(errorMessage: string) {

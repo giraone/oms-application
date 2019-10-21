@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import * as moment from 'moment';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,9 +39,11 @@ export class DocumentsService {
       .post(targetUrl, formData);
   }
 
-  uploadToS3UsingPut(bytes: string | ArrayBuffer, targetUrl: string): Observable<Object> {
+  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<Object> {
+    let httpHeaders = new HttpHeaders();
+    httpHeaders = httpHeaders.append('content-type', mimeType);
     return this.http
-      .put(targetUrl, bytes);
+      .put(targetUrl, bytes, { headers : httpHeaders });
   }
 
   update(documentObject: IDocumentObject): Observable<EntityResponseType> {
