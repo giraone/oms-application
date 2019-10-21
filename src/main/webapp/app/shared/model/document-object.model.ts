@@ -8,6 +8,7 @@ export interface IDocumentObject {
   nameUuid?: string;
   mimeType?: string;
   objectUrl?: string;
+  objectWriteUrl?: string;
   thumbnailUrl?: string;
   byteSize?: number;
   numberOfPages?: number;
@@ -25,6 +26,7 @@ export class DocumentObject implements IDocumentObject {
     public nameUuid?: string,
     public mimeType?: string,
     public objectUrl?: string,
+    public objectWriteUrl?: string,
     public thumbnailUrl?: string,
     public byteSize?: number,
     public numberOfPages?: number,
