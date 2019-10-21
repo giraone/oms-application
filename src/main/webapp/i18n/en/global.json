@@ -50,9 +50,9 @@
     "messages": {
       "info": {
         "authenticated": {
-          "prefix": "If you want to ",
+          "prefix": "Use ",
           "link": "sign in",
-          "suffix": ", you can try the default accounts:<br/>- Administrator (login=\"admin\" and password=\"admin\") <br/>- User (login=\"user\" and password=\"user\")."
+          "suffix": " to log into the system."
         },
         "register": {
           "noaccount": "You don't have an account yet?",
@@ -133,7 +133,8 @@
     "emailexists": "Email is already in use!",
     "idexists": "A new {{ entityName }} cannot already have an ID",
     "idnull": "Invalid ID",
-    "not.found": "Not found"
+    "not.found": "Not found",
+    "user.invalid": "Invalid user"
   },
   "footer": "Made with &#x1F9E0 by giraone &#x1F60E"
 }

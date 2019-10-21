@@ -50,9 +50,9 @@
     "messages": {
       "info": {
         "authenticated": {
-          "prefix": "Wenn Sie sich ",
-          "link": "anmelden",
-          "suffix": " möchten, versuchen Sie es mit <br/>- Administrator (Name=\"admin\" und Passwort=\"admin\")<br/>- Benutzer (Name=\"user\" und Passwort=\"user\")."
+          "prefix": "Benutzen Sie ",
+          "link": "LOGIN",
+          "suffix": " um sich anzumelden."
         },
         "register": {
           "noaccount": "Sie haben noch keinen Zugang?",
@@ -132,7 +132,8 @@
     "emailexists": "Email wird bereits verwendet!",
     "idexists": "Ein neuer {{entityName}} kann noch keine ID haben",
     "idnull": "Ungültige ID",
-    "not.found": "Nicht gefunden"
+    "not.found": "Nicht gefunden",
+    "user.invalid": "Ungültiger Benutzer"
   },
   "footer": "Made with &#x1F9E0 by giraone &#x1F60E"
 }

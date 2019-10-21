@@ -9,11 +9,13 @@
   "documents": {
     "menu": {
       "storage": "Storage",
-      "documents": "Documents"
+      "documents": "Documents",
+      "tools": "Tools"
     },
     "titles": {
       "documents": "Documents",
-      "upload": "Upload"
+      "upload": "Upload",
+      "tools": "Tools"
     }
   }
 }
