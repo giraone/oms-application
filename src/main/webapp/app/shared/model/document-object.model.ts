@@ -1,4 +1,5 @@
 import { Moment } from 'moment';
+import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.model';
 
 export interface IDocumentObject {
   id?: number;
@@ -14,6 +15,7 @@ export interface IDocumentObject {
   numberOfPages?: number;
   creation?: Moment;
   lastContentModification?: Moment;
+  documentPolicy?: DocumentPolicy;
   ownerId?: number;
 }
 
@@ -32,6 +34,7 @@ export class DocumentObject implements IDocumentObject {
     public numberOfPages?: number,
     public creation?: Moment,
     public lastContentModification?: Moment,
+    public documentPolicy?: DocumentPolicy,
     public ownerId?: number
   ) {}
 }

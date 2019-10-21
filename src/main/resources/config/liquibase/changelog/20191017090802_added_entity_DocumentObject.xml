@@ -48,6 +48,9 @@
             <column name="last_content_modification" type="datetime" remarks="Timestamp of last content modification">
                 <constraints nullable="true" />
             </column>
+            <column name="document_policy" type="varchar(255)" remarks="Simple policy to show attribute based access control">
+                <constraints nullable="true" />
+            </column>
             <column name="owner_id" type="bigint">
                 <constraints nullable="false" />
             </column>
@@ -87,6 +90,7 @@
             <column name="number_of_pages" type="numeric"/>
             <column name="creation" type="datetime"/>
             <column name="last_content_modification" type="datetime"/>
+            <column name="document_policy" type="string"/>
             <column name="owner_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here, do not remove-->
         </loadData>

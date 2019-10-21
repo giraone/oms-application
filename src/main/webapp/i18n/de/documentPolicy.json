@@ -1,0 +1,10 @@
+{
+  "omsApp": {
+    "DocumentPolicy": {
+      "null": "",
+      "PRIVATE": "PRIVATE",
+      "PUBLIC": "PUBLIC",
+      "LOCKED": "LOCKED"
+    }
+  }
+}

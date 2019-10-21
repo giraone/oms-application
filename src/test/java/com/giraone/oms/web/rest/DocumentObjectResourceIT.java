@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.giraone.oms.domain.enumeration.DocumentPolicy;
 /**
  * Integration tests for the {@link DocumentObjectResource} REST controller.
  */
@@ -71,6 +72,9 @@ public class DocumentObjectResourceIT {
 
     private static final Instant DEFAULT_LAST_CONTENT_MODIFICATION = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_LAST_CONTENT_MODIFICATION = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final DocumentPolicy DEFAULT_DOCUMENT_POLICY = DocumentPolicy.PRIVATE;
+    private static final DocumentPolicy UPDATED_DOCUMENT_POLICY = DocumentPolicy.PUBLIC;
 
     @Autowired
     private DocumentObjectRepository documentObjectRepository;
@@ -130,7 +134,8 @@ public class DocumentObjectResourceIT {
             .byteSize(DEFAULT_BYTE_SIZE)
             .numberOfPages(DEFAULT_NUMBER_OF_PAGES)
             .creation(DEFAULT_CREATION)
-            .lastContentModification(DEFAULT_LAST_CONTENT_MODIFICATION);
+            .lastContentModification(DEFAULT_LAST_CONTENT_MODIFICATION)
+            .documentPolicy(DEFAULT_DOCUMENT_POLICY);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -156,7 +161,8 @@ public class DocumentObjectResourceIT {
             .byteSize(UPDATED_BYTE_SIZE)
             .numberOfPages(UPDATED_NUMBER_OF_PAGES)
             .creation(UPDATED_CREATION)
-            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION);
+            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION)
+            .documentPolicy(UPDATED_DOCUMENT_POLICY);
         // Add required entity
         User user = UserResourceIT.createEntity(em);
         em.persist(user);
@@ -197,6 +203,7 @@ public class DocumentObjectResourceIT {
         assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(DEFAULT_NUMBER_OF_PAGES);
         assertThat(testDocumentObject.getCreation()).isEqualTo(DEFAULT_CREATION);
         assertThat(testDocumentObject.getLastContentModification()).isEqualTo(DEFAULT_LAST_CONTENT_MODIFICATION);
+        assertThat(testDocumentObject.getDocumentPolicy()).isEqualTo(DEFAULT_DOCUMENT_POLICY);
     }
 
     @Test
@@ -317,7 +324,8 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.[*].byteSize").value(hasItem(DEFAULT_BYTE_SIZE.intValue())))
             .andExpect(jsonPath("$.[*].numberOfPages").value(hasItem(DEFAULT_NUMBER_OF_PAGES)))
             .andExpect(jsonPath("$.[*].creation").value(hasItem(DEFAULT_CREATION.toString())))
-            .andExpect(jsonPath("$.[*].lastContentModification").value(hasItem(DEFAULT_LAST_CONTENT_MODIFICATION.toString())));
+            .andExpect(jsonPath("$.[*].lastContentModification").value(hasItem(DEFAULT_LAST_CONTENT_MODIFICATION.toString())))
+            .andExpect(jsonPath("$.[*].documentPolicy").value(hasItem(DEFAULT_DOCUMENT_POLICY.toString())));
     }
     
     @Test
@@ -341,7 +349,8 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.byteSize").value(DEFAULT_BYTE_SIZE.intValue()))
             .andExpect(jsonPath("$.numberOfPages").value(DEFAULT_NUMBER_OF_PAGES))
             .andExpect(jsonPath("$.creation").value(DEFAULT_CREATION.toString()))
-            .andExpect(jsonPath("$.lastContentModification").value(DEFAULT_LAST_CONTENT_MODIFICATION.toString()));
+            .andExpect(jsonPath("$.lastContentModification").value(DEFAULT_LAST_CONTENT_MODIFICATION.toString()))
+            .andExpect(jsonPath("$.documentPolicy").value(DEFAULT_DOCUMENT_POLICY.toString()));
     }
 
     @Test
@@ -375,7 +384,8 @@ public class DocumentObjectResourceIT {
             .byteSize(UPDATED_BYTE_SIZE)
             .numberOfPages(UPDATED_NUMBER_OF_PAGES)
             .creation(UPDATED_CREATION)
-            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION);
+            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION)
+            .documentPolicy(UPDATED_DOCUMENT_POLICY);
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(updatedDocumentObject);
 
         restDocumentObjectMockMvc.perform(put("/api/document-objects")
@@ -398,6 +408,7 @@ public class DocumentObjectResourceIT {
         assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(UPDATED_NUMBER_OF_PAGES);
         assertThat(testDocumentObject.getCreation()).isEqualTo(UPDATED_CREATION);
         assertThat(testDocumentObject.getLastContentModification()).isEqualTo(UPDATED_LAST_CONTENT_MODIFICATION);
+        assertThat(testDocumentObject.getDocumentPolicy()).isEqualTo(UPDATED_DOCUMENT_POLICY);
     }
 
     @Test

@@ -5,6 +5,7 @@ import java.time.Instant;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
+import com.giraone.oms.domain.enumeration.DocumentPolicy;
 
 /**
  * A DTO for the {@link com.giraone.oms.domain.DocumentObject} entity.
@@ -31,12 +32,14 @@ public class DocumentObjectDTO implements Serializable {
     /**
      * The folder structure as an internal UUID
      */
+    @NotNull
     @ApiModelProperty(value = "The folder structure as an internal UUID", required = true)
     private String pathUuid;
 
     /**
      * The name of the document as an internal UUID
      */
+    @NotNull
     @ApiModelProperty(value = "The name of the document as an internal UUID", required = true)
     private String nameUuid;
 
@@ -90,6 +93,12 @@ public class DocumentObjectDTO implements Serializable {
      */
     @ApiModelProperty(value = "Timestamp of last content modification")
     private Instant lastContentModification;
+
+    /**
+     * Simple policy to show attribute based access control
+     */
+    @ApiModelProperty(value = "Simple policy to show attribute based access control")
+    private DocumentPolicy documentPolicy;
 
 
     private Long ownerId;
@@ -198,6 +207,14 @@ public class DocumentObjectDTO implements Serializable {
         this.lastContentModification = lastContentModification;
     }
 
+    public DocumentPolicy getDocumentPolicy() {
+        return documentPolicy;
+    }
+
+    public void setDocumentPolicy(DocumentPolicy documentPolicy) {
+        this.documentPolicy = documentPolicy;
+    }
+
     public Long getOwnerId() {
         return ownerId;
     }
@@ -237,7 +254,7 @@ public class DocumentObjectDTO implements Serializable {
             ", nameUuid='" + getNameUuid() + "'" +
             ", mimeType='" + getMimeType() + "'" +
             ", objectUrl='" + getObjectUrl() + "'" +
-            ", objectUpdateUrl='" + getObjectWriteUrl() + "'" +
+            ", getObjectWriteUrl='" + getObjectWriteUrl() + "'" +
             ", thumbnailUrl='" + getThumbnailUrl() + "'" +
             ", byteSize=" + getByteSize() +
             ", numberOfPages=" + getNumberOfPages() +

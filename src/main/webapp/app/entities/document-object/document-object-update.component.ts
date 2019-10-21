@@ -36,6 +36,7 @@ export class DocumentObjectUpdateComponent implements OnInit {
     numberOfPages: [],
     creation: [],
     lastContentModification: [],
+    documentPolicy: [],
     ownerId: [null, Validators.required]
   });
 
@@ -76,6 +77,7 @@ export class DocumentObjectUpdateComponent implements OnInit {
       creation: documentObject.creation != null ? documentObject.creation.format(DATE_TIME_FORMAT) : null,
       lastContentModification:
         documentObject.lastContentModification != null ? documentObject.lastContentModification.format(DATE_TIME_FORMAT) : null,
+      documentPolicy: documentObject.documentPolicy,
       ownerId: documentObject.ownerId
     });
   }
@@ -112,6 +114,7 @@ export class DocumentObjectUpdateComponent implements OnInit {
         this.editForm.get(['lastContentModification']).value != null
           ? moment(this.editForm.get(['lastContentModification']).value, DATE_TIME_FORMAT)
           : undefined,
+      documentPolicy: this.editForm.get(['documentPolicy']).value,
       ownerId: this.editForm.get(['ownerId']).value
     };
   }

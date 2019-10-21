@@ -5,6 +5,7 @@ import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { DocumentObjectService } from 'app/entities/document-object/document-object.service';
 import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
+import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.model';
 
 describe('Service Tests', () => {
   describe('DocumentObject Service', () => {
@@ -36,7 +37,8 @@ describe('Service Tests', () => {
         0,
         0,
         currentDate,
-        currentDate
+        currentDate,
+        DocumentPolicy.PRIVATE
       );
     });
 
@@ -97,7 +99,8 @@ describe('Service Tests', () => {
             byteSize: 1,
             numberOfPages: 1,
             creation: currentDate.format(DATE_TIME_FORMAT),
-            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT),
+            documentPolicy: 'BBBBBB'
           },
           elemDefault
         );
@@ -131,7 +134,8 @@ describe('Service Tests', () => {
             byteSize: 1,
             numberOfPages: 1,
             creation: currentDate.format(DATE_TIME_FORMAT),
-            lastContentModification: currentDate.format(DATE_TIME_FORMAT)
+            lastContentModification: currentDate.format(DATE_TIME_FORMAT),
+            documentPolicy: 'BBBBBB'
           },
           elemDefault
         );

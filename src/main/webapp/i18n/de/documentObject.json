@@ -27,6 +27,7 @@
       "numberOfPages": "Number Of Pages",
       "creation": "Creation",
       "lastContentModification": "Last Content Modification",
+      "documentPolicy": "Document Policy",
       "owner": "Owner",
       "help": {
         "path": "The folder structure of the object using human readable path components",
@@ -39,7 +40,8 @@
         "byteSize": "Size in bytes of the document",
         "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
         "creation": "Timestamp of creation",
-        "lastContentModification": "Timestamp of last content modification"
+        "lastContentModification": "Timestamp of last content modification",
+        "documentPolicy": "Simple policy to show attribute based access control"
       }
     }
   }

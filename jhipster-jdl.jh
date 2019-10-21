@@ -10,7 +10,11 @@ enum AccessType {
     READ_CONTENT, READ_METADATA, CHANGE_CONTENT
 }
 
-// ENITIES
+enum DocumentPolicy {
+    PRIVATE, PUBLIC, LOCKED
+}
+
+// ENTITIES
 
 /**
  * A document entity.
@@ -40,6 +44,8 @@ entity DocumentObject {
     creation Instant,
     /** Timestamp of last content modification */
     lastContentModification Instant
+    /** Simple policy to show attribute based access control */
+    documentPolicy DocumentPolicy
 }
 
 /**

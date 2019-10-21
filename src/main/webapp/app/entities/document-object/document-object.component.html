@@ -30,6 +30,7 @@
             <th scope="col"  jhiSortBy="numberOfPages"><span jhiTranslate="omsApp.documentObject.numberOfPages">Number Of Pages</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="creation"><span jhiTranslate="omsApp.documentObject.creation">Creation</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="lastContentModification"><span jhiTranslate="omsApp.documentObject.lastContentModification">Last Content Modification</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th scope="col"  jhiSortBy="documentPolicy"><span jhiTranslate="omsApp.documentObject.documentPolicy">Document Policy</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"  jhiSortBy="ownerId"><span jhiTranslate="omsApp.documentObject.owner">Owner</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th scope="col"></th>
             </tr>
@@ -48,6 +49,7 @@
                 <td>{{documentObject.numberOfPages}}</td>
                 <td>{{documentObject.creation | date:'medium'}}</td>
                 <td>{{documentObject.lastContentModification | date:'medium'}}</td>
+                <td jhiTranslate="{{'omsApp.DocumentPolicy.' + documentObject.documentPolicy}}">{{documentObject.documentPolicy}}</td>
                 <td>
                     {{documentObject.ownerId}}
                 </td>

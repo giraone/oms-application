@@ -9,6 +9,8 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
 
+import com.giraone.oms.domain.enumeration.DocumentPolicy;
+
 /**
  * A document entity.
  */
@@ -95,6 +97,13 @@ public class DocumentObject implements Serializable {
      */
     @Column(name = "last_content_modification")
     private Instant lastContentModification;
+
+    /**
+     * Simple policy to show attribute based access control
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "document_policy")
+    private DocumentPolicy documentPolicy;
 
     @ManyToOne(optional = false)
     @NotNull
@@ -253,6 +262,19 @@ public class DocumentObject implements Serializable {
         this.lastContentModification = lastContentModification;
     }
 
+    public DocumentPolicy getDocumentPolicy() {
+        return documentPolicy;
+    }
+
+    public DocumentObject documentPolicy(DocumentPolicy documentPolicy) {
+        this.documentPolicy = documentPolicy;
+        return this;
+    }
+
+    public void setDocumentPolicy(DocumentPolicy documentPolicy) {
+        this.documentPolicy = documentPolicy;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -298,6 +320,7 @@ public class DocumentObject implements Serializable {
             ", numberOfPages=" + getNumberOfPages() +
             ", creation='" + getCreation() + "'" +
             ", lastContentModification='" + getLastContentModification() + "'" +
+            ", documentPolicy='" + getDocumentPolicy() + "'" +
             "}";
     }
 }

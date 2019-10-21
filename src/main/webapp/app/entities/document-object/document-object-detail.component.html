@@ -49,6 +49,10 @@
                 <dd>
                     <span>{{documentObject.lastContentModification}}</span>
                 </dd>
+                <dt><span jhiTranslate="omsApp.documentObject.documentPolicy" [ngbTooltip]="'omsApp.documentObject.help.documentPolicy' | translate">Document Policy</span></dt>
+                <dd>
+                    <span jhiTranslate="{{'omsApp.DocumentPolicy.' + documentObject.documentPolicy}}">{{documentObject.documentPolicy}}</span>
+                </dd>
                 <dt><span jhiTranslate="omsApp.documentObject.owner">Owner</span></dt>
                 <dd>
                     {{documentObject.ownerId}}
