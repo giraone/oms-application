@@ -19,6 +19,9 @@ public class ApplicationProperties {
 
     private boolean showConfigOnStartup = true;
     private int thumbWidthAndHeight = 180;
+    private int cacheControlThumbnail = 600;
+    private int cacheControlContentRead = 600;
+    private int cacheControlContentWrite = 600;
 
     @PostConstruct
     private void startup() {
@@ -43,11 +46,38 @@ public class ApplicationProperties {
         this.thumbWidthAndHeight = thumbWidthAndHeight;
     }
 
+    public int getCacheControlThumbnail() {
+        return cacheControlThumbnail;
+    }
+
+    public void setCacheControlThumbnail(int cacheControlThumbnail) {
+        this.cacheControlThumbnail = cacheControlThumbnail;
+    }
+
+    public int getCacheControlContentRead() {
+        return cacheControlContentRead;
+    }
+
+    public void setCacheControlContentRead(int cacheControlContentRead) {
+        this.cacheControlContentRead = cacheControlContentRead;
+    }
+
+    public int getCacheControlContentWrite() {
+        return cacheControlContentWrite;
+    }
+
+    public void setCacheControlContentWrite(int cacheControlContentWrite) {
+        this.cacheControlContentWrite = cacheControlContentWrite;
+    }
+
     @Override
     public String toString() {
         return "ApplicationProperties{" +
             "showConfigOnStartup=" + showConfigOnStartup +
             ", thumbWidthAndHeight=" + thumbWidthAndHeight +
+            ", cacheControlThumbnail=" + cacheControlThumbnail +
+            ", cacheControlContentRead=" + cacheControlContentRead +
+            ", cacheControlContentWrite=" + cacheControlContentWrite +
             '}';
     }
 }
