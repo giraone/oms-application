@@ -158,7 +158,7 @@ public class S3StorageService {
                 .withMethod(httpMethod)
                 .withResponseHeaders(responseHeaders)
                 .withExpiration(expiration);
-        URL url = this.amazonClient.getS3Client().generatePresignedUrl(generatePresignedUrlRequest);
+        final URL url = this.amazonClient.getS3Client().generatePresignedUrl(generatePresignedUrlRequest);
         log.debug("S3StorageService.createPreSignedUrl: {} {} {} -> {}", bucketName, objectKey, httpMethod.name(), url.toString());
         return url;
     }

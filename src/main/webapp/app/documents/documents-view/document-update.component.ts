@@ -69,11 +69,11 @@ export class DocumentUpdateComponent implements OnInit {
     this.documentsService.reservePostUrl(this.documentObject)
       .subscribe((data) => {
         // eslint-disable-next-line no-console
-        console.log('DocumentsUploadComponent.save reservePostUrl ' + data.body);
+        console.log('DocumentUpdateComponent.save reservePostUrl ' + data.body);
         this.documentsService.uploadToS3UsingPut(byteArray, this.documentObject.mimeType, data.body.objectWriteUrl)
-          .subscribe((s3Data) => {
+          .subscribe((httpResponse : HttpResponse<Object>) => {
             // eslint-disable-next-line no-console
-            console.log('DocumentsUploadComponent.save uploadToS3 ' + s3Data);
+            console.log('DocumentUpdateComponent.save uploadToS3UsingPut SUCCESS X-Amz-Request-Id=' + httpResponse.headers.get('X-Amz-Request-Id'));
             this.isSaving = false;
             setTimeout(() => {
               this.previousState();

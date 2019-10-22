@@ -79,21 +79,19 @@ export class DocumentsUploadComponent implements OnInit {
     } else {
       documentObject.mimeType = this.fileToUpload.type;
     }
-    // eslint-disable-next-line no-console
-    console.log('documentObject.mimeType = ' + documentObject.mimeType);
 
     this.documentsService.reservePostUrl(documentObject)
       .subscribe((data) => {
         // eslint-disable-next-line no-console
         console.log('DocumentsUploadComponent.save reservePostUrl ' + JSON.stringify(data.body));
         this.documentsService.uploadToS3UsingPut(byteArray, documentObject.mimeType, data.body.objectWriteUrl)
-          .subscribe((s3Data) => {
+          .subscribe((httpResponse : HttpResponse<Object>) => {
             // eslint-disable-next-line no-console
-            console.log('DocumentsUploadComponent.save uploadToS3UsingPut ' + s3Data);
+            console.log('DocumentsUploadComponent.save uploadToS3UsingPut SUCCESS X-Amz-Request-Id=' + httpResponse.headers.get('X-Amz-Request-Id'));
             this.isSaving = false;
             setTimeout(() => {
               this.previousState();
-            }, 1000);
+            }, 0);
           }, (error) => {
             this.isSaving = false;
             this.jhiAlertService.error("ERROR in uploadToS3UsingPut: " + error, null, null);

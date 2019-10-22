@@ -39,13 +39,21 @@ export class DocumentsService {
       .post(targetUrl, formData);
   }
 
-  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<Object> {
+  /**
+   * Upload an object/document to S3 using a pre-signed URL
+   * @param bytes The content ot be put in S3
+   * @param mimeType The MIME type of the content
+   * @param targetUrl The S3 pre-signed URL
+   * @returns An Observable containing the full HttpResponse. The response will be null, but HTTP headers
+   * might be of interest.
+   */
+  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<HttpResponse<Object>> {
     let httpHeaders = new HttpHeaders();
     httpHeaders = httpHeaders.append('content-type', mimeType);
     // eslint-disable-next-line no-console
     console.log('uploadToS3UsingPut ' + targetUrl + ' ' + mimeType);
     return this.http
-      .put(targetUrl, bytes, { headers : httpHeaders });
+      .put(targetUrl, bytes, { headers : httpHeaders, observe: 'response'});
   }
 
   update(documentObject: IDocumentObject): Observable<EntityResponseType> {

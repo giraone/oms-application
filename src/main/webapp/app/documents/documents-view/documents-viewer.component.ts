@@ -10,6 +10,7 @@ import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.mo
 import { AccountService } from 'app/core/auth/account.service';
 
 import { DocumentsService } from './documents.service';
+import { DocumentEventsService } from './document-events.service';
 
 @Component({
   selector: 'jhi-documents-viewer',
@@ -32,6 +33,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
 
   constructor(
     protected documentsService: DocumentsService,
+    protected documentEventsService: DocumentEventsService,
     protected parseLinks: JhiParseLinks,
     protected accountService: AccountService,
     protected activatedRoute: ActivatedRoute,
@@ -112,13 +114,28 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // eslint-disable-next-line no-console
+    console.log('ngOnInit DocumentsViewerComponent');
+
     this.loadAll();
+
     this.accountService.identity().subscribe(account => {
       this.currentAccount = account;
+    });
+
+    this.documentEventsService.connect();
+    this.documentEventsService.subscribe();
+    this.documentEventsService.receive().subscribe(s3Event => {
+      // eslint-disable-next-line no-console
+      console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
+      alert(JSON.stringify(s3Event));
+      this.loadAll();
     });
   }
 
   ngOnDestroy() {
+    this.documentEventsService.unsubscribe();
+    this.documentEventsService.disconnect();
   }
 
   trackId(index: number, item: IDocumentObject) {
@@ -126,6 +143,12 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   }
 
   protected useResponse(data: IDocumentObject[], headers: HttpHeaders) {
+    this.links = this.parseLinks.parse(headers.get('link'));
+    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+    this.documentObjects = data;
+  }
+
+  protected handleServerPush(data: IDocumentObject[], headers: HttpHeaders) {
     this.links = this.parseLinks.parse(headers.get('link'));
     this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
     this.documentObjects = data;

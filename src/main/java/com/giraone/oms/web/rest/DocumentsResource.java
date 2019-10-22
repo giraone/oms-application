@@ -87,7 +87,8 @@ public class DocumentsResource {
      * {@code POST  /documents} : Prepare upload of a new document
      *
      * @param documentObjectDTO the documentObjectDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new documentObjectDTO, or with status {@code 400 (Bad Request)} if the documentObject has already an ID.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new documentObjectDTO,
+     * or with status {@code 400 (Bad Request)} if the documentObject has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/documents")
