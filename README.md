@@ -7,6 +7,12 @@ is directly exposed as a tier-2 system.
 All the logic (e.g. authorization) is held in a relational database (tier 3) and served by a tier 2 Spring Boot
 REST service. The S3 storage is used directly by the clients (browser) using **pre-signed URLs**.
 
+## The application
+
+Screenshot of the application's user interface
+
+![User-Interface](docs/images/screenshot-of-user-interface.png) 
+
 ## Local Setup with Minio
 
 The default setting
