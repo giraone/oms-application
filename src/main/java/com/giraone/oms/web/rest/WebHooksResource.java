@@ -4,10 +4,15 @@ import com.amazonaws.services.s3.event.S3EventNotification;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
+import com.giraone.oms.web.websocket.dto.S3ClientEventDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -26,15 +31,13 @@ public class WebHooksResource {
 
     private final ImagingService imagingService;
     private final DocumentObjectService documentObjectService;
+    private final SimpMessageSendingOperations messagingTemplate;
 
-    public WebHooksResource(ImagingService imagingService, DocumentObjectService documentObjectService) {
+    public WebHooksResource(ImagingService imagingService, DocumentObjectService documentObjectService,
+                            SimpMessageSendingOperations messagingTemplate) {
         this.imagingService = imagingService;
         this.documentObjectService = documentObjectService;
-    }
-
-    @GetMapping("/s3")
-    public ResponseEntity<String> receiveEventGet(@RequestParam String eventString) {
-        return ResponseEntity.ok("OK");
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/s3")
@@ -48,9 +51,15 @@ public class WebHooksResource {
 
         eventNotification.getRecords().forEach(this::processOneEvent);
 
-        return ResponseEntity.ok("OK");
+        S3ClientEventDTO s3ClientEventDTO = new S3ClientEventDTO();
+        s3ClientEventDTO.setPayload("ready");
+        messagingTemplate.convertAndSendToUser("user-01", "/topic/s3-event", s3ClientEventDTO);
+        log.info("> > > > > > > > > STOMP Client send payload={}", s3ClientEventDTO.getPayload());
+
+        return ResponseEntity.accepted().build();
     }
 
+    // TODO: When WebHooks are used, there is a timeout, so the generation should be asynchronous
     private boolean processOneEvent(S3EventNotification.S3EventNotificationRecord eventRecord) {
         String objectKey = eventRecord.getS3().getObject().getKey();
         try {

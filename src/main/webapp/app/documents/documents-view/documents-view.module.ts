@@ -7,6 +7,8 @@ import { DocumentsUploadComponent } from './documents-upload.component';
 import { DocumentUpdateComponent } from './document-update.component';
 import { DocumentToolsComponent } from './document-tools.component';
 
+import { DocumentEventsService } from './document-events.service';
+
 import { documentsViewerRoute } from './documents-view.route';
 
 const ENTITY_STATES = [...documentsViewerRoute];
@@ -18,6 +20,9 @@ const ENTITY_STATES = [...documentsViewerRoute];
     DocumentsUploadComponent,
     DocumentUpdateComponent,
     DocumentToolsComponent
+  ],
+  providers: [
+    DocumentEventsService
   ]
 })
 export class OmsDocumentsViewModule {}
