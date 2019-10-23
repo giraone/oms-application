@@ -13,6 +13,26 @@ Screenshot of the application's user interface
 
 ![User-Interface](docs/images/screenshot-of-user-interface.png) 
 
+## Architecture
+
+Flow for upoad of documents:
+
+![Upload Flow](docs/images/Using-S3-Right-Upload.svg) 
+
+1. Client sends meta-data of document to application service (POST)
+   and saves it to the application's database
+2. Client receives pre-signed URL to write document content (PUT)
+3. Client uses PUT to upload document content to S3 object storage
+4. Client receives HTTP 200 on success
+5. Object Storage publishes PUT event (`s3:ObjectCreated:Put`) via
+   - AQMP, Kafka, WebHooks, ... in case of using private minio or Ceph
+   - SQS, Lambda (in case of using public AWS S3)
+6. Application service
+   - receives PUT event
+   - finalizes meta data (content length, mime type, ...) to database
+   - creates a thumbnail (not shown in diagram)
+   - and sends "ready" event back to client using WebSocket/STOMP
+   
 ## Local Setup with Minio
 
 The default setting
