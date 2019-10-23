@@ -1,8 +1,10 @@
 package com.giraone.oms.web.rest;
 
 import com.amazonaws.services.s3.event.S3EventNotification;
+import com.giraone.oms.domain.User;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
+import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.web.websocket.dto.S3ClientEventDTO;
 import org.slf4j.Logger;
@@ -31,13 +33,15 @@ public class WebHooksResource {
 
     private final ImagingService imagingService;
     private final DocumentObjectService documentObjectService;
+    private final UserService userService;
     private final SimpMessageSendingOperations messagingTemplate;
 
     public WebHooksResource(ImagingService imagingService, DocumentObjectService documentObjectService,
-                            SimpMessageSendingOperations messagingTemplate) {
+                            UserService userService, SimpMessageSendingOperations messagingTemplate) {
         this.imagingService = imagingService;
         this.documentObjectService = documentObjectService;
         this.messagingTemplate = messagingTemplate;
+        this.userService = userService;
     }
 
     @PostMapping("/s3")
@@ -50,11 +54,6 @@ public class WebHooksResource {
         log.info("# # # # # # # # # # # # # # # # # # # CONVERTED EVENT: {}", eventNotification);
 
         eventNotification.getRecords().forEach(this::processOneEvent);
-
-        S3ClientEventDTO s3ClientEventDTO = new S3ClientEventDTO();
-        s3ClientEventDTO.setPayload("ready");
-        messagingTemplate.convertAndSendToUser("user-01", "/topic/s3-event", s3ClientEventDTO);
-        log.info("> > > > > > > > > STOMP Client send payload={}", s3ClientEventDTO.getPayload());
 
         return ResponseEntity.accepted().build();
     }
@@ -98,6 +97,27 @@ public class WebHooksResource {
         documentObject.setNumberOfPages(metaData.getNumberOfPages());
 
         documentObjectService.save(documentObject);
+
+        publishReadyEventToUser(documentObject.getOwnerId());
+
+        return true;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private boolean publishReadyEventToUser(long userId) {
+
+        Optional<User> user = userService.getUserWithAuthorities(userId);
+        if (!user.isPresent()) {
+            log.error("User with id {} NOT FOUND!", userId);
+            return false;
+        }
+        final String userLogin = user.get().getLogin();
+
+        S3ClientEventDTO s3ClientEventDTO = new S3ClientEventDTO();
+        s3ClientEventDTO.setPayload("ready");
+        messagingTemplate.convertAndSendToUser(userLogin, "/topic/s3-event", s3ClientEventDTO);
+        log.info("> > > > > > > > > STOMP Client send user={}, payload={}", userLogin, s3ClientEventDTO.getPayload());
 
         return true;
     }
