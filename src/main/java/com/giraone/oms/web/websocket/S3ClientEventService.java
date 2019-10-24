@@ -19,7 +19,10 @@ public class S3ClientEventService {
     @MessageMapping("/topic/s3-queue")
     @SendTo("/topic/s3-event")
     public S3ClientEventDTO receive(@Payload S3ClientEventDTO clientEventDTO, StompHeaderAccessor stompHeaderAccessor, Principal principal) {
-        clientEventDTO.setPayload("connect " + principal.getName() + " " + stompHeaderAccessor.getSessionId());
+
+        if (!"ready".equals(clientEventDTO.getPayload())) {
+            clientEventDTO.setPayload("connect user=" + principal.getName() + " session=" + stompHeaderAccessor.getSessionId());
+        }
         log.info("S3ClientEventService {}", clientEventDTO);
         return clientEventDTO;
     }
