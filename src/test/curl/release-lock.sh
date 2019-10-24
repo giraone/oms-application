@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #BASE_URL="http://localhost:8080"
-BASE_URL="http://tonotracker1.eu-central-1.elasticbeanstalk.com"
+BASE_URL="http://oms1.eu-central-1.elasticbeanstalk.com"
 
 HTTP_RESPONSE=$(curl "${BASE_URL}/management/reset-liquibase-lock" --request GET \
   --silent --write-out "HTTPSTATUS:%{http_code}" \
