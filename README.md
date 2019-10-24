@@ -32,7 +32,16 @@ Flow for upoad of documents:
    - finalizes meta data (content length, mime type, ...) to database
    - creates a thumbnail (not shown in diagram)
    - and sends "ready" event back to client using WebSocket/STOMP
-   
+
+## Web Socket and STOMP
+
+- the frontend uses [sockjs-client](https://www.npmjs.com/package/sockjs-client) to allow websockets also on older (non ES5) browsers
+- the frontend uses [webstomp-client](https://www.npmjs.com/package/webstomp-client)
+- currently *Spring Boot* offers STOMP with `V1.0`, *webstomp-client* offers `V1.0, V1.1, V1.2`
+- STOMP heart beats are on default rate for incoming / outcoming at 10 seconds / 10 seconds
+- The data returned by the application to the browser client on receiving an S3 event is currently a simple JSON with one
+  string *payload* argument, like `{ "payload": "ready" }`.
+
 ## Local Setup with Minio
 
 The default setting
