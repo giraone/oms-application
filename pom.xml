@@ -5,9 +5,9 @@
 
     <groupId>com.giraone.oms</groupId>
     <artifactId>oms</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Oms</name>
+    <name>OMS</name>
 
     <repositories>
         <!-- jhipster-needle-maven-repository -->

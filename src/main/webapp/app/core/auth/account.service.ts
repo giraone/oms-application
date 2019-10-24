@@ -7,7 +7,6 @@ import { shareReplay, tap } from 'rxjs/operators';
 
 import { SERVER_API_URL } from 'app/app.constants';
 import { Account } from 'app/core/user/account.model';
-import { JhiTrackerService } from '../tracker/tracker.service';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -19,8 +18,7 @@ export class AccountService {
   constructor(
     private languageService: JhiLanguageService,
     private sessionStorage: SessionStorageService,
-    private http: HttpClient,
-    private trackerService: JhiTrackerService
+    private http: HttpClient
   ) {}
 
   fetch(): Observable<Account> {
@@ -61,7 +59,6 @@ export class AccountService {
             if (account) {
               this.userIdentity = account;
               this.authenticated = true;
-              this.trackerService.connect();
               // After retrieve the account info, the language will be changed to
               // the user's preferred language configured in the account setting
               if (this.userIdentity.langKey) {
@@ -75,9 +72,6 @@ export class AccountService {
             this.authenticationState.next(this.userIdentity);
           },
           () => {
-            if (this.trackerService.stompClient && this.trackerService.stompClient.connected) {
-              this.trackerService.disconnect();
-            }
             this.userIdentity = null;
             this.authenticated = false;
             this.authenticationState.next(this.userIdentity);

@@ -6,8 +6,6 @@ import { of, throwError } from 'rxjs';
 import { OmsTestModule } from '../../../test.module';
 import { PasswordComponent } from 'app/account/password/password.component';
 import { PasswordService } from 'app/account/password/password.service';
-import { JhiTrackerService } from 'app/core/tracker/tracker.service';
-import { MockTrackerService } from '../../../helpers/mock-tracker.service';
 
 describe('Component Tests', () => {
   describe('PasswordComponent', () => {
@@ -20,11 +18,7 @@ describe('Component Tests', () => {
         imports: [OmsTestModule],
         declarations: [PasswordComponent],
         providers: [
-          FormBuilder,
-          {
-            provide: JhiTrackerService,
-            useClass: MockTrackerService
-          }
+          FormBuilder
         ]
       })
         .overrideTemplate(PasswordComponent, '')
