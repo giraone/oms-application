@@ -38,7 +38,7 @@ export class DocumentToolsComponent implements OnInit {
 
     this.documentsService.maintenanceThumbnails()
     .subscribe((data) => {
-      // eslint-disable-next-line no-console
+
       console.log('DocumentToolsComponent.recreateThumbnails OK');
     }, (error) => {
       this.jhiAlertService.error("ERROR in recreateThumbnails: " + error, null, null);

@@ -50,7 +50,7 @@ export class DocumentsService {
   uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<HttpResponse<Object>> {
     let httpHeaders = new HttpHeaders();
     httpHeaders = httpHeaders.append('content-type', mimeType);
-    // eslint-disable-next-line no-console
+
     console.log('uploadToS3UsingPut ' + targetUrl + ' ' + mimeType);
     return this.http
       .put(targetUrl, bytes, { headers : httpHeaders, observe: 'response'});

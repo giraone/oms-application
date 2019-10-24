@@ -40,10 +40,10 @@ export class DocumentEventsService {
     const socket = new SockJS(url);
     this.stompClient = Stomp.over(socket);
     const headers = {};
-    // eslint-disable-next-line no-console
+
     console.log('# # # # DocumentEventsService TRY TO CONNECT');
     this.stompClient.connect(headers, () => {
-      // eslint-disable-next-line no-console
+
       console.log('# # # # DocumentEventsService CONNECTED');
       this.connectedPromise('success');
       this.connectedPromise = null;
@@ -53,6 +53,8 @@ export class DocumentEventsService {
   disconnect() {
     if (this.stompClient !== null) {
       this.stompClient.disconnect();
+
+      console.log('# # # # DocumentEventsService DISCONNECTED');
       this.stompClient = null;
     }
     if (this.subscription) {
@@ -67,7 +69,7 @@ export class DocumentEventsService {
   }
 
   send(payloadText: string) {
-    // eslint-disable-next-line no-console
+
     console.log('DocumentEventsService ' + this.stompClient);
     if (this.stompClient !== null && this.stompClient.connected) {
       this.stompClient.send(
@@ -80,10 +82,12 @@ export class DocumentEventsService {
 
   subscribe() {
     this.connection.then(() => {
+
+      console.log('# # # # DocumentEventsService SUBSCRIBE');
       this.subscriber = this.stompClient.subscribe('/topic/s3-event', data => {
+
+        console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
         const payload = JSON.parse(data.body);
-        // eslint-disable-next-line no-console
-        console.log('# # # # DocumentEventsService ' + data.body);
         this.listenerObserver.next(payload);
       });
     });
@@ -91,6 +95,8 @@ export class DocumentEventsService {
 
   unsubscribe() {
     if (this.subscriber !== null) {
+
+      console.log('# # # # DocumentEventsService UNSUBSCRIBE');
       this.subscriber.unsubscribe();
     }
     this.listener = this.createListener();

@@ -63,16 +63,16 @@ export class DocumentUpdateComponent implements OnInit {
     } else {
       this.documentObject.mimeType = this.fileToUpload.type;
     }
-    // eslint-disable-next-line no-console
+
     console.log('documentObject.mimeType = ' + this.documentObject.mimeType);
 
     this.documentsService.reservePostUrl(this.documentObject)
       .subscribe((data) => {
-        // eslint-disable-next-line no-console
+
         console.log('DocumentUpdateComponent.save reservePostUrl ' + data.body);
         this.documentsService.uploadToS3UsingPut(byteArray, this.documentObject.mimeType, data.body.objectWriteUrl)
           .subscribe((httpResponse : HttpResponse<Object>) => {
-            // eslint-disable-next-line no-console
+
             console.log('DocumentUpdateComponent.save uploadToS3UsingPut SUCCESS X-Amz-Request-Id=' + httpResponse.headers.get('X-Amz-Request-Id'));
             this.isSaving = false;
             setTimeout(() => {

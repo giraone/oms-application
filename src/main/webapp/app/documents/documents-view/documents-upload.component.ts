@@ -82,11 +82,11 @@ export class DocumentsUploadComponent implements OnInit {
 
     this.documentsService.reservePostUrl(documentObject)
       .subscribe((data) => {
-        // eslint-disable-next-line no-console
+
         console.log('DocumentsUploadComponent.save reservePostUrl ' + JSON.stringify(data.body));
         this.documentsService.uploadToS3UsingPut(byteArray, documentObject.mimeType, data.body.objectWriteUrl)
           .subscribe((httpResponse : HttpResponse<Object>) => {
-            // eslint-disable-next-line no-console
+
             console.log('DocumentsUploadComponent.save uploadToS3UsingPut SUCCESS X-Amz-Request-Id=' + httpResponse.headers.get('X-Amz-Request-Id'));
             this.isSaving = false;
             setTimeout(() => {

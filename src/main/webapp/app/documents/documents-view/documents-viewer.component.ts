@@ -40,7 +40,6 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     protected router: Router,
     protected eventManager: JhiEventManager
   ) {
-    // eslint-disable-next-line no-console
     console.log('CTOR DocumentsViewerComponent');
     this.itemsPerPage = 100;
     this.routeData = this.activatedRoute.data.subscribe(data => {
@@ -114,8 +113,8 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // eslint-disable-next-line no-console
-    console.log('ngOnInit DocumentsViewerComponent');
+
+    console.log('DocumentsViewerComponent # # # # ON_INIT');
 
     this.loadAll();
 
@@ -126,14 +125,18 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     this.documentEventsService.connect();
     this.documentEventsService.subscribe();
     this.documentEventsService.receive().subscribe(s3Event => {
-      // eslint-disable-next-line no-console
+
       console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
-      alert(JSON.stringify(s3Event));
+      // alert(JSON.stringify(s3Event));
       this.loadAll();
     });
+
+    // this.documentEventsService.send('Test');
   }
 
   ngOnDestroy() {
+
+    console.log('DocumentsViewerComponent # # # # ON_DESTROY');
     this.documentEventsService.unsubscribe();
     this.documentEventsService.disconnect();
   }
