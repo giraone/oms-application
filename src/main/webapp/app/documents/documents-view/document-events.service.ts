@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Observer, Subscription } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
 import { Location } from '@angular/common';
 
 import { AuthServerProvider } from '../../core/auth/auth-jwt.service';
@@ -15,8 +15,6 @@ export class DocumentEventsService {
   connectedPromise: any;
   listener: Observable<any>;
   listenerObserver: Observer<any>;
-  alreadyConnectedOnce = false;
-  private subscription: Subscription;
 
   constructor(
     private authServerProvider: AuthServerProvider,
@@ -26,7 +24,7 @@ export class DocumentEventsService {
     this.listener = this.createListener();
   }
 
-  connect() {
+  connectAndSubscribe() {
     if (this.connectedPromise === null) {
       this.connection = this.createConnection();
     }
@@ -38,30 +36,29 @@ export class DocumentEventsService {
       url += '?access_token=' + authToken;
     }
     const socket = new SockJS(url);
-    this.stompClient = Stomp.over(socket);
+    console.log('# # # # DocumentEventsService.connect VERSIONS = ' + JSON.stringify(Stomp.VERSIONS));
+    this.stompClient = Stomp.over(socket, { protocols: ['v10.stomp', 'v11.stomp', 'v12.stomp'], binary: false });
+    this.stompClient.heartbeat.outgoing = 10000; // send outgoing heart beat every 10 seconds (default)
+    this.stompClient.heartbeat.incoming = 10000; // request incoming heart beat every 10 seconds (default)
+    this.stompClient.reconnectDelay = 200; // wait in milliseconds before attempting auto reconnect
     const headers = {};
 
-    console.log('# # # # DocumentEventsService TRY TO CONNECT');
     this.stompClient.connect(headers, () => {
-
       console.log('# # # # DocumentEventsService CONNECTED');
-      this.connectedPromise('success');
-      this.connectedPromise = null;
+      this.subscribe();
+    },
+    (error) => {
+      console.log('# # # # DocumentEventsService CONNECT FAILED ' + JSON.stringify(error));
     });
   }
 
-  disconnect() {
+  unsubcribeAndDisconnect() {
     if (this.stompClient !== null) {
+      this.unsubscribe();
       this.stompClient.disconnect();
-
       console.log('# # # # DocumentEventsService DISCONNECTED');
       this.stompClient = null;
     }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = null;
-    }
-    this.alreadyConnectedOnce = false;
   }
 
   receive() {
@@ -70,32 +67,32 @@ export class DocumentEventsService {
 
   send(payloadText: string) {
 
-    console.log('DocumentEventsService ' + this.stompClient);
     if (this.stompClient !== null && this.stompClient.connected) {
       this.stompClient.send(
         '/topic/s3-queue', // destination
         JSON.stringify({ payload: payloadText }), // body
         {} // header
       );
+    } else {
+      console.log('DocumentEventsService.send ERROR: no stompClient!');
     }
   }
 
-  subscribe() {
-    this.connection.then(() => {
-
-      console.log('# # # # DocumentEventsService SUBSCRIBE');
-      this.subscriber = this.stompClient.subscribe('/topic/s3-event', data => {
-
-        console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
-        const payload = JSON.parse(data.body);
-        this.listenerObserver.next(payload);
-      });
+  private subscribe() {
+    this.subscriber = this.stompClient.subscribe('/topic/s3-event', data => {
+      console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
+      const response = JSON.parse(data.body);
+      if (response.payload.startsWith("connect")) {
+        console.log('# # # # DocumentEventsService RECEIVED CONNECT');
+      } else if (this.listenerObserver) {
+        console.log('# # # # DocumentEventsService PASS_TO_OBSERVER ' + response.payload);
+        this.listenerObserver.next(response.payload);
+      }
     });
   }
 
-  unsubscribe() {
+  private unsubscribe() {
     if (this.subscriber !== null) {
-
       console.log('# # # # DocumentEventsService UNSUBSCRIBE');
       this.subscriber.unsubscribe();
     }
