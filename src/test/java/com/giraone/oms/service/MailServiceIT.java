@@ -1,8 +1,7 @@
 package com.giraone.oms.service;
 
-import com.giraone.oms.config.Constants;
-
 import com.giraone.oms.OmsApp;
+import com.giraone.oms.config.Constants;
 import com.giraone.oms.domain.User;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +32,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

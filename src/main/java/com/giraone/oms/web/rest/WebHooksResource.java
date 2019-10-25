@@ -11,10 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -45,50 +43,65 @@ public class WebHooksResource {
     }
 
     @PostMapping("/s3")
-    public ResponseEntity<String> receiveEventPost(@RequestBody String eventString) {
+    public ResponseEntity<Void> receiveEventPost(@RequestBody(required = false) S3EventNotification eventNotification) {
 
-        log.info("# # # # # # # # # # # # # # # # # # # RECEIVED S3 EVENT by POST: {}", eventString);
-
-        final S3EventNotification eventNotification = S3EventNotification.parseJson(eventString);
-
-        log.info("# # # # # # # # # # # # # # # # # # # CONVERTED EVENT: {}", eventNotification);
+        long start = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("# # # # # # # # # # # # # # # # # # # CONVERTED S3 EVENT: {}", eventNotification == null ? "null" : eventNotification.toJson());
+        }
+        if (eventNotification == null) {
+            return ResponseEntity.accepted().build();
+        }
 
         eventNotification.getRecords().forEach(this::processOneEvent);
-
+        long end = System.currentTimeMillis();
+        log.info("# # # # # # # # # # # # # # # # # # # PROCESSING S3 EVENT took {} msecs", (end-start));
         return ResponseEntity.accepted().build();
     }
 
-    // TODO: When WebHooks are used, there is a timeout, so the generation should be asynchronous
-    private boolean processOneEvent(S3EventNotification.S3EventNotificationRecord eventRecord) {
+    private void processOneEvent(S3EventNotification.S3EventNotificationRecord eventRecord) {
         String objectKey = eventRecord.getS3().getObject().getKey();
         try {
             objectKey = URLDecoder.decode(objectKey, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             log.error("Received event for objectKey {}, but cannot decode", objectKey);
+            return;
         }
 
-        log.info("# # # # # # # # # # # # # # # # # # # OBJECT-KEY: {}", objectKey);
-
         if (!objectKey.endsWith("/content")) {
-            log.warn("Received event for objectKey {} no ending in /content", objectKey);
-            return false;
+            if (!objectKey.contains("/thumb-")) {
+                log.warn("Received event for objectKey {} not matching /content or /thumb-* - skipped", objectKey);
+            }
+            return;
         }
 
         final Optional<DocumentObjectDTO> foundDocumentObject = documentObjectService.findByObjectKey(objectKey);
         if (!foundDocumentObject.isPresent()) {
             log.error("Received event for objectKey {}, but no object found!", objectKey);
-            return false;
+            return;
         }
 
         final DocumentObjectDTO documentObject = foundDocumentObject.get();
         documentObject.buildThumbnailUrl();
 
+        // we perform this asynchronously, because when WebHooks are used, there is a timeout,
+        // so the generation of thumbnails in larger documents may be to slow.
+        long start = System.currentTimeMillis();
+        createThumbnailAsynchronously(documentObject);
+        long end = System.currentTimeMillis();
+        log.info("# # # # # # # # # # # # # # # # # # # createThumbnailAsynchronously took {} msecs", (end-start));
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    @Async // must be public
+    public void createThumbnailAsynchronously(DocumentObjectDTO documentObject) {
         ImagingService.ObjectMetaDataInfo metaData;
         try {
             metaData = imagingService.createThumbnail(documentObject.getObjectUrl(), documentObject.getThumbnailUrl());
         } catch (Exception e) {
-            log.error("Error creating thumbnail for objectKey {}", objectKey, e);
-            return false;
+            log.error("Error creating thumbnail for objectKey {}", documentObject.getObjectUrl(), e);
+            return;
         }
 
         documentObject.setLastContentModification(Instant.now());
@@ -99,11 +112,7 @@ public class WebHooksResource {
         documentObjectService.save(documentObject);
 
         publishReadyEventToUser(documentObject.getOwnerId());
-
-        return true;
     }
-
-    //------------------------------------------------------------------------------------------------------------------
 
     private boolean publishReadyEventToUser(long userId) {
 

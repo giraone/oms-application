@@ -7,6 +7,7 @@ import com.giraone.imaging.java2.ProviderJava2D;
 import com.giraone.imaging.pdf.PdfProviderPdfBox;
 import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.service.s3.S3StorageService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -64,11 +65,21 @@ public class ImagingService {
             }
         }
         finally {
-            tmpFileOriginal.delete();
-            tmpFileThumbnail.delete();
+            // We do not have to wait for the deletion - this can be done later
+            deleteFileAsync(new File[] { tmpFileOriginal, tmpFileThumbnail });
         }
 
         return ret;
+    }
+
+    @Async // must be public
+    public void deleteFileAsync(File[] filesToBeDeleted) {
+
+        for (File file : filesToBeDeleted) {
+            if (file.exists()) {
+                file.delete();
+            }
+        }
     }
 
     public static class ObjectMetaDataInfo {

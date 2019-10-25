@@ -5,7 +5,7 @@
 
     <groupId>com.giraone.oms</groupId>
     <artifactId>oms</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>OMS</name>
 
@@ -138,7 +138,7 @@
         </dependency>
 
 
-        <!-- (HS) ADAPTED -->
+        <!-- (HS) ADAPTED START-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
@@ -155,6 +155,7 @@
             <artifactId>imaging-kit</artifactId>
             <version>${giraone.imagingkit.version}</version>
         </dependency>
+        <!-- (HS) ADAPTED END -->
 
         <dependency>
             <groupId>com.h2database</groupId>

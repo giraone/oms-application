@@ -15,9 +15,9 @@
 
 logging:
   level:
-    ROOT: DEBUG
-    io.github.jhipster: DEBUG
-    com.giraone.oms: DEBUG
+    ROOT: INFO
+    io.github.jhipster: INFO
+    com.giraone.oms: INFO
 
 spring:
   profiles:
