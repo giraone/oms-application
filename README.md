@@ -24,7 +24,7 @@ Flow for upoad of documents:
 2. Client receives pre-signed URL to write document content (PUT)
 3. Client uses PUT to upload document content to S3 object storage
 4. Client receives HTTP 200 on success
-5. Object Storage publishes PUT event (`s3:ObjectCreated:Put`) via
+5. Object Storage publishes PUT events (`s3:ObjectCreated:Put`) via
    - AQMP, Kafka, WebHooks, ... in case of using private minio or Ceph
    - SQS, Lambda (in case of using public AWS S3)
 6. Application service
@@ -47,12 +47,12 @@ Flow for upoad of documents:
 The default setting
 
 - assumes minio runs on port `9999`
-- is using a bucket names `bucket-001`
+- is using a bucket named `bucket-001`
 - uses `minio-local` as an alias
 - uses *WebHook* for bucket event notification
 
 ```
-# Config the server's alias
+# Configure the server's alias
 > ./mc config host add minio-local http://192.168.178.48:9999 minio miniosecret S3V4
 # Check minio content
 > ./mc ls minio-local
@@ -61,14 +61,14 @@ The default setting
 # Create bucket
 > ./mc mb minio-local/bucket-01 --region default
 
-# Export config
+# Export configuration
 > ./mc admin config get minio-local/ > myconfig.json
 
 # Add/Replace webhook
 > vi myconfig.json
 "webhook":{"1":{"enable":true,"endpoint":"http://localhost:8080/event-api/s3/","queueDir":"","queueLimit":0}}}
 
-# Import config
+# Import configuration
 ./mc admin config set minio-local/ < myconfig.json
 
 # Restart server
@@ -79,7 +79,7 @@ SecretKey: miniosecret
 Region:    default
 SQS ARNs:  arn:minio:sqs:default:1:webhook
 
-# Add event filter/config
+# Add event filter to configuration
 ./mc event add minio-local/bucket-01 arn:minio:sqs:default:1:webhook --event put
 Successfully added arn:minio:sqs:default:1:webhook
 
