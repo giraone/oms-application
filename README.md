@@ -51,25 +51,29 @@ The default setting
 - uses `minio-local` as an alias
 - uses *WebHook* for bucket event notification
 
+Start minio (here on a local IP 192.168.178.45):
+
+```
+export MINIO_ACCESS_KEY=minio
+export MINIO_SECRET_KEY=miniosecret
+export MINIO_REGION_NAME=default
+./minio server --address 192.168.178.45:9999 data
+```
+
 ```
 # Configure the server's alias
-> ./mc config host add minio-local http://192.168.178.48:9999 minio miniosecret S3V4
+./mc config host add minio-local http://192.168.178.45:9999 minio miniosecret S3V4
 # Check minio content
-> ./mc ls minio-local
+./mc ls minio-local
 # Remove the bucket, if it exists
-> ./mc rb minio-local/bucket-01 --force
+./mc rb minio-local/bucket-01 --force
 # Create bucket
-> ./mc mb minio-local/bucket-01 --region default
-
-# Export configuration
-> ./mc admin config get minio-local/ > myconfig.json
+./mc mb minio-local/bucket-01 --region default
 
 # Add/Replace webhook
-> vi myconfig.json
-"webhook":{"1":{"enable":true,"endpoint":"http://localhost:8080/event-api/s3/","queueDir":"","queueLimit":0}}}
-
-# Import configuration
-./mc admin config set minio-local/ < myconfig.json
+./mc admin config set minio-local/ notify_webhook:1 enable="true" endpoint="http://localhost:8080/event-api/s3/"
+> Setting new key has been successful.
+> Please restart your server with `mc admin service restart minio-local/`.
 
 # Restart server
 ./mc admin service restart minio-local/
