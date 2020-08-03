@@ -7,6 +7,7 @@
       "jhipster-needle-menu-add-element": "JHipster will add additional menu entries here (do not translate!)",
       "entities": {
         "main": "Entities",
+        "document": "Document",
         "documentObject": "Document Object",
         "documentAccessEntry": "Document Access Entry",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
@@ -23,6 +24,7 @@
       "admin": {
         "main": "Administration",
         "userManagement": "User management",
+        "tracker": "User tracker",
         "metrics": "Metrics",
         "health": "Health",
         "configuration": "Configuration",

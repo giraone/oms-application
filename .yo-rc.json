@@ -4,7 +4,7 @@
       "packageName": "com.giraone.oms",
       "nativeLanguage": "en"
     },
-    "jhipsterVersion": "6.4.1",
+    "jhipsterVersion": "6.10.1",
     "applicationType": "monolith",
     "baseName": "oms",
     "packageName": "com.giraone.oms",
@@ -36,10 +36,8 @@
     "otherModules": [],
     "enableTranslation": true,
     "nativeLanguage": "en",
-    "languages": [
-      "en",
-      "de"
-    ],
-    "blueprints": []
+    "languages": ["en", "de"],
+    "blueprints": [],
+    "creationTimestamp": 1596275163200
   }
 }

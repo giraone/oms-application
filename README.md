@@ -92,6 +92,23 @@ arn:minio:sqs:default:1:webhook   s3:ObjectCreated:*   Filter:
 
 ```
 
+## TSLint/ESLint
+
+Temporary or permanent switch off rules per line or per file:
+
+```
+// tslint:disable-next-line:no-console
+// tslint:disable:no-console
+
+// eslint:disable-next-line:no-console
+// eslint:disable:no-console
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable @typescript-eslint/no-unused-vars
+```
+## Change log
+
+- 31.07.2020 - Upgrade to JHipster 6.10.1, Upgrade to AWS SDK 1.11.831
 
 
 

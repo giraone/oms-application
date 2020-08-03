@@ -1,6 +1,5 @@
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { take, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { DocumentAccessEntryService } from 'app/entities/document-access-entry/document-access-entry.service';
@@ -13,13 +12,14 @@ describe('Service Tests', () => {
     let service: DocumentAccessEntryService;
     let httpMock: HttpTestingController;
     let elemDefault: IDocumentAccessEntry;
-    let expectedResult;
+    let expectedResult: IDocumentAccessEntry | IDocumentAccessEntry[] | boolean | null;
     let currentDate: moment.Moment;
+
     beforeEach(() => {
       TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule]
+        imports: [HttpClientTestingModule],
       });
-      expectedResult = {};
+      expectedResult = null;
       injector = getTestBed();
       service = injector.get(DocumentAccessEntryService);
       httpMock = injector.get(HttpTestingController);
@@ -32,88 +32,82 @@ describe('Service Tests', () => {
       it('should find an element', () => {
         const returnedFromService = Object.assign(
           {
-            until: currentDate.format(DATE_TIME_FORMAT)
+            until: currentDate.format(DATE_TIME_FORMAT),
           },
           elemDefault
         );
-        service
-          .find(123)
-          .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+
+        service.find(123).subscribe(resp => (expectedResult = resp.body));
 
         const req = httpMock.expectOne({ method: 'GET' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: elemDefault });
+        expect(expectedResult).toMatchObject(elemDefault);
       });
 
       it('should create a DocumentAccessEntry', () => {
         const returnedFromService = Object.assign(
           {
             id: 0,
-            until: currentDate.format(DATE_TIME_FORMAT)
+            until: currentDate.format(DATE_TIME_FORMAT),
           },
           elemDefault
         );
+
         const expected = Object.assign(
           {
-            until: currentDate
+            until: currentDate,
           },
           returnedFromService
         );
-        service
-          .create(new DocumentAccessEntry(null))
-          .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+
+        service.create(new DocumentAccessEntry()).subscribe(resp => (expectedResult = resp.body));
+
         const req = httpMock.expectOne({ method: 'POST' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: expected });
+        expect(expectedResult).toMatchObject(expected);
       });
 
       it('should update a DocumentAccessEntry', () => {
         const returnedFromService = Object.assign(
           {
             access: 'BBBBBB',
-            until: currentDate.format(DATE_TIME_FORMAT)
+            until: currentDate.format(DATE_TIME_FORMAT),
           },
           elemDefault
         );
 
         const expected = Object.assign(
           {
-            until: currentDate
+            until: currentDate,
           },
           returnedFromService
         );
-        service
-          .update(expected)
-          .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+
+        service.update(expected).subscribe(resp => (expectedResult = resp.body));
+
         const req = httpMock.expectOne({ method: 'PUT' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: expected });
+        expect(expectedResult).toMatchObject(expected);
       });
 
       it('should return a list of DocumentAccessEntry', () => {
         const returnedFromService = Object.assign(
           {
             access: 'BBBBBB',
-            until: currentDate.format(DATE_TIME_FORMAT)
+            until: currentDate.format(DATE_TIME_FORMAT),
           },
           elemDefault
         );
+
         const expected = Object.assign(
           {
-            until: currentDate
+            until: currentDate,
           },
           returnedFromService
         );
-        service
-          .query(expected)
-          .pipe(
-            take(1),
-            map(resp => resp.body)
-          )
-          .subscribe(body => (expectedResult = body));
+
+        service.query().subscribe(resp => (expectedResult = resp.body));
+
         const req = httpMock.expectOne({ method: 'GET' });
         req.flush([returnedFromService]);
         httpMock.verify();

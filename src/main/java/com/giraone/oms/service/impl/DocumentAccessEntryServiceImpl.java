@@ -33,12 +33,6 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
         this.documentAccessEntryMapper = documentAccessEntryMapper;
     }
 
-    /**
-     * Save a documentAccessEntry.
-     *
-     * @param documentAccessEntryDTO the entity to save.
-     * @return the persisted entity.
-     */
     @Override
     public DocumentAccessEntryDTO save(DocumentAccessEntryDTO documentAccessEntryDTO) {
         log.debug("Request to save DocumentAccessEntry : {}", documentAccessEntryDTO);
@@ -47,12 +41,6 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
         return documentAccessEntryMapper.toDto(documentAccessEntry);
     }
 
-    /**
-     * Get all the documentAccessEntries.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<DocumentAccessEntryDTO> findAll(Pageable pageable) {
@@ -62,12 +50,6 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
     }
 
 
-    /**
-     * Get one documentAccessEntry by id.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
-     */
     @Override
     @Transactional(readOnly = true)
     public Optional<DocumentAccessEntryDTO> findOne(Long id) {
@@ -76,11 +58,6 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
             .map(documentAccessEntryMapper::toDto);
     }
 
-    /**
-     * Delete the documentAccessEntry by id.
-     *
-     * @param id the id of the entity.
-     */
     @Override
     public void delete(Long id) {
         log.debug("Request to delete DocumentAccessEntry : {}", id);

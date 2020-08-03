@@ -21,7 +21,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   documentObjects: IDocumentObject[];
   error: any;
   success: any;
-  eventSubscriber: Subscription;
+  eventSubscriber: Subscription|undefined;
   routeData: any;
   links: any;
   totalItems: any;
@@ -40,7 +40,9 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     protected router: Router,
     protected eventManager: JhiEventManager
   ) {
+    // tslint:disable-next-line:no-console
     console.log('DocumentsViewerComponent # # # # CTOR');
+    this.documentObjects = [];
     this.itemsPerPage = 100;
     this.routeData = this.activatedRoute.data.subscribe(data => {
       this.page = data.pagingParams.page;
@@ -57,7 +59,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
         size: this.itemsPerPage,
         sort: ['id,desc']
       })
-      .subscribe((res: HttpResponse<IDocumentObject[]>) => this.useResponse(res.body, res.headers));
+      .subscribe((res: HttpResponse<IDocumentObject[]>) => res.body && this.useResponse(res.body, res.headers));
   }
 
   display(document: IDocumentObject) {
@@ -102,17 +104,18 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       .update({
         id: document.id,
         name: newName,
-        path: document.path, // TODO: use new model
+        path: document.path // TODO: Implement rename path
       }).subscribe(() => { this.loadAll(); });
   }
 
   delete(document: IDocumentObject) {
-    this.documentsService.delete(document.id)
+    document.id && this.documentsService.delete(document.id)
       .subscribe(() => { this.loadAll(); }
     );
   }
 
   ngOnInit() {
+    // tslint:disable-next-line:no-console
     console.log('DocumentsViewerComponent # # # # ON_INIT');
     this.loadAll();
     this.accountService.identity().subscribe(account => {
@@ -120,12 +123,14 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     });
     this.documentEventsService.connectAndSubscribe();
     this.documentEventsService.receive().subscribe(s3Event => {
+      // tslint:disable-next-line:no-console
       console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
       this.loadAll();
     });
   }
 
   ngOnDestroy() {
+    // tslint:disable-next-line:no-console
     console.log('DocumentsViewerComponent # # # # ON_DESTROY');
     this.documentEventsService.unsubcribeAndDisconnect();
   }
@@ -135,14 +140,10 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   }
 
   protected useResponse(data: IDocumentObject[], headers: HttpHeaders) {
-    this.links = this.parseLinks.parse(headers.get('link'));
-    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
-    this.documentObjects = data;
-  }
-
-  protected handleServerPush(data: IDocumentObject[], headers: HttpHeaders) {
-    this.links = this.parseLinks.parse(headers.get('link'));
-    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+    const linkHeader = headers.get('link');
+    this.links = linkHeader ? this.parseLinks.parse(linkHeader) : undefined;
+    const totalItemsHeader = headers.get('X-Total-Count');
+    this.totalItems = totalItemsHeader ? parseInt(totalItemsHeader, 10) : 0;
     this.documentObjects = data;
   }
 }

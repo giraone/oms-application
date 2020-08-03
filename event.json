@@ -1,0 +1,54 @@
+{
+  "EventName": "s3:ObjectCreated:Put",
+  "Key": "bucket-01/adef7792-f275-11e9-ab54-bf6dab9bc95c/3034d32f-76cf-4942-a1d9-876e6e2d9dee/content",
+  "Records": [
+    {
+      "eventVersion": "2.0",
+      "eventSource": "minio:s3",
+      "awsRegion": "default",
+      "eventTime": "2019-10-20T16:06:18Z",
+      "eventName": "s3:ObjectCreated:Put",
+      "userIdentity": {
+        "principalId": "minio"
+      },
+      "requestParameters": {
+        "accessKey": "minio",
+        "region": "default",
+        "sourceIPAddress": "127.0.0.1"
+      },
+      "responseElements": {
+        "content-length": "0",
+        "x-amz-request-id": "15CF66938AEDFD93",
+        "x-minio-deployment-id": "909193bc-1ca1-4b23-ab31-d56849683cca",
+        "x-minio-origin-endpoint": "http://192.168.178.48:9999"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "Config",
+        "bucket": {
+          "name": "bucket-01",
+          "ownerIdentity": {
+            "principalId": "minio"
+          },
+          "arn": "arn:aws:s3:::bucket-01"
+        },
+        "object": {
+          "key": "adef7792-f275-11e9-ab54-bf6dab9bc95c%2F3034d32f-76cf-4942-a1d9-876e6e2d9dee%2Fcontent",
+          "size": 66940,
+          "eTag": "f86e5d0c161dea75a311aaefadf54333-1",
+          "contentType": "application/octet-stream",
+          "userMetadata": {
+            "content-type": "application/octet-stream"
+          },
+          "versionId": "1",
+          "sequencer": "15CF66938BE3BD6E"
+        }
+      },
+      "source": {
+        "host": "127.0.0.1",
+        "port": "",
+        "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0"
+      }
+    }
+  ]
+}

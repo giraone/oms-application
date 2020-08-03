@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { errorRoute } from './layouts/error/error.route';
 import { navbarRoute } from './layouts/navbar/navbar.route';
-// import { DEBUG_INFO_ENABLED } from 'app/app.constants';
+import { DEBUG_INFO_ENABLED } from 'app/app.constants';
+import { Authority } from 'app/shared/constants/authority.constants';
 
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 
@@ -15,14 +16,14 @@ const LAYOUT_ROUTES = [navbarRoute, ...errorRoute];
         {
           path: 'admin',
           data: {
-            authorities: ['ROLE_ADMIN']
+            authorities: [Authority.ADMIN],
           },
           canActivate: [UserRouteAccessService],
-          loadChildren: () => import('./admin/admin-routing.module').then(m => m.AdminRoutingModule)
+          loadChildren: () => import('./admin/admin-routing.module').then(m => m.AdminRoutingModule),
         },
         {
           path: 'account',
-          loadChildren: () => import('./account/account.module').then(m => m.OmsAccountModule)
+          loadChildren: () => import('./account/account.module').then(m => m.AccountModule),
         },
         {
           path: 'documents',
@@ -30,9 +31,9 @@ const LAYOUT_ROUTES = [navbarRoute, ...errorRoute];
         },
         ...LAYOUT_ROUTES
       ],
-      { enableTracing: false /* DEBUG_INFO_ENABLED */ }
-    )
+      { enableTracing: DEBUG_INFO_ENABLED }
+    ),
   ],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class OmsAppRoutingModule {}

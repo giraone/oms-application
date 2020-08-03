@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -88,9 +87,7 @@ public class DocumentAccessEntryResource {
     /**
      * {@code GET  /document-access-entries} : get all the documentAccessEntries.
      *
-
      * @param pageable the pagination information.
-
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of documentAccessEntries in body.
      */
     @GetMapping("/document-access-entries")

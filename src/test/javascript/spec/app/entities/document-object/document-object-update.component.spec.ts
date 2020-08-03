@@ -18,7 +18,7 @@ describe('Component Tests', () => {
       TestBed.configureTestingModule({
         imports: [OmsTestModule],
         declarations: [DocumentObjectUpdateComponent],
-        providers: [FormBuilder]
+        providers: [FormBuilder],
       })
         .overrideTemplate(DocumentObjectUpdateComponent, '')
         .compileComponents();

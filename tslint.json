@@ -11,6 +11,10 @@
     "use-lifecycle-interface": true,
     "use-pipe-transform-interface": false,
     "component-class-suffix": true,
-    "directive-class-suffix": true
+    "directive-class-suffix": true,
+
+    "typedef": false,
+    "no-inferrable-types": false,
+    "no-console": false
   }
 }

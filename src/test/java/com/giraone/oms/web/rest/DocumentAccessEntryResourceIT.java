@@ -8,27 +8,21 @@ import com.giraone.oms.repository.DocumentAccessEntryRepository;
 import com.giraone.oms.service.DocumentAccessEntryService;
 import com.giraone.oms.service.dto.DocumentAccessEntryDTO;
 import com.giraone.oms.service.mapper.DocumentAccessEntryMapper;
-import com.giraone.oms.web.rest.errors.ExceptionTranslator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.Validator;
-
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static com.giraone.oms.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,6 +33,8 @@ import com.giraone.oms.domain.enumeration.AccessType;
  * Integration tests for the {@link DocumentAccessEntryResource} REST controller.
  */
 @SpringBootTest(classes = OmsApp.class)
+@AutoConfigureMockMvc
+@WithMockUser
 public class DocumentAccessEntryResourceIT {
 
     private static final AccessType DEFAULT_ACCESS = AccessType.READ_CONTENT;
@@ -57,35 +53,12 @@ public class DocumentAccessEntryResourceIT {
     private DocumentAccessEntryService documentAccessEntryService;
 
     @Autowired
-    private MappingJackson2HttpMessageConverter jacksonMessageConverter;
-
-    @Autowired
-    private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
-
-    @Autowired
-    private ExceptionTranslator exceptionTranslator;
-
-    @Autowired
     private EntityManager em;
 
     @Autowired
-    private Validator validator;
-
     private MockMvc restDocumentAccessEntryMockMvc;
 
     private DocumentAccessEntry documentAccessEntry;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        final DocumentAccessEntryResource documentAccessEntryResource = new DocumentAccessEntryResource(documentAccessEntryService);
-        this.restDocumentAccessEntryMockMvc = MockMvcBuilders.standaloneSetup(documentAccessEntryResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build();
-    }
 
     /**
      * Create an entity for this test.
@@ -151,11 +124,10 @@ public class DocumentAccessEntryResourceIT {
     @Transactional
     public void createDocumentAccessEntry() throws Exception {
         int databaseSizeBeforeCreate = documentAccessEntryRepository.findAll().size();
-
         // Create the DocumentAccessEntry
         DocumentAccessEntryDTO documentAccessEntryDTO = documentAccessEntryMapper.toDto(documentAccessEntry);
         restDocumentAccessEntryMockMvc.perform(post("/api/document-access-entries")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentAccessEntryDTO)))
             .andExpect(status().isCreated());
 
@@ -178,7 +150,7 @@ public class DocumentAccessEntryResourceIT {
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restDocumentAccessEntryMockMvc.perform(post("/api/document-access-entries")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentAccessEntryDTO)))
             .andExpect(status().isBadRequest());
 
@@ -198,8 +170,9 @@ public class DocumentAccessEntryResourceIT {
         // Create the DocumentAccessEntry, which fails.
         DocumentAccessEntryDTO documentAccessEntryDTO = documentAccessEntryMapper.toDto(documentAccessEntry);
 
+
         restDocumentAccessEntryMockMvc.perform(post("/api/document-access-entries")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentAccessEntryDTO)))
             .andExpect(status().isBadRequest());
 
@@ -216,7 +189,7 @@ public class DocumentAccessEntryResourceIT {
         // Get all the documentAccessEntryList
         restDocumentAccessEntryMockMvc.perform(get("/api/document-access-entries?sort=id,desc"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(documentAccessEntry.getId().intValue())))
             .andExpect(jsonPath("$.[*].access").value(hasItem(DEFAULT_ACCESS.toString())))
             .andExpect(jsonPath("$.[*].until").value(hasItem(DEFAULT_UNTIL.toString())));
@@ -231,12 +204,11 @@ public class DocumentAccessEntryResourceIT {
         // Get the documentAccessEntry
         restDocumentAccessEntryMockMvc.perform(get("/api/document-access-entries/{id}", documentAccessEntry.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(documentAccessEntry.getId().intValue()))
             .andExpect(jsonPath("$.access").value(DEFAULT_ACCESS.toString()))
             .andExpect(jsonPath("$.until").value(DEFAULT_UNTIL.toString()));
     }
-
     @Test
     @Transactional
     public void getNonExistingDocumentAccessEntry() throws Exception {
@@ -263,7 +235,7 @@ public class DocumentAccessEntryResourceIT {
         DocumentAccessEntryDTO documentAccessEntryDTO = documentAccessEntryMapper.toDto(updatedDocumentAccessEntry);
 
         restDocumentAccessEntryMockMvc.perform(put("/api/document-access-entries")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentAccessEntryDTO)))
             .andExpect(status().isOk());
 
@@ -285,7 +257,7 @@ public class DocumentAccessEntryResourceIT {
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDocumentAccessEntryMockMvc.perform(put("/api/document-access-entries")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentAccessEntryDTO)))
             .andExpect(status().isBadRequest());
 
@@ -304,49 +276,11 @@ public class DocumentAccessEntryResourceIT {
 
         // Delete the documentAccessEntry
         restDocumentAccessEntryMockMvc.perform(delete("/api/document-access-entries/{id}", documentAccessEntry.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item
         List<DocumentAccessEntry> documentAccessEntryList = documentAccessEntryRepository.findAll();
         assertThat(documentAccessEntryList).hasSize(databaseSizeBeforeDelete - 1);
-    }
-
-    @Test
-    @Transactional
-    public void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(DocumentAccessEntry.class);
-        DocumentAccessEntry documentAccessEntry1 = new DocumentAccessEntry();
-        documentAccessEntry1.setId(1L);
-        DocumentAccessEntry documentAccessEntry2 = new DocumentAccessEntry();
-        documentAccessEntry2.setId(documentAccessEntry1.getId());
-        assertThat(documentAccessEntry1).isEqualTo(documentAccessEntry2);
-        documentAccessEntry2.setId(2L);
-        assertThat(documentAccessEntry1).isNotEqualTo(documentAccessEntry2);
-        documentAccessEntry1.setId(null);
-        assertThat(documentAccessEntry1).isNotEqualTo(documentAccessEntry2);
-    }
-
-    @Test
-    @Transactional
-    public void dtoEqualsVerifier() throws Exception {
-        TestUtil.equalsVerifier(DocumentAccessEntryDTO.class);
-        DocumentAccessEntryDTO documentAccessEntryDTO1 = new DocumentAccessEntryDTO();
-        documentAccessEntryDTO1.setId(1L);
-        DocumentAccessEntryDTO documentAccessEntryDTO2 = new DocumentAccessEntryDTO();
-        assertThat(documentAccessEntryDTO1).isNotEqualTo(documentAccessEntryDTO2);
-        documentAccessEntryDTO2.setId(documentAccessEntryDTO1.getId());
-        assertThat(documentAccessEntryDTO1).isEqualTo(documentAccessEntryDTO2);
-        documentAccessEntryDTO2.setId(2L);
-        assertThat(documentAccessEntryDTO1).isNotEqualTo(documentAccessEntryDTO2);
-        documentAccessEntryDTO1.setId(null);
-        assertThat(documentAccessEntryDTO1).isNotEqualTo(documentAccessEntryDTO2);
-    }
-
-    @Test
-    @Transactional
-    public void testEntityFromId() {
-        assertThat(documentAccessEntryMapper.fromId(42L).getId()).isEqualTo(42);
-        assertThat(documentAccessEntryMapper.fromId(null)).isNull();
     }
 }

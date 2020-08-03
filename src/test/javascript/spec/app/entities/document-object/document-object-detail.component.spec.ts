@@ -16,7 +16,7 @@ describe('Component Tests', () => {
       TestBed.configureTestingModule({
         imports: [OmsTestModule],
         declarations: [DocumentObjectDetailComponent],
-        providers: [{ provide: ActivatedRoute, useValue: route }]
+        providers: [{ provide: ActivatedRoute, useValue: route }],
       })
         .overrideTemplate(DocumentObjectDetailComponent, '')
         .compileComponents();
@@ -25,9 +25,7 @@ describe('Component Tests', () => {
     });
 
     describe('OnInit', () => {
-      it('Should call load all on init', () => {
-        // GIVEN
-
+      it('Should load documentObject on init', () => {
         // WHEN
         comp.ngOnInit();
 

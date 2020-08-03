@@ -21,7 +21,7 @@
             <span>No documents found</span>
         </div>
     </div>
-    <div class="row" *ngIf="documentObjects?.length > 0">
+    <div class="row" *ngIf="documentObjects && documentObjects.length > 0">
         <div class="col-sm-2" *ngFor="let document of documentObjects">
             <div class="card" style="width: 188px; margin-top: 4px;">
                 <div style="height: 240px; padding: 4px; background-color: darkgrey;">
@@ -31,9 +31,9 @@
                 <div class="card-body" style="background-color: lightgrey;">
                     <h6 class="card-title" style="height: 32px;">{{ document.name }} [{{ document.documentPolicy }}]</h6>
                     <p class="card-text" style="font-size: 70%">
-                        MIME type: {{ document.mimeType }}</br />
-                        Bytes/Pages: {{ document.byteSize }} / {{ document.numberOfPages }}</br />
-                        Created: {{ document.creation | date:'dd.MM.yy HH:mm:ss' }}<br />
+                        MIME type: {{ document.mimeType }}<br/>
+                        Bytes / Pages: {{ document.byteSize }} / {{ document.numberOfPages }}<br/>
+                        Created: {{ document.creation | date:'dd.MM.yy HH:mm:ss' }}<br/>
                         Modified: {{ document.lastContentModification | date:'dd.MM.yy HH:mm:ss' }}
                     </p>
                     <div class="col">

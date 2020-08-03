@@ -5,20 +5,18 @@ import { IDocumentAccessEntry } from 'app/shared/model/document-access-entry.mod
 
 @Component({
   selector: 'jhi-document-access-entry-detail',
-  templateUrl: './document-access-entry-detail.component.html'
+  templateUrl: './document-access-entry-detail.component.html',
 })
 export class DocumentAccessEntryDetailComponent implements OnInit {
-  documentAccessEntry: IDocumentAccessEntry;
+  documentAccessEntry: IDocumentAccessEntry | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
-    this.activatedRoute.data.subscribe(({ documentAccessEntry }) => {
-      this.documentAccessEntry = documentAccessEntry;
-    });
+  ngOnInit(): void {
+    this.activatedRoute.data.subscribe(({ documentAccessEntry }) => (this.documentAccessEntry = documentAccessEntry));
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

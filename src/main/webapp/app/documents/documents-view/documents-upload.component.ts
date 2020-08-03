@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -11,15 +9,16 @@ import { DocumentObjectService } from '../../entities/document-object/document-o
 import { DocumentsService } from './documents.service';
 import { IUser } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
+import { IDocumentObjectWrite, DocumentObjectWrite } from './document-object-write.model';
 
 @Component({
   selector: 'jhi-documents-upload',
   templateUrl: './documents-upload.component.html'
 })
 export class DocumentsUploadComponent implements OnInit {
-  isSaving: boolean;
-  fileToUpload: File = null;
-  users: IUser[];
+  isSaving = false;
+  fileToUpload: File|null = null;
+  users: IUser[]|null = null;
 
   editForm = this.fb.group({
     name: [null, [Validators.required]]
@@ -46,11 +45,20 @@ export class DocumentsUploadComponent implements OnInit {
         filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
         map((response: HttpResponse<IUser[]>) => response.body)
       )
-      .subscribe((res: IUser[]) => (this.users = res), (res: HttpErrorResponse) => this.onError(res.message));
+      .subscribe(
+        (res: IUser[]|null) => this.users = res,
+        (res: HttpErrorResponse) => this.onError(res.message)
+      );
   }
 
-  handleFileInput(files: FileList) {
-    this.fileToUpload = files.item(0);
+  handleFileInput(event: any) { // any instead of Event, because of files does not exist in TS
+
+    const files: FileList = event?.target?.files;
+    console.log('DocumentsUploadComponent.handleFileInput file=' + JSON.stringify(files));
+    this.fileToUpload = files?.item(0);
+    if (!this.fileToUpload) {
+      return;
+    }
     let documentName = this.fileToUpload.name;
     const index = documentName.lastIndexOf('.');
     if (index > 0) {
@@ -63,16 +71,22 @@ export class DocumentsUploadComponent implements OnInit {
   }
 
   save() {
+    if (!this.fileToUpload) {
+      return;
+    }
     this.isSaving = true;
     const fileReader = new FileReader();
     fileReader.readAsArrayBuffer(this.fileToUpload);
     fileReader.addEventListener("load", () => {
-      this.saveBytes(fileReader.result)
+      fileReader.result && this.saveBytes(fileReader.result)
     });
   }
 
   saveBytes(byteArray: string | ArrayBuffer) {
 
+    if (!this.fileToUpload) {
+      return;
+    }
     const documentObject = this.createFromForm();
     if (!this.fileToUpload.type || this.fileToUpload.type === '') {
       documentObject.mimeType = 'application/octet-stream';
@@ -80,10 +94,15 @@ export class DocumentsUploadComponent implements OnInit {
       documentObject.mimeType = this.fileToUpload.type;
     }
 
-    this.documentsService.reservePostUrl(documentObject)
+    this.documentsService.reservePutUrl(documentObject)
       .subscribe((data) => {
 
-        console.log('DocumentsUploadComponent.save reservePostUrl ' + JSON.stringify(data.body));
+        console.log('DocumentsUploadComponent.save reservePutUrl ' + JSON.stringify(data.body));
+        if (!data.body?.objectWriteUrl) {
+          this.isSaving = false;
+          this.jhiAlertService.error("No write URL in response: ", null);
+          return;
+        }
         this.documentsService.uploadToS3UsingPut(byteArray, documentObject.mimeType, data.body.objectWriteUrl)
           .subscribe((httpResponse : HttpResponse<Object>) => {
 
@@ -94,15 +113,15 @@ export class DocumentsUploadComponent implements OnInit {
             }, 0);
           }, (error) => {
             this.isSaving = false;
-            this.jhiAlertService.error("ERROR in uploadToS3UsingPut: " + error, null, null);
+            this.jhiAlertService.error("ERROR in uploadToS3UsingPut: " + error, null);
           });
       }, (error) => {
         this.isSaving = false;
-        this.jhiAlertService.error("ERROR in reservePostUrl: " + error, null, null);
+        this.jhiAlertService.error("ERROR in reservePutUrl: " + error, null);
       });
   }
 
-  updateForm(documentObject: IDocumentObject) {
+  updateForm(documentObject: IDocumentObjectWrite) {
     this.editForm.patchValue({
       name: documentObject.name
     });
@@ -113,16 +132,17 @@ export class DocumentsUploadComponent implements OnInit {
   }
 
 
-  private createFromForm(): IDocumentObject {
+  private createFromForm(): IDocumentObjectWrite {
+    const nameControl = this.editForm.get(['name']);
     return {
-      ...new DocumentObject(),
+      ...new DocumentObjectWrite(),
       path: '/',
-      name: this.editForm.get(['name']).value
+      name: nameControl ? nameControl.value : 'newDocument'
     };
   }
 
   protected onError(errorMessage: string) {
-    this.jhiAlertService.error(errorMessage, null, null);
+    this.jhiAlertService.error(errorMessage, null);
   }
 
   trackUserById(index: number, item: IUser) {

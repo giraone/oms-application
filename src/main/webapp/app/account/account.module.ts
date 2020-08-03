@@ -21,7 +21,7 @@ import { accountState } from './account.route';
     PasswordStrengthBarComponent,
     PasswordResetInitComponent,
     PasswordResetFinishComponent,
-    SettingsComponent
-  ]
+    SettingsComponent,
+  ],
 })
-export class OmsAccountModule {}
+export class AccountModule {}

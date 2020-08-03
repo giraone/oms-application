@@ -7,9 +7,9 @@
         "createOrEditLabel": "Create or edit a Document Access Entry",
         "notFound": "No Document Access Entries found"
       },
-      "created": "A new Document Access Entry was created with identifier {{ param }}",
-      "updated": "A Document Access Entry was updated with identifier {{ param }}",
-      "deleted": "A Document Access Entry was deleted with identifier {{ param }}",
+      "created": "A new Document Access Entry is created with identifier {{ param }}",
+      "updated": "A Document Access Entry is updated with identifier {{ param }}",
+      "deleted": "A Document Access Entry is deleted with identifier {{ param }}",
       "delete": {
         "question": "Are you sure you want to delete Document Access Entry {{ id }}?"
       },

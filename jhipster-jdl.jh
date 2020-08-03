@@ -19,7 +19,7 @@ enum DocumentPolicy {
 /**
  * A document entity.
  */
-@paginate(pager)
+@paginate(pagination)
 @dto(mapstruct)
 entity DocumentObject {
     /** The folder structure of the object using human readable path components */
@@ -44,14 +44,14 @@ entity DocumentObject {
     creation Instant,
     /** Timestamp of last content modification */
     lastContentModification Instant
-    /** Simple policy to show attribute based access controls */
+    /** Simple policy to show attribute based access control */
     documentPolicy DocumentPolicy
 }
 
 /**
  * A document access entry (access control entry)
  */
-@paginate(pager)
+@paginate(pagination)
 @dto(mapstruct)
 entity DocumentAccessEntry {
     access AccessType required,
@@ -61,7 +61,7 @@ entity DocumentAccessEntry {
 // RELATIONSHIPS
 
 relationship ManyToOne {
-    DocumentObject{owner required} to User{id}
+    DocumentObject{owner required} to User
 }
 
 relationship ManyToOne {

@@ -1,46 +1,46 @@
 {
-    "name": "DocumentAccessEntry",
-    "fields": [
-        {
-            "fieldName": "access",
-            "fieldType": "AccessType",
-            "fieldValues": "READ_CONTENT,READ_METADATA,CHANGE_CONTENT",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "until",
-            "fieldType": "Instant"
-        }
-    ],
-    "relationships": [
-        {
-            "relationshipType": "many-to-one",
-            "otherEntityName": "documentObject",
-            "otherEntityRelationshipName": "documentAccessEntry",
-            "relationshipValidateRules": "required",
-            "relationshipName": "document",
-            "otherEntityField": "id"
-        },
-        {
-            "relationshipType": "many-to-one",
-            "otherEntityName": "user",
-            "otherEntityRelationshipName": "documentAccessEntry",
-            "relationshipValidateRules": "required",
-            "relationshipName": "grantee",
-            "otherEntityField": "id"
-        }
-    ],
-    "changelogDate": "20191017090803",
-    "javadoc": "A document access entry (access control entry)",
-    "entityTableName": "document_access_entry",
-    "dto": "mapstruct",
-    "pagination": "pager",
-    "service": "serviceImpl",
-    "jpaMetamodelFiltering": false,
-    "fluentMethods": true,
-    "readOnly": false,
-    "clientRootFolder": "",
-    "applications": "*"
+  "name": "DocumentAccessEntry",
+  "fields": [
+    {
+      "fieldName": "access",
+      "fieldType": "AccessType",
+      "fieldValues": "READ_CONTENT,READ_METADATA,CHANGE_CONTENT",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "until",
+      "fieldType": "Instant"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "documentObject",
+      "otherEntityRelationshipName": "documentAccessEntry",
+      "relationshipValidateRules": "required",
+      "relationshipName": "document",
+      "otherEntityField": "id"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "user",
+      "otherEntityRelationshipName": "documentAccessEntry",
+      "relationshipValidateRules": "required",
+      "relationshipName": "grantee",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20191017090803",
+  "javadoc": "A document access entry (access control entry)",
+  "entityTableName": "document_access_entry",
+  "dto": "mapstruct",
+  "pagination": "pagination",
+  "service": "serviceImpl",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "clientRootFolder": "",
+  "applications": "*",
+  "embedded": false,
+  "paginate": true
 }

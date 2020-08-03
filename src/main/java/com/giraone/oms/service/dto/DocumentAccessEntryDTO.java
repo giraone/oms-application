@@ -1,9 +1,9 @@
 package com.giraone.oms.service.dto;
+
 import io.swagger.annotations.ApiModel;
 import java.time.Instant;
 import javax.validation.constraints.*;
 import java.io.Serializable;
-import java.util.Objects;
 import com.giraone.oms.domain.enumeration.AccessType;
 
 /**
@@ -11,7 +11,7 @@ import com.giraone.oms.domain.enumeration.AccessType;
  */
 @ApiModel(description = "A document access entry (access control entry)")
 public class DocumentAccessEntryDTO implements Serializable {
-
+    
     private Long id;
 
     @NotNull
@@ -23,7 +23,7 @@ public class DocumentAccessEntryDTO implements Serializable {
     private Long documentId;
 
     private Long granteeId;
-
+    
     public Long getId() {
         return id;
     }
@@ -69,30 +69,27 @@ public class DocumentAccessEntryDTO implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof DocumentAccessEntryDTO)) {
             return false;
         }
 
-        DocumentAccessEntryDTO documentAccessEntryDTO = (DocumentAccessEntryDTO) o;
-        if (documentAccessEntryDTO.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), documentAccessEntryDTO.getId());
+        return id != null && id.equals(((DocumentAccessEntryDTO) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
+    // prettier-ignore
     @Override
     public String toString() {
         return "DocumentAccessEntryDTO{" +
             "id=" + getId() +
             ", access='" + getAccess() + "'" +
             ", until='" + getUntil() + "'" +
-            ", document=" + getDocumentId() +
-            ", grantee=" + getGranteeId() +
+            ", documentId=" + getDocumentId() +
+            ", granteeId=" + getGranteeId() +
             "}";
     }
 }

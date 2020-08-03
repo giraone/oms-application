@@ -1,8 +1,8 @@
 package com.giraone.oms.config;
 
-import com.giraone.oms.security.AuthoritiesConstants;
-import com.giraone.oms.security.jwt.JWTConfigurer;
-import com.giraone.oms.security.jwt.TokenProvider;
+import com.giraone.oms.security.*;
+import com.giraone.oms.security.jwt.*;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
@@ -63,8 +63,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .disable()
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling()
-            .authenticationEntryPoint(problemSupport)
-            .accessDeniedHandler(problemSupport)
+                .authenticationEntryPoint(problemSupport)
+                .accessDeniedHandler(problemSupport)
         .and()
             .headers()
             .contentSecurityPolicy("default-src 'self' http://localhost:9060 " + s3Configuration.getEndpointUrl()

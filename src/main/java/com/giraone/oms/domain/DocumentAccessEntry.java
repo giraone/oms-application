@@ -1,4 +1,5 @@
 package com.giraone.oms.domain;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -16,7 +17,7 @@ import com.giraone.oms.domain.enumeration.AccessType;
  */
 @Entity
 @Table(name = "document_access_entry")
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class DocumentAccessEntry implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,15 +37,15 @@ public class DocumentAccessEntry implements Serializable {
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties("documentAccessEntries")
+    @JsonIgnoreProperties(value = "documentAccessEntries", allowSetters = true)
     private DocumentObject document;
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties("documentAccessEntries")
+    @JsonIgnoreProperties(value = "documentAccessEntries", allowSetters = true)
     private User grantee;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -104,7 +105,7 @@ public class DocumentAccessEntry implements Serializable {
     public void setGrantee(User user) {
         this.grantee = user;
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {
@@ -122,6 +123,7 @@ public class DocumentAccessEntry implements Serializable {
         return 31;
     }
 
+    // prettier-ignore
     @Override
     public String toString() {
         return "DocumentAccessEntry{" +

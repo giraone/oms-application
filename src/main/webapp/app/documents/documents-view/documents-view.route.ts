@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
+import { Resolve, ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { JhiResolvePagingParams } from 'ng-jhipster';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { Observable, of } from 'rxjs';
@@ -18,12 +18,12 @@ import { DocumentToolsComponent } from './document-tools.component';
 export class DocumentsViewerResolve implements Resolve<IDocumentObject> {
   constructor(private service: DocumentObjectService) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IDocumentObject> {
+  resolve(route: ActivatedRouteSnapshot): Observable<IDocumentObject> {
     const id = route.params['id'];
     if (id) {
       return this.service.find(id).pipe(
         filter((response: HttpResponse<DocumentObject>) => response.ok),
-        map((documentObject: HttpResponse<DocumentObject>) => documentObject.body)
+        map((documentObject: HttpResponse<DocumentObject>) => documentObject.body ? documentObject.body : new DocumentObject())
       );
     }
     return of(new DocumentObject());

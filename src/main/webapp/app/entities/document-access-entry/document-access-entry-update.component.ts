@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
-import { JhiAlertService } from 'ng-jhipster';
+
 import { IDocumentAccessEntry, DocumentAccessEntry } from 'app/shared/model/document-access-entry.model';
 import { DocumentAccessEntryService } from './document-access-entry.service';
 import { IDocumentObject } from 'app/shared/model/document-object.model';
@@ -16,27 +14,26 @@ import { DocumentObjectService } from 'app/entities/document-object/document-obj
 import { IUser } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
 
+type SelectableEntity = IDocumentObject | IUser;
+
 @Component({
   selector: 'jhi-document-access-entry-update',
-  templateUrl: './document-access-entry-update.component.html'
+  templateUrl: './document-access-entry-update.component.html',
 })
 export class DocumentAccessEntryUpdateComponent implements OnInit {
-  isSaving: boolean;
-
-  documentobjects: IDocumentObject[];
-
-  users: IUser[];
+  isSaving = false;
+  documentobjects: IDocumentObject[] = [];
+  users: IUser[] = [];
 
   editForm = this.fb.group({
     id: [],
     access: [null, [Validators.required]],
     until: [],
     documentId: [null, Validators.required],
-    granteeId: [null, Validators.required]
+    granteeId: [null, Validators.required],
   });
 
   constructor(
-    protected jhiAlertService: JhiAlertService,
     protected documentAccessEntryService: DocumentAccessEntryService,
     protected documentObjectService: DocumentObjectService,
     protected userService: UserService,
@@ -44,42 +41,36 @@ export class DocumentAccessEntryUpdateComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
-    this.isSaving = false;
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ documentAccessEntry }) => {
+      if (!documentAccessEntry.id) {
+        const today = moment().startOf('day');
+        documentAccessEntry.until = today;
+      }
+
       this.updateForm(documentAccessEntry);
+
+      this.documentObjectService.query().subscribe((res: HttpResponse<IDocumentObject[]>) => (this.documentobjects = res.body || []));
+
+      this.userService.query().subscribe((res: HttpResponse<IUser[]>) => (this.users = res.body || []));
     });
-    this.documentObjectService
-      .query()
-      .pipe(
-        filter((mayBeOk: HttpResponse<IDocumentObject[]>) => mayBeOk.ok),
-        map((response: HttpResponse<IDocumentObject[]>) => response.body)
-      )
-      .subscribe((res: IDocumentObject[]) => (this.documentobjects = res), (res: HttpErrorResponse) => this.onError(res.message));
-    this.userService
-      .query()
-      .pipe(
-        filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
-        map((response: HttpResponse<IUser[]>) => response.body)
-      )
-      .subscribe((res: IUser[]) => (this.users = res), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
-  updateForm(documentAccessEntry: IDocumentAccessEntry) {
+  updateForm(documentAccessEntry: IDocumentAccessEntry): void {
     this.editForm.patchValue({
       id: documentAccessEntry.id,
       access: documentAccessEntry.access,
-      until: documentAccessEntry.until != null ? documentAccessEntry.until.format(DATE_TIME_FORMAT) : null,
+      until: documentAccessEntry.until ? documentAccessEntry.until.format(DATE_TIME_FORMAT) : null,
       documentId: documentAccessEntry.documentId,
-      granteeId: documentAccessEntry.granteeId
+      granteeId: documentAccessEntry.granteeId,
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const documentAccessEntry = this.createFromForm();
     if (documentAccessEntry.id !== undefined) {
@@ -92,35 +83,31 @@ export class DocumentAccessEntryUpdateComponent implements OnInit {
   private createFromForm(): IDocumentAccessEntry {
     return {
       ...new DocumentAccessEntry(),
-      id: this.editForm.get(['id']).value,
-      access: this.editForm.get(['access']).value,
-      until: this.editForm.get(['until']).value != null ? moment(this.editForm.get(['until']).value, DATE_TIME_FORMAT) : undefined,
-      documentId: this.editForm.get(['documentId']).value,
-      granteeId: this.editForm.get(['granteeId']).value
+      id: this.editForm.get(['id'])!.value,
+      access: this.editForm.get(['access'])!.value,
+      until: this.editForm.get(['until'])!.value ? moment(this.editForm.get(['until'])!.value, DATE_TIME_FORMAT) : undefined,
+      documentId: this.editForm.get(['documentId'])!.value,
+      granteeId: this.editForm.get(['granteeId'])!.value,
     };
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IDocumentAccessEntry>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IDocumentAccessEntry>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
-  protected onError(errorMessage: string) {
-    this.jhiAlertService.error(errorMessage, null, null);
-  }
 
-  trackDocumentObjectById(index: number, item: IDocumentObject) {
-    return item.id;
-  }
-
-  trackUserById(index: number, item: IUser) {
+  trackById(index: number, item: SelectableEntity): any {
     return item.id;
   }
 }

@@ -1,107 +1,97 @@
 {
-    "name": "DocumentObject",
-    "fields": [
-        {
-            "fieldName": "path",
-            "javadoc": "The folder structure of the object using human readable path components",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "name",
-            "javadoc": "The human readable name of the document",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "pathUuid",
-            "javadoc": "The folder structure as an internal UUID",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "nameUuid",
-            "javadoc": "The name of the document as an internal UUID",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "mimeType",
-            "javadoc": "The MIME type of the document",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "objectUrl",
-            "javadoc": "The S3 object key to access the document",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "maxlength"
-            ],
-            "fieldValidateRulesMaxlength": 1024
-        },
-        {
-            "fieldName": "thumbnailUrl",
-            "javadoc": "The S3 object key to access a thumbnail of the document",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "maxlength"
-            ],
-            "fieldValidateRulesMaxlength": 1024
-        },
-        {
-            "fieldName": "byteSize",
-            "javadoc": "Size in bytes of the document",
-            "fieldType": "Long"
-        },
-        {
-            "fieldName": "numberOfPages",
-            "javadoc": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
-            "fieldType": "Integer"
-        },
-        {
-            "fieldName": "creation",
-            "javadoc": "Timestamp of creation",
-            "fieldType": "Instant"
-        },
-        {
-            "fieldName": "lastContentModification",
-            "javadoc": "Timestamp of last content modification",
-            "fieldType": "Instant"
-        },
-        {
-            "fieldName": "documentPolicy",
-            "javadoc": "Simple policy to show attribute based access controls",
-            "fieldType": "DocumentPolicy",
-            "fieldValues": "PRIVATE,PUBLIC,LOCKED"
-        }
-    ],
-    "relationships": [
-        {
-            "relationshipType": "many-to-one",
-            "otherEntityName": "user",
-            "otherEntityRelationshipName": "id",
-            "relationshipValidateRules": "required",
-            "relationshipName": "owner",
-            "otherEntityField": "id"
-        }
-    ],
-    "changelogDate": "20191017090802",
-    "javadoc": "A document entity.",
-    "entityTableName": "document_object",
-    "dto": "mapstruct",
-    "pagination": "pager",
-    "service": "serviceImpl",
-    "jpaMetamodelFiltering": false,
-    "fluentMethods": true,
-    "readOnly": false,
-    "clientRootFolder": "",
-    "applications": "*"
+  "name": "DocumentObject",
+  "fields": [
+    {
+      "fieldName": "path",
+      "fieldType": "String",
+      "javadoc": "The folder structure of the object using human readable path components",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "javadoc": "The human readable name of the document",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "pathUuid",
+      "fieldType": "String",
+      "javadoc": "The folder structure as an internal UUID",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "nameUuid",
+      "fieldType": "String",
+      "javadoc": "The name of the document as an internal UUID",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "mimeType",
+      "fieldType": "String",
+      "javadoc": "The MIME type of the document"
+    },
+    {
+      "fieldName": "objectUrl",
+      "fieldType": "String",
+      "javadoc": "The S3 object key to access the document",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "fieldName": "thumbnailUrl",
+      "fieldType": "String",
+      "javadoc": "The S3 object key to access a thumbnail of the document",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "fieldName": "byteSize",
+      "fieldType": "Long",
+      "javadoc": "Size in bytes of the document"
+    },
+    {
+      "fieldName": "numberOfPages",
+      "fieldType": "Integer",
+      "javadoc": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented"
+    },
+    {
+      "fieldName": "creation",
+      "fieldType": "Instant",
+      "javadoc": "Timestamp of creation"
+    },
+    {
+      "fieldName": "lastContentModification",
+      "fieldType": "Instant",
+      "javadoc": "Timestamp of last content modification"
+    },
+    {
+      "fieldName": "documentPolicy",
+      "fieldType": "DocumentPolicy",
+      "javadoc": "Simple policy to show attribute based access controls",
+      "fieldValues": "PRIVATE,PUBLIC,LOCKED"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "user",
+      "otherEntityRelationshipName": "documentObject",
+      "relationshipValidateRules": "required",
+      "relationshipName": "owner",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20191017090802",
+  "javadoc": "A document entity.",
+  "entityTableName": "document_object",
+  "dto": "mapstruct",
+  "pagination": "pagination",
+  "service": "serviceImpl",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "clientRootFolder": "",
+  "applications": "*",
+  "embedded": false,
+  "paginate": true
 }

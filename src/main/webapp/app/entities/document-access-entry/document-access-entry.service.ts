@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import * as moment from 'moment';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
+import * as moment from 'moment';
 
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared/util/request-util';
@@ -46,20 +44,20 @@ export class DocumentAccessEntryService {
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
-  delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  delete(id: number): Observable<HttpResponse<{}>> {
+    return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
   protected convertDateFromClient(documentAccessEntry: IDocumentAccessEntry): IDocumentAccessEntry {
     const copy: IDocumentAccessEntry = Object.assign({}, documentAccessEntry, {
-      until: documentAccessEntry.until != null && documentAccessEntry.until.isValid() ? documentAccessEntry.until.toJSON() : null
+      until: documentAccessEntry.until && documentAccessEntry.until.isValid() ? documentAccessEntry.until.toJSON() : undefined,
     });
     return copy;
   }
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.until = res.body.until != null ? moment(res.body.until) : null;
+      res.body.until = res.body.until ? moment(res.body.until) : undefined;
     }
     return res;
   }
@@ -67,7 +65,7 @@ export class DocumentAccessEntryService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((documentAccessEntry: IDocumentAccessEntry) => {
-        documentAccessEntry.until = documentAccessEntry.until != null ? moment(documentAccessEntry.until) : null;
+        documentAccessEntry.until = documentAccessEntry.until ? moment(documentAccessEntry.until) : undefined;
       });
     }
     return res;

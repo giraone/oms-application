@@ -1,5 +1,7 @@
 package com.giraone.oms.repository;
+
 import com.giraone.oms.domain.DocumentAccessEntry;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +16,4 @@ public interface DocumentAccessEntryRepository extends JpaRepository<DocumentAcc
 
     @Query("select documentAccessEntry from DocumentAccessEntry documentAccessEntry where documentAccessEntry.grantee.login = ?#{principal.username}")
     List<DocumentAccessEntry> findByGranteeIsCurrentUser();
-
 }

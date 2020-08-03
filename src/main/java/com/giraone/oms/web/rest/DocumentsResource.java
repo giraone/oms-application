@@ -9,6 +9,7 @@ import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
 import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
+import com.giraone.oms.service.dto.DocumentObjectWriteDTO;
 import com.giraone.oms.service.s3.S3StorageService;
 import com.giraone.oms.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.HeaderUtil;
@@ -86,71 +87,80 @@ public class DocumentsResource {
     /**
      * {@code POST  /documents} : Prepare upload of a new document
      *
-     * @param documentObjectDTO the documentObjectDTO to create.
+     * @param documentObjectWriteDTO the documentObjectWriteDTO data to create a new DocumentObject.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new documentObjectDTO,
      * or with status {@code 400 (Bad Request)} if the documentObject has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/documents")
-    public ResponseEntity<DocumentObjectDTO> createDocument(@Valid @RequestBody DocumentObjectDTO documentObjectDTO) throws URISyntaxException {
+    public ResponseEntity<DocumentObjectDTO> createDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO) throws URISyntaxException {
 
-        log.debug("REST request to save document : {} by user {}", documentObjectDTO, SecurityUtils.getCurrentUserLogin());
-        if (documentObjectDTO.getId() != null) {
-            throw new BadRequestAlertException("A new documentObject cannot already have an ID", ENTITY_NAME, "idexists");
-        }
+        log.debug("REST request to save document : {} by user {}", documentObjectWriteDTO, SecurityUtils.getCurrentUserLogin());
 
+        DocumentObjectDTO documentObjectDTO;
         final Instant now = Instant.now();
         User user = getUser();
 
-        // path and name are kept untouched - this is the view of the creator
-        documentObjectDTO.setOwnerId(user.getId());
-        documentObjectDTO.setPath("/");
-        documentObjectDTO.setPathUuid(ROOT_UUID);
-        documentObjectDTO.setNameUuid(UUID.randomUUID().toString());
-        documentObjectDTO.setCreation(now);
-        documentObjectDTO.setNumberOfPages(0);
-        documentObjectDTO.setDocumentPolicy(DocumentPolicy.PRIVATE);
-        documentObjectDTO.buildObjectUrl();
+        if (documentObjectWriteDTO.getId() != null) {
+            Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectWriteDTO.getId());
+            if (!existingDocumentObject.isPresent()) {
+                throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
+            }
+            documentObjectDTO = existingDocumentObject.get();
+        } else {
+            documentObjectDTO = new DocumentObjectDTO();
+            // The name and policy is defined by the creator
+            documentObjectDTO.setName(documentObjectWriteDTO.getName());
+            documentObjectDTO.setDocumentPolicy(DocumentPolicy.PRIVATE);
+            // Path is optional and ROOT by default
+            documentObjectDTO.setPath(documentObjectWriteDTO.getPath() != null && documentObjectWriteDTO.getPath().trim().length() > 0 ?
+                documentObjectWriteDTO.getPath().trim() : "/");
+            // The rest is added by the service
+            documentObjectDTO.setOwnerId(user.getId());
+            // TODO: Multiple path defined by creator with multiple path UUIDs
+            documentObjectDTO.setPathUuid(ROOT_UUID);
+            documentObjectDTO.setNameUuid(UUID.randomUUID().toString());
+            documentObjectDTO.setCreation(now);
+            documentObjectDTO.setNumberOfPages(0);
+            documentObjectDTO.buildObjectUrl();
 
-        // Save the meta-data
-        DocumentObjectDTO result = documentObjectService.save(documentObjectDTO);
+            // Save the meta-data
+            documentObjectDTO = documentObjectService.save(documentObjectDTO);
+        }
 
         // Reserve a pre-signed URL for a POST upload and patch the objectWriteUrl for the browser client
-        result.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
+        documentObjectDTO.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
             documentObjectDTO.getObjectKey(), HttpMethod.PUT, 1, 0).toExternalForm());
 
-        return ResponseEntity.created(new URI("/api/document-objects/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        return ResponseEntity.created(new URI("/api/document-objects/" + documentObjectDTO.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
+            .body(documentObjectDTO);
     }
 
     /**
      * {@code PUT  /documents} : Change meta-data of an existing document.
      *
-     * @param documentObjectDTO the documentObjectDTO to update (currently only name is updated)
+     * @param documentObjectWriteDTO the documentObjectDTO to update (currently only name is updated)
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentObjectDTO,
      * or with status {@code 400 (Bad Request)} if the documentObjectDTO is not valid,
      * or with status {@code 500 (Internal Server Error)} if the documentObjectDTO couldn't be updated.
      */
     @PutMapping("/documents")
-    public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectDTO documentObjectDTO)  {
-        log.debug("REST request to update document : {}", documentObjectDTO);
-        if (documentObjectDTO.getId() == null) {
+    public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO)  {
+        log.debug("REST request to update document : {}", documentObjectWriteDTO);
+        if (documentObjectWriteDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectDTO.getId());
+        Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectWriteDTO.getId());
         if (!existingDocumentObject.isPresent()) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
         }
 
-        existingDocumentObject.get().setName(documentObjectDTO.getName());
-        if (documentObjectDTO.getDocumentPolicy() != null) {
-            existingDocumentObject.get().setDocumentPolicy(documentObjectDTO.getDocumentPolicy());
-        }
+        existingDocumentObject.get().setName(documentObjectWriteDTO.getName());
 
         DocumentObjectDTO result = documentObjectService.save(existingDocumentObject.get());
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectWriteDTO.getId().toString()))
             .body(result);
     }
 

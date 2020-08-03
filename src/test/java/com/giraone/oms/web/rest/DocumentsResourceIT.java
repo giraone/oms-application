@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -47,7 +48,7 @@ public class DocumentsResourceIT {
     @Autowired
     private DocumentObjectRepository documentObjectRepository;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private MockMvc mockMvc;
 
@@ -75,7 +76,7 @@ public class DocumentsResourceIT {
 
         String json = mockMvc.perform(post(BASE_URL)
             .with(user(DEFAULT_USER_USER))
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andDo(print())
             .andExpect(status().isCreated())
@@ -84,13 +85,14 @@ public class DocumentsResourceIT {
             .andExpect(jsonPath("$.objectUrl").isNotEmpty())
             .andExpect(jsonPath("$.objectUrl", matchesRegex("http.*/content.*")))
             .andExpect(jsonPath("$.ownerId").value(4)) // TODO
-            .andReturn().getResponse().getContentAsString();
+            .andReturn().getResponse().getContentAsString()
         ;
 
         DocumentObjectDTO returnedDocumentObjectDTO = objectMapper.readValue(json, DocumentObjectDTO.class);
+        assertThat(returnedDocumentObjectDTO).isNotNull();
 
         // assert
-        List<DocumentObject> sensorList = documentObjectRepository.findAll();
-        assertThat(sensorList).hasSize(databaseSizeBeforeCreate + 1);
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeCreate + 1);
     }
 }

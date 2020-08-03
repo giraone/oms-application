@@ -1,93 +1,97 @@
 <div>
     <h2 id="page-heading">
         <span jhiTranslate="omsApp.documentObject.home.title">Document Objects</span>
+
         <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-document-object" [routerLink]="['/document-object/new']">
-            <fa-icon [icon]="'plus'"></fa-icon>
+            <fa-icon icon="plus"></fa-icon>
             <span  jhiTranslate="omsApp.documentObject.home.createLabel">
             Create a new Document Object
             </span>
         </button>
     </h2>
+
     <jhi-alert-error></jhi-alert-error>
+
     <jhi-alert></jhi-alert>
-    <br/>
-    <div class="alert alert-warning" *ngIf="documentObjects?.length === 0">
+
+    <div class="alert alert-warning" id="no-result" *ngIf="documentObjects?.length === 0">
         <span jhiTranslate="omsApp.documentObject.home.notFound">No documentObjects found</span>
     </div>
-    <div class="table-responsive" *ngIf="documentObjects?.length > 0">
+
+    <div class="table-responsive" id="entities" *ngIf="documentObjects && documentObjects.length > 0">
         <table class="table table-striped" aria-describedby="page-heading">
             <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-            <th scope="col"  jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="path"><span jhiTranslate="omsApp.documentObject.path">Path</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="name"><span jhiTranslate="omsApp.documentObject.name">Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="pathUuid"><span jhiTranslate="omsApp.documentObject.pathUuid">Path Uuid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="nameUuid"><span jhiTranslate="omsApp.documentObject.nameUuid">Name Uuid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="mimeType"><span jhiTranslate="omsApp.documentObject.mimeType">Mime Type</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="objectUrl"><span jhiTranslate="omsApp.documentObject.objectUrl">Object Url</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="thumbnailUrl"><span jhiTranslate="omsApp.documentObject.thumbnailUrl">Thumbnail Url</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="byteSize"><span jhiTranslate="omsApp.documentObject.byteSize">Byte Size</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="numberOfPages"><span jhiTranslate="omsApp.documentObject.numberOfPages">Number Of Pages</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="creation"><span jhiTranslate="omsApp.documentObject.creation">Creation</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="lastContentModification"><span jhiTranslate="omsApp.documentObject.lastContentModification">Last Content Modification</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="documentPolicy"><span jhiTranslate="omsApp.documentObject.documentPolicy">Document Policy</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"  jhiSortBy="ownerId"><span jhiTranslate="omsApp.documentObject.owner">Owner</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th scope="col"></th>
-            </tr>
+                <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" [callback]="loadPage.bind(this)">
+                    <th scope="col"  jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="path"><span jhiTranslate="omsApp.documentObject.path">Path</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="name"><span jhiTranslate="omsApp.documentObject.name">Name</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="pathUuid"><span jhiTranslate="omsApp.documentObject.pathUuid">Path Uuid</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="nameUuid"><span jhiTranslate="omsApp.documentObject.nameUuid">Name Uuid</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="mimeType"><span jhiTranslate="omsApp.documentObject.mimeType">Mime Type</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="objectUrl"><span jhiTranslate="omsApp.documentObject.objectUrl">Object Url</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="thumbnailUrl"><span jhiTranslate="omsApp.documentObject.thumbnailUrl">Thumbnail Url</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="byteSize"><span jhiTranslate="omsApp.documentObject.byteSize">Byte Size</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="numberOfPages"><span jhiTranslate="omsApp.documentObject.numberOfPages">Number Of Pages</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="creation"><span jhiTranslate="omsApp.documentObject.creation">Creation</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="lastContentModification"><span jhiTranslate="omsApp.documentObject.lastContentModification">Last Content Modification</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="documentPolicy"><span jhiTranslate="omsApp.documentObject.documentPolicy">Document Policy</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"  jhiSortBy="ownerId"><span jhiTranslate="omsApp.documentObject.owner">Owner</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col"></th>
+                </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let documentObject of documentObjects ;trackBy: trackId">
-                <td><a [routerLink]="['/document-object', documentObject.id, 'view' ]">{{documentObject.id}}</a></td>
-                <td>{{documentObject.path}}</td>
-                <td>{{documentObject.name}}</td>
-                <td>{{documentObject.pathUuid}}</td>
-                <td>{{documentObject.nameUuid}}</td>
-                <td>{{documentObject.mimeType}}</td>
-                <td>{{documentObject.objectUrl}}</td>
-                <td>{{documentObject.thumbnailUrl}}</td>
-                <td>{{documentObject.byteSize}}</td>
-                <td>{{documentObject.numberOfPages}}</td>
-                <td>{{documentObject.creation | date:'medium'}}</td>
-                <td>{{documentObject.lastContentModification | date:'medium'}}</td>
-                <td jhiTranslate="{{'omsApp.DocumentPolicy.' + documentObject.documentPolicy}}">{{documentObject.documentPolicy}}</td>
-                <td>
-                    {{documentObject.ownerId}}
-                </td>
-                <td class="text-right">
-                    <div class="btn-group">
-                        <button type="submit"
-                                [routerLink]="['/document-object', documentObject.id, 'view' ]"
-                                class="btn btn-info btn-sm">
-                            <fa-icon [icon]="'eye'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/document-object', documentObject.id, 'edit']"
-                                class="btn btn-primary btn-sm">
-                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/document-object', { outlets: { popup: documentObject.id + '/delete'} }]"
-                                replaceUrl="true"
-                                queryParamsHandling="merge"
-                                class="btn btn-danger btn-sm">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+                <tr *ngFor="let documentObject of documentObjects ;trackBy: trackId">
+                    <td><a [routerLink]="['/document-object', documentObject.id, 'view']">{{ documentObject.id }}</a></td>
+                    <td>{{ documentObject.path }}</td>
+                    <td>{{ documentObject.name }}</td>
+                    <td>{{ documentObject.pathUuid }}</td>
+                    <td>{{ documentObject.nameUuid }}</td>
+                    <td>{{ documentObject.mimeType }}</td>
+                    <td>{{ documentObject.objectUrl }}</td>
+                    <td>{{ documentObject.thumbnailUrl }}</td>
+                    <td>{{ documentObject.byteSize }}</td>
+                    <td>{{ documentObject.numberOfPages }}</td>
+                    <td>{{ documentObject.creation | date:'medium' }}</td>
+                    <td>{{ documentObject.lastContentModification | date:'medium' }}</td>
+                    <td jhiTranslate="{{ 'omsApp.DocumentPolicy.' + documentObject.documentPolicy }}">{{ documentObject.documentPolicy }}</td>
+                    <td>
+                        {{ documentObject.ownerId }}
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group">
+                            <button type="submit"
+                                    [routerLink]="['/document-object', documentObject.id, 'view']"
+                                    class="btn btn-info btn-sm">
+                                <fa-icon icon="eye"></fa-icon>
+                                <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                            </button>
+
+                            <button type="submit"
+                                    [routerLink]="['/document-object', documentObject.id, 'edit']"
+                                    class="btn btn-primary btn-sm">
+                                <fa-icon icon="pencil-alt"></fa-icon>
+                                <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                            </button>
+
+                            <button type="submit" (click)="delete(documentObject)"
+                                    class="btn btn-danger btn-sm">
+                                <fa-icon icon="times"></fa-icon>
+                                <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
-    <!-- Pager is not implemented yet, so this is normal pagination instead -->
-    <div [hidden]="documentObjects?.length === 0">
+
+    <div *ngIf="documentObjects && documentObjects.length > 0">
         <div class="row justify-content-center">
             <jhi-item-count [page]="page" [total]="totalItems" [itemsPerPage]="itemsPerPage"></jhi-item-count>
         </div>
+
         <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="ngbPaginationPage" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage($event)"></ngb-pagination>
         </div>
     </div>
 </div>

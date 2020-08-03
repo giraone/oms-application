@@ -7,27 +7,21 @@ import com.giraone.oms.repository.DocumentObjectRepository;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.service.mapper.DocumentObjectMapper;
-import com.giraone.oms.web.rest.errors.ExceptionTranslator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.Validator;
-
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static com.giraone.oms.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,6 +32,8 @@ import com.giraone.oms.domain.enumeration.DocumentPolicy;
  * Integration tests for the {@link DocumentObjectResource} REST controller.
  */
 @SpringBootTest(classes = OmsApp.class)
+@AutoConfigureMockMvc
+@WithMockUser
 public class DocumentObjectResourceIT {
 
     private static final String DEFAULT_PATH = "AAAAAAAAAA";
@@ -86,35 +82,12 @@ public class DocumentObjectResourceIT {
     private DocumentObjectService documentObjectService;
 
     @Autowired
-    private MappingJackson2HttpMessageConverter jacksonMessageConverter;
-
-    @Autowired
-    private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
-
-    @Autowired
-    private ExceptionTranslator exceptionTranslator;
-
-    @Autowired
     private EntityManager em;
 
     @Autowired
-    private Validator validator;
-
     private MockMvc restDocumentObjectMockMvc;
 
     private DocumentObject documentObject;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        final DocumentObjectResource documentObjectResource = new DocumentObjectResource(documentObjectService);
-        this.restDocumentObjectMockMvc = MockMvcBuilders.standaloneSetup(documentObjectResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build();
-    }
 
     /**
      * Create an entity for this test.
@@ -180,11 +153,10 @@ public class DocumentObjectResourceIT {
     @Transactional
     public void createDocumentObject() throws Exception {
         int databaseSizeBeforeCreate = documentObjectRepository.findAll().size();
-
         // Create the DocumentObject
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isCreated());
 
@@ -217,7 +189,7 @@ public class DocumentObjectResourceIT {
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -237,8 +209,9 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
+
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -256,8 +229,9 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
+
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -275,8 +249,9 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
+
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -294,8 +269,9 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
+
         restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -312,7 +288,7 @@ public class DocumentObjectResourceIT {
         // Get all the documentObjectList
         restDocumentObjectMockMvc.perform(get("/api/document-objects?sort=id,desc"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(documentObject.getId().intValue())))
             .andExpect(jsonPath("$.[*].path").value(hasItem(DEFAULT_PATH)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
@@ -337,7 +313,7 @@ public class DocumentObjectResourceIT {
         // Get the documentObject
         restDocumentObjectMockMvc.perform(get("/api/document-objects/{id}", documentObject.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(documentObject.getId().intValue()))
             .andExpect(jsonPath("$.path").value(DEFAULT_PATH))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
@@ -352,7 +328,6 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.lastContentModification").value(DEFAULT_LAST_CONTENT_MODIFICATION.toString()))
             .andExpect(jsonPath("$.documentPolicy").value(DEFAULT_DOCUMENT_POLICY.toString()));
     }
-
     @Test
     @Transactional
     public void getNonExistingDocumentObject() throws Exception {
@@ -389,7 +364,7 @@ public class DocumentObjectResourceIT {
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(updatedDocumentObject);
 
         restDocumentObjectMockMvc.perform(put("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isOk());
 
@@ -421,7 +396,7 @@ public class DocumentObjectResourceIT {
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDocumentObjectMockMvc.perform(put("/api/document-objects")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
             .andExpect(status().isBadRequest());
 
@@ -440,49 +415,11 @@ public class DocumentObjectResourceIT {
 
         // Delete the documentObject
         restDocumentObjectMockMvc.perform(delete("/api/document-objects/{id}", documentObject.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item
         List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
         assertThat(documentObjectList).hasSize(databaseSizeBeforeDelete - 1);
-    }
-
-    @Test
-    @Transactional
-    public void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(DocumentObject.class);
-        DocumentObject documentObject1 = new DocumentObject();
-        documentObject1.setId(1L);
-        DocumentObject documentObject2 = new DocumentObject();
-        documentObject2.setId(documentObject1.getId());
-        assertThat(documentObject1).isEqualTo(documentObject2);
-        documentObject2.setId(2L);
-        assertThat(documentObject1).isNotEqualTo(documentObject2);
-        documentObject1.setId(null);
-        assertThat(documentObject1).isNotEqualTo(documentObject2);
-    }
-
-    @Test
-    @Transactional
-    public void dtoEqualsVerifier() throws Exception {
-        TestUtil.equalsVerifier(DocumentObjectDTO.class);
-        DocumentObjectDTO documentObjectDTO1 = new DocumentObjectDTO();
-        documentObjectDTO1.setId(1L);
-        DocumentObjectDTO documentObjectDTO2 = new DocumentObjectDTO();
-        assertThat(documentObjectDTO1).isNotEqualTo(documentObjectDTO2);
-        documentObjectDTO2.setId(documentObjectDTO1.getId());
-        assertThat(documentObjectDTO1).isEqualTo(documentObjectDTO2);
-        documentObjectDTO2.setId(2L);
-        assertThat(documentObjectDTO1).isNotEqualTo(documentObjectDTO2);
-        documentObjectDTO1.setId(null);
-        assertThat(documentObjectDTO1).isNotEqualTo(documentObjectDTO2);
-    }
-
-    @Test
-    @Transactional
-    public void testEntityFromId() {
-        assertThat(documentObjectMapper.fromId(42L).getId()).isEqualTo(42);
-        assertThat(documentObjectMapper.fromId(null)).isNull();
     }
 }

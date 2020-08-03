@@ -8,6 +8,6 @@ import { logsRoute } from './logs.route';
 
 @NgModule({
   imports: [OmsSharedModule, RouterModule.forChild([logsRoute])],
-  declarations: [LogsComponent]
+  declarations: [LogsComponent],
 })
 export class LogsModule {}

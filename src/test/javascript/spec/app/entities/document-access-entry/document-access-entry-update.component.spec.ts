@@ -18,7 +18,7 @@ describe('Component Tests', () => {
       TestBed.configureTestingModule({
         imports: [OmsTestModule],
         declarations: [DocumentAccessEntryUpdateComponent],
-        providers: [FormBuilder]
+        providers: [FormBuilder],
       })
         .overrideTemplate(DocumentAccessEntryUpdateComponent, '')
         .compileComponents();

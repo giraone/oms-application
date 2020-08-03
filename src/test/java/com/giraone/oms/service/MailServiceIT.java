@@ -1,7 +1,8 @@
 package com.giraone.oms.service;
 
-import com.giraone.oms.OmsApp;
 import com.giraone.oms.config.Constants;
+
+import com.giraone.oms.OmsApp;
 import com.giraone.oms.domain.User;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -42,7 +43,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = OmsApp.class)
 public class MailServiceIT {
 
-    private static String languages[] = {
+    private static final String[] languages = {
         "en",
         "de"
         // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array
@@ -196,9 +197,13 @@ public class MailServiceIT {
     }
 
     @Test
-    public void testSendEmailWithException() throws Exception {
+    public void testSendEmailWithException() {
         doThrow(MailSendException.class).when(javaMailSender).send(any(MimeMessage.class));
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false);
+        try {
+            mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false);
+        } catch (Exception e) {
+            fail("Exception shouldn't have been thrown");
+        }
     }
 
     @Test

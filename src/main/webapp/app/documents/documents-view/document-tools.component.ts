@@ -15,7 +15,7 @@ import { DocumentEventsService } from './document-events.service';
 })
 export class DocumentToolsComponent implements OnInit {
 
-  users: IUser[];
+  users: IUser[]|null = null;
 
   constructor(
     protected jhiAlertService: JhiAlertService,
@@ -33,19 +33,18 @@ export class DocumentToolsComponent implements OnInit {
         filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
         map((response: HttpResponse<IUser[]>) => response.body)
       )
-      .subscribe((res: IUser[]) => {
+      .subscribe((res: IUser[]|null) => {
         this.users = res
         }, (res: HttpErrorResponse) => {
-        this.jhiAlertService.error(res.message, null, null);
+        this.jhiAlertService.error(res.message, null);
       });
   }
 
   recreateThumbnails() {
-    this.documentsService.maintenanceThumbnails()
-    .subscribe((data) => {
+    this.documentsService.maintenanceThumbnails().subscribe(() => {
       console.log('DocumentToolsComponent.recreateThumbnails OK');
     }, (error) => {
-      this.jhiAlertService.error("ERROR in recreateThumbnails: " + error, null, null);
+      this.jhiAlertService.error("ERROR in recreateThumbnails: " + error, null);
     });
   }
 

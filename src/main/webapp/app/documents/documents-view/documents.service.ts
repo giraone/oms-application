@@ -9,6 +9,7 @@ import { map } from 'rxjs/operators';
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared/util/request-util';
 import { IDocumentObject } from 'app/shared/model/document-object.model';
+import { IDocumentObjectWrite } from './document-object-write.model';
 
 type EntityResponseType = HttpResponse<IDocumentObject>;
 type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
@@ -24,10 +25,7 @@ export class DocumentsService {
     return this.http.get<IDocumentObject[]>(this.resourceUrl, { params: options, observe: 'response' });
   }
 
-  reservePostUrl(documentObject: IDocumentObject): Observable<EntityResponseType> {
-    // TODO: create separate DTO
-    documentObject.nameUuid= documentObject.name;
-    documentObject.pathUuid= documentObject.path;
+  reservePutUrl(documentObject: IDocumentObjectWrite): Observable<EntityResponseType> {
     return this.http.post<IDocumentObject>(this.resourceUrl, documentObject, { observe: 'response' });
   }
 
@@ -42,21 +40,24 @@ export class DocumentsService {
   /**
    * Upload an object/document to S3 using a pre-signed URL
    * @param bytes The content ot be put in S3
-   * @param mimeType The MIME type of the content
+   * @param mimeType The MIME type of the content. If not given application/octet-stream is used.
    * @param targetUrl The S3 pre-signed URL
    * @returns An Observable containing the full HttpResponse. The response will be null, but HTTP headers
    * might be of interest.
    */
-  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string, targetUrl: string): Observable<HttpResponse<Object>> {
+  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string|undefined, targetUrl: string): Observable<HttpResponse<Object>> {
     let httpHeaders = new HttpHeaders();
+    if (mimeType == null) {
+      mimeType = 'application/octet-stream';
+    }
     httpHeaders = httpHeaders.append('content-type', mimeType);
-
+    // eslint-disable-next-line no-console
     console.log('uploadToS3UsingPut ' + targetUrl + ' ' + mimeType);
     return this.http
       .put(targetUrl, bytes, { headers : httpHeaders, observe: 'response'});
   }
 
-  update(documentObject: IDocumentObject): Observable<EntityResponseType> {
+  update(documentObject: IDocumentObjectWrite): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
       .put<IDocumentObject>(this.resourceUrl, copy, { observe: 'response' })
@@ -67,7 +68,7 @@ export class DocumentsService {
     return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
-  maintenanceThumbnails(req?: any): Observable<EntityArrayResponseType> {
+  maintenanceThumbnails(): Observable<EntityArrayResponseType> {
     return this.http.get<IDocumentObject[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
   }
 
@@ -85,8 +86,9 @@ export class DocumentsService {
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.creation = res.body.creation != null ? moment(res.body.creation) : null;
-      res.body.lastContentModification = res.body.lastContentModification != null ? moment(res.body.lastContentModification) : null;
+      res.body.creation = res.body.creation != null ? moment(res.body.creation) : undefined;
+      res.body.lastContentModification = res.body.lastContentModification != null ?
+        moment(res.body.lastContentModification) : undefined;
     }
     return res;
   }
@@ -94,9 +96,9 @@ export class DocumentsService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((documentObject: IDocumentObject) => {
-        documentObject.creation = documentObject.creation != null ? moment(documentObject.creation) : null;
+        documentObject.creation = documentObject.creation != null ? moment(documentObject.creation) : undefined;
         documentObject.lastContentModification =
-          documentObject.lastContentModification != null ? moment(documentObject.lastContentModification) : null;
+          documentObject.lastContentModification != null ? moment(documentObject.lastContentModification) : undefined;
       });
     }
     return res;

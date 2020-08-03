@@ -5,20 +5,18 @@ import { IDocumentObject } from 'app/shared/model/document-object.model';
 
 @Component({
   selector: 'jhi-document-object-detail',
-  templateUrl: './document-object-detail.component.html'
+  templateUrl: './document-object-detail.component.html',
 })
 export class DocumentObjectDetailComponent implements OnInit {
-  documentObject: IDocumentObject;
+  documentObject: IDocumentObject | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
-    this.activatedRoute.data.subscribe(({ documentObject }) => {
-      this.documentObject = documentObject;
-    });
+  ngOnInit(): void {
+    this.activatedRoute.data.subscribe(({ documentObject }) => (this.documentObject = documentObject));
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }
