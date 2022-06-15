@@ -6186,10 +6186,10 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-generator-jhipster@6.10.1:
-  version "6.10.1"
-  resolved "https://registry.yarnpkg.com/generator-jhipster/-/generator-jhipster-6.10.1.tgz#c5be498007314695a3ef509665794c1f88566168"
-  integrity sha512-a2MtlL//Ui/29F2Q4qgHp6qoXRr5vcqFwH4y5I5xDRHq3x1cHscZYedR79EV1oAwKzmFCqYpsWGoPAhFJlj0UA==
+generator-jhipster@6.10.5:
+  version "6.10.5"
+  resolved "https://registry.yarnpkg.com/generator-jhipster/-/generator-jhipster-6.10.5.tgz#843bd2b5d639d636aa8366cc02c1008f015554d3"
+  integrity sha512-5NulSuou7sghjggc1rQuWWWigfJAdlzB0iMB92WQd90nXBC9ZopVFvgkjfLxWpKEgidFPjrwhrt5iWjoA+yo5A==
   dependencies:
     aws-sdk "2.706.0"
     axios "0.19.2"
@@ -6213,15 +6213,15 @@ generator-jhipster@6.10.1:
     os-locale "5.0.0"
     parse-gitignore "1.0.1"
     pluralize "8.0.0"
-    prettier "2.0.5"
-    prettier-plugin-java "0.8.0"
+    prettier "2.1.2"
+    prettier-plugin-java "0.8.2"
     progress "2.0.3"
     randexp "0.5.3"
     semver "7.3.2"
     shelljs "0.8.4"
-    sync-request "6.1.0"
     tabtab "2.2.2"
     test "^0.6.0"
+    then-request "6.0.2"
     through2 "3.0.2"
     uuid "7.0.3"
     yeoman-environment "2.10.3"
@@ -6265,11 +6265,6 @@ get-package-type@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/get-package-type/-/get-package-type-0.1.0.tgz#8de2d803cff44df3bc6c456e6668b36c3926e11a"
   integrity sha512-pjzuKtY64GYfWizNAJ0fr9VqttZkNiK2iS430LtIHzjBEr6bX8Am2zm4sW4Ro5wjWW5cAlRL1qAMTcXbjNAO2Q==
-
-get-port@^3.1.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/get-port/-/get-port-3.2.0.tgz#dd7ce7de187c06c8bf353796ac71e099f0980ebc"
-  integrity sha1-3Xzn3hh8Bsi/NTeWrHHgmfCYDrw=
 
 get-stdin@^6.0.0:
   version "6.0.0"
@@ -7808,7 +7803,7 @@ jake@^10.6.1:
     filelist "^1.0.1"
     minimatch "^3.0.4"
 
-java-parser@^0.8.0:
+java-parser@0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/java-parser/-/java-parser-0.8.2.tgz#12a29a6ef8e9ca50d5d047e4c4c8ac383ff240d6"
   integrity sha512-YphTEk4zIpWAHqBriAdjlNnTEcEYQ2xBA8KOH5V7QxggNbxjkeEcKJjNYnQvqEue8+O1TLj7vfL0NVG6x5LGMw==
@@ -9332,7 +9327,12 @@ moment-locales-webpack-plugin@1.2.0:
   dependencies:
     lodash.difference "^4.5.0"
 
-moment@2.29.2, moment@^2.15.1, moment@^2.22.1, moment@^2.24.0:
+moment@2.27.0:
+  version "2.27.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.27.0.tgz#8bff4e3e26a236220dfe3e36de756b6ebaa0105d"
+  integrity sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
+
+moment@^2.15.1, moment@^2.22.1, moment@^2.24.0:
   version "2.29.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
   integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
@@ -9459,10 +9459,10 @@ neo-async@^2.5.0, neo-async@^2.6.0, neo-async@^2.6.1:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.1.tgz#ac27ada66167fa8849a6addd837f6b189ad2081c"
   integrity sha512-iyam8fBuCUpWeKPGpaNMetEocMt364qkCsfL9JuhjXX6dRnguRVOfk2GZaDpPjcOKiiXCPINZC1GczQ7iTq3Zw==
 
-ng-jhipster@0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/ng-jhipster/-/ng-jhipster-0.14.0.tgz#2870707dda9026ac44858056497d447a946e1e5a"
-  integrity sha512-f6S8gkGLVOLYcODykhhgGkqY3zTO/VIc2oavvkN8pg7BAqIwj7gkLjrPnYTF4IDH9taSDkkD+Oizp4XLPEEc4A==
+ng-jhipster@0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/ng-jhipster/-/ng-jhipster-0.15.0.tgz#938a42e9232c2af4cc17177fc11bb8d90019d200"
+  integrity sha512-tiTbf0zmnm9qdB73E++sTtB5HA0HlmtyZ4116UBQ0FEhJGb/xJgO1dyKzFliJ+365pZK0ulWygRjziNzjnl5SQ==
   dependencies:
     tslib "^2.0.0"
 
@@ -10948,16 +10948,7 @@ postcss-value-parser@^4.1.0:
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz#723c09920836ba6d3e5af019f92bc0971c02e514"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
-postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.16, postcss@^7.0.5, postcss@^7.0.6:
-  version "7.0.18"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.18.tgz#4b9cda95ae6c069c67a4d933029eddd4838ac233"
-  integrity sha512-/7g1QXXgegpF+9GJj4iN7ChGF40sYuGYJ8WZu8DZWnmhQ/G36hfdk3q9LBJmoK+lZ+yzZ5KYpOoxq7LF1BxE8g==
-  dependencies:
-    chalk "^2.4.2"
-    source-map "^0.6.1"
-    supports-color "^6.1.0"
-
-postcss@^7.0.32:
+postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.16, postcss@^7.0.32, postcss@^7.0.5, postcss@^7.0.6:
   version "7.0.39"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.39.tgz#9624375d965630e2e1f2c02a935c82a59cb48309"
   integrity sha512-yioayjNbHn6z1/Bywyb2Y4s3yvDAeXGOyxqD+LnVOinq6Mdmd++SW2wUNVzavyyHxd6+DxzWGIuosg6P1Rj8uA==
@@ -10975,24 +10966,24 @@ prepend-http@^1.0.0, prepend-http@^1.0.1:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
   integrity sha1-1PRWKwzjaW5BrFLQ4ALlemNdxtw=
 
-prettier-plugin-java@0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-java/-/prettier-plugin-java-0.8.0.tgz#231320f9c7f1a115df33256c0b4c66e48eb876ce"
-  integrity sha512-+4qdhUfFQIj4bLGSDrAGmUZKXQRjJYpQFbmRh04atEZe7QEZUF6NHVyRjJ73Cgwhc5NaiyIpFhtcXgLf9J9V6A==
+prettier-plugin-java@0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-java/-/prettier-plugin-java-0.8.2.tgz#8cbeef028b40d1e8d9968b2c36a769441a719e83"
+  integrity sha512-G11PMutlfhUjLqmrB0gW9n6hTIvlnXX+lhzgH3Uhc1QSlDQoLBky5lNSRgvdYSDPpSF3DmyYd3/7U3Ez8n0ckg==
   dependencies:
-    java-parser "^0.8.0"
-    lodash "4.17.15"
-    prettier "2.0.4"
+    java-parser "0.8.2"
+    lodash "4.17.20"
+    prettier "2.1.1"
 
-prettier@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.4.tgz#2d1bae173e355996ee355ec9830a7a1ee05457ef"
-  integrity sha512-SVJIQ51spzFDvh4fIbCLvciiDMCrRhlN3mbZvv/+ycjvmF5E73bKdGfU8QDLNmjYJf+lsGnDBC4UUnvTe5OO0w==
+prettier@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.1.1.tgz#d9485dd5e499daa6cb547023b87a6cf51bee37d6"
+  integrity sha512-9bY+5ZWCfqj3ghYBLxApy2zf6m+NJo5GzmLTpr9FsApsfjriNnS2dahWReHMi7qNPhhHl9SYHJs2cHZLgexNIw==
 
-prettier@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.5.tgz#d6d56282455243f2f92cc1716692c08aa31522d4"
-  integrity sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
+prettier@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.1.2.tgz#3050700dae2e4c8b67c4c3f666cdb8af405e1ce5"
+  integrity sha512-16c7K+x4qVlJg9rEbXl7HEGmQyZlG4R9AgP+oHKRMsMsuk8s+ATStlf1NpDqyBI1HpVyfjLOeMhH2LvuNvV5Vg==
 
 pretty-bytes@^5.2.0, pretty-bytes@^5.3.0:
   version "5.6.0"
@@ -13033,10 +13024,10 @@ svgo@^1.0.0:
     unquote "~1.1.1"
     util.promisify "~1.0.0"
 
-swagger-ui-dist@4.1.3:
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-4.1.3.tgz#2be9f9de9b5c19132fa4a5e40933058c151563dc"
-  integrity sha512-WvfPSfAAMlE/sKS6YkW47nX/hA7StmhYnAHc6wWCXNL0oclwLj6UXv0hQCkLnDgvebi0MEV40SJJpVjKUgH1IQ==
+swagger-ui-dist@3.25.1:
+  version "3.25.1"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.25.1.tgz#8aa9c3217849722f6d8c7fac6b2222f9082227bb"
+  integrity sha512-Sw/K95j1pT9TZtLKiHDEml7YqcXC9thTTQjxrvNgd9j1KzOIxpo/5lhHuUMAN/hxVAHetzmcBcQaBjywRXog8w==
 
 symbol-observable@1.0.1:
   version "1.0.1"
@@ -13052,22 +13043,6 @@ symbol-tree@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
-
-sync-request@6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/sync-request/-/sync-request-6.1.0.tgz#e96217565b5e50bbffe179868ba75532fb597e68"
-  integrity sha512-8fjNkrNlNCrVc/av+Jn+xxqfCjYaBoHqCsDz6mt030UMxJGr+GSfCV1dQt2gRtlL63+VPidwDVLr7V2OcTSdRw==
-  dependencies:
-    http-response-object "^3.0.1"
-    sync-rpc "^1.2.1"
-    then-request "^6.0.0"
-
-sync-rpc@^1.2.1:
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/sync-rpc/-/sync-rpc-1.3.6.tgz#b2e8b2550a12ccbc71df8644810529deb68665a7"
-  integrity sha512-J8jTXuZzRlvU7HemDgHi3pGnh/rkoqR/OZSjhTyyZrEkkYQbk7Z33AXp37mkPfPpfdOuj7Ex3H/TJM1z48uPQw==
-  dependencies:
-    get-port "^3.1.0"
 
 synchronous-promise@^2.0.6:
   version "2.0.10"
@@ -13250,7 +13225,7 @@ tfunk@^3.0.1:
     chalk "^1.1.1"
     object-path "^0.9.0"
 
-then-request@^6.0.0:
+then-request@6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/then-request/-/then-request-6.0.2.tgz#ec18dd8b5ca43aaee5cb92f7e4c1630e950d4f0c"
   integrity sha512-3ZBiG7JvP3wbDzA9iNY5zJQcHL4jn/0BWtXIkagfz7QgOL/LqjCEOBQuJNZfu0XYnv5JhKh+cDxCPM4ILrqruA==
