@@ -69,6 +69,10 @@ export MINIO_REGION_NAME=default
 ./mc rb minio-local/bucket-01 --force
 # Create bucket
 ./mc mb minio-local/bucket-01 --region default
+# Check version
+./mv --version
+# Update minio to latest version
+./mc update
 
 # Add/Replace webhook
 ./mc admin config set minio-local/ notify_webhook:1 enable="true" endpoint="http://localhost:8080/event-api/s3/"
@@ -110,6 +114,7 @@ Temporary or permanent switch off rules per line or per file:
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable @typescript-eslint/no-unused-vars
 ```
+
 ## Change log
 
 - 31.07.2020 - Upgrade to JHipster 6.10.1, Upgrade to AWS SDK 1.11.831
