@@ -12,8 +12,15 @@ import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.service.dto.DocumentObjectWriteDTO;
 import com.giraone.oms.service.s3.S3StorageService;
 import com.giraone.oms.web.rest.errors.BadRequestAlertException;
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.PaginationUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,16 +31,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.PaginationUtil;
 
 /**
  * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
@@ -56,8 +55,13 @@ public class DocumentsResource {
     private final ImagingService imagingService;
     private final ApplicationProperties applicationProperties;
 
-    public DocumentsResource(DocumentObjectService documentObjectService, S3StorageService s3StorageService,
-                             UserService userService, ImagingService imagingService, ApplicationProperties applicationProperties) {
+    public DocumentsResource(
+        DocumentObjectService documentObjectService,
+        S3StorageService s3StorageService,
+        UserService userService,
+        ImagingService imagingService,
+        ApplicationProperties applicationProperties
+    ) {
         this.documentObjectService = documentObjectService;
         this.s3StorageService = s3StorageService;
         this.userService = userService;
@@ -73,7 +77,6 @@ public class DocumentsResource {
      */
     @GetMapping("/documents")
     public ResponseEntity<List<DocumentObjectDTO>> getAllDocuments(Pageable pageable) {
-
         log.debug("REST request to get document list by user={}", SecurityUtils.getCurrentUserLogin());
 
         User user = getUser();
@@ -93,8 +96,8 @@ public class DocumentsResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/documents")
-    public ResponseEntity<DocumentObjectDTO> createDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO) throws URISyntaxException {
-
+    public ResponseEntity<DocumentObjectDTO> createDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO)
+        throws URISyntaxException {
         log.debug("REST request to save document : {} by user {}", documentObjectWriteDTO, SecurityUtils.getCurrentUserLogin());
 
         DocumentObjectDTO documentObjectDTO;
@@ -113,8 +116,11 @@ public class DocumentsResource {
             documentObjectDTO.setName(documentObjectWriteDTO.getName());
             documentObjectDTO.setDocumentPolicy(DocumentPolicy.PRIVATE);
             // Path is optional and ROOT by default
-            documentObjectDTO.setPath(documentObjectWriteDTO.getPath() != null && documentObjectWriteDTO.getPath().trim().length() > 0 ?
-                documentObjectWriteDTO.getPath().trim() : "/");
+            documentObjectDTO.setPath(
+                documentObjectWriteDTO.getPath() != null && documentObjectWriteDTO.getPath().trim().length() > 0
+                    ? documentObjectWriteDTO.getPath().trim()
+                    : "/"
+            );
             // The rest is added by the service
             documentObjectDTO.setOwnerId(user.getId());
             // TODO: Multiple path defined by creator with multiple path UUIDs
@@ -129,10 +135,12 @@ public class DocumentsResource {
         }
 
         // Reserve a pre-signed URL for a POST upload and patch the objectWriteUrl for the browser client
-        documentObjectDTO.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
-            documentObjectDTO.getObjectKey(), HttpMethod.PUT, 1, 0).toExternalForm());
+        documentObjectDTO.setObjectWriteUrl(
+            s3StorageService.createPreSignedUrl(documentObjectDTO.getObjectKey(), HttpMethod.PUT, 1, 0).toExternalForm()
+        );
 
-        return ResponseEntity.created(new URI("/api/document-objects/" + documentObjectDTO.getId()))
+        return ResponseEntity
+            .created(new URI("/api/document-objects/" + documentObjectDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
             .body(documentObjectDTO);
     }
@@ -146,7 +154,7 @@ public class DocumentsResource {
      * or with status {@code 500 (Internal Server Error)} if the documentObjectDTO couldn't be updated.
      */
     @PutMapping("/documents")
-    public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO)  {
+    public ResponseEntity<DocumentObjectDTO> updateDocument(@Valid @RequestBody DocumentObjectWriteDTO documentObjectWriteDTO) {
         log.debug("REST request to update document : {}", documentObjectWriteDTO);
         if (documentObjectWriteDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -159,7 +167,8 @@ public class DocumentsResource {
         existingDocumentObject.get().setName(documentObjectWriteDTO.getName());
 
         DocumentObjectDTO result = documentObjectService.save(existingDocumentObject.get());
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectWriteDTO.getId().toString()))
             .body(result);
     }
@@ -172,7 +181,6 @@ public class DocumentsResource {
      */
     @DeleteMapping("/documents/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-
         log.debug("REST request to delete document : {}", id);
 
         Optional<DocumentObjectDTO> document = documentObjectService.findOne(id);
@@ -192,36 +200,40 @@ public class DocumentsResource {
 
         documentObjectService.delete(id);
 
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(
-            applicationName, true, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+            .build();
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
     @GetMapping("/maintenance/thumbnails")
     public ResponseEntity<List<DocumentObjectDTO>> reCreateThumbnails() {
-
         log.debug("REST request to re-create thumbnails");
 
         Pageable pageable = PageRequest.of(0, 100);
         Page<DocumentObjectDTO> page = documentObjectService.findAll(pageable);
         Stream<DocumentObjectDTO> allDocuments = page.get();
-        page.get().forEach(documentObject -> {
-
-            if (documentObject.hasObject() && !documentObject.hasThumbnail()) {
-                documentObject.buildThumbnailUrl();
-                try {
-                    ImagingService.ObjectMetaDataInfo metaData = imagingService.createThumbnail(
-                        documentObject.getObjectUrl(), documentObject.getThumbnailUrl());
-                    documentObject.setMimeType(metaData.getMimeType());
-                    documentObject.setByteSize(metaData.getByteSizeOriginal());
-                    documentObject.setNumberOfPages(metaData.getNumberOfPages());
-                } catch (Exception e) {
-                    log.error("Error creating thumbnail for {}", documentObject.dump(), e);
-                    documentObject.setThumbnailUrl(null);
+        page
+            .get()
+            .forEach(documentObject -> {
+                if (documentObject.hasObject() && !documentObject.hasThumbnail()) {
+                    documentObject.buildThumbnailUrl();
+                    try {
+                        ImagingService.ObjectMetaDataInfo metaData = imagingService.createThumbnail(
+                            documentObject.getObjectUrl(),
+                            documentObject.getThumbnailUrl()
+                        );
+                        documentObject.setMimeType(metaData.getMimeType());
+                        documentObject.setByteSize(metaData.getByteSizeOriginal());
+                        documentObject.setNumberOfPages(metaData.getNumberOfPages());
+                    } catch (Exception e) {
+                        log.error("Error creating thumbnail for {}", documentObject.dump(), e);
+                        documentObject.setThumbnailUrl(null);
+                    }
                 }
-            }
-        });
+            });
 
         List<DocumentObjectDTO> ret = documentObjectService.save(allDocuments.collect(Collectors.toList()));
 
@@ -245,19 +257,27 @@ public class DocumentsResource {
     }
 
     private void preparePolicyBasedUrls(DocumentObjectDTO d, User user) {
-
         // everybody, who has access can read the content
-        d.setObjectUrl(s3StorageService.createPreSignedUrl(
-            d.getObjectKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead()).toExternalForm());
+        d.setObjectUrl(
+            s3StorageService
+                .createPreSignedUrl(d.getObjectKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead())
+                .toExternalForm()
+        );
         // everybody, who has access can read the thumbnail
         if (d.getThumbnailUrl() != null) {
-            d.setThumbnailUrl(s3StorageService.createPreSignedUrl(
-                d.getThumbnailKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail()).toExternalForm());
+            d.setThumbnailUrl(
+                s3StorageService
+                    .createPreSignedUrl(d.getThumbnailKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail())
+                    .toExternalForm()
+            );
         }
         // if the document is not locked and if the caller is the owner write access is possible
         if (d.getDocumentPolicy() != DocumentPolicy.LOCKED && d.getOwnerId().longValue() == user.getId().longValue()) {
-            d.setObjectWriteUrl(s3StorageService.createPreSignedUrl(
-                d.getObjectKey(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite()).toExternalForm());
+            d.setObjectWriteUrl(
+                s3StorageService
+                    .createPreSignedUrl(d.getObjectKey(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite())
+                    .toExternalForm()
+            );
         }
     }
 }

@@ -15,10 +15,11 @@
 
 spring:
   profiles:
-  # Uncomment the following line to enable tests against production database type rather than H2, using Testcontainers
-  #active: testcontainers
+    # Uncomment the following line to enable tests against production database type rather than H2, using Testcontainers
+    #active: testcontainers
   application:
     name: oms
+
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:h2:mem:oms;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -31,9 +32,8 @@ spring:
     serialization:
       write-durations-as-timestamps: false
   jpa:
-    database-platform: io.github.jhipster.domain.util.FixedH2Dialect
+    database-platform: tech.jhipster.domain.util.FixedH2Dialect
     open-in-view: false
-    show-sql: false
     hibernate:
       ddl-auto: none
       naming:
@@ -47,12 +47,16 @@ spring:
       hibernate.generate_statistics: false
       hibernate.hbm2ddl.auto: validate
       hibernate.jdbc.time_zone: UTC
+      hibernate.query.fail_on_pagination_over_collection_fetch: true
   liquibase:
     contexts: test
   mail:
     host: localhost
   main:
     allow-bean-definition-overriding: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   messages:
     basename: i18n/messages
   task:
@@ -65,7 +69,7 @@ spring:
     scheduling:
       thread-name-prefix: oms-scheduling-
       pool:
-        size: 1
+        size: 20
   thymeleaf:
     mode: HTML
 
@@ -78,7 +82,6 @@ server:
 #
 # Full reference is available at: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
-
 jhipster:
   clientApp:
     name: 'omsApp'
@@ -97,14 +100,9 @@ jhipster:
     authentication:
       jwt:
         # This token must be encoded using Base64 (you can type `echo 'secret-key'|base64` on your command line)
-        base64-secret: ZTkwNTc4MDUxZDhkYzc2NWMyY2YxMTU1OGRkMDZiM2ZhZDk0MGM2OGE1NDI1MjEzYzdkNWE4MzM2YTk1ZGY2ZDI0NmM3Njc4MmEwNGQzZGQxZmM5NjBmNGFlMWEzMjFkZTI0Y2NkY2U1YmY1M2M3YzUzYjEzOWE2MWQ0ODA0NDc=
+        base64-secret: MjYyNDEwMjQ5NTFlYmYwM2Q5YjcxYmQ1MTE2YzBkMWYyODg4MTY2Zjg4Y2UyNTM1N2VmNjUxODdlMTcwZWY2ODI2M2QyZTY4ZmFiYWU0NjIyOTk4YWJjMzM4MWJjZTQ3NzQ1OTBmOTVlMDAyYjk1ODdhOWI3MjdmMmNlYWI3NDA=
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
-  metrics:
-    logs: # Reports metrics in the logs
-      enabled: true
-      report-frequency: 60 # in seconds
-
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class

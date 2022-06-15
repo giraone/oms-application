@@ -1,19 +1,14 @@
 package com.giraone.oms.service.dto;
 
 import com.giraone.oms.domain.enumeration.DocumentPolicy;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
-import java.time.Instant;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the creating/updating a {@link com.giraone.oms.domain.DocumentObject} entity.
  */
-@ApiModel(description = "A document entity.")
+@Schema(description = "A document entity.")
 public class DocumentObjectWriteDTO implements Serializable {
 
     private Long id;
@@ -22,20 +17,20 @@ public class DocumentObjectWriteDTO implements Serializable {
      * The human readable name of the document
      */
     @NotNull
-    @ApiModelProperty(value = "The human readable name of the document", required = true)
+    @Schema(description = "The human readable name of the document", required = true)
     private String name;
 
     /**
      * The folder structure of the object using human readable path components
      */
     @NotNull
-    @ApiModelProperty(value = "The folder structure of the object using human readable path components. Default = /.")
+    @Schema(description = "The folder structure of the object using human readable path components. Default = /.")
     private String path = "/";
 
     /**
      * Simple policy to show attribute based access control
      */
-    @ApiModelProperty(value = "Simple policy to show attribute based access control")
+    @Schema(description = "Simple policy to show attribute based access control")
     private DocumentPolicy documentPolicy;
 
     //------------------------------------------------------------------------------------------------------------------
@@ -74,11 +69,19 @@ public class DocumentObjectWriteDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "DocumentObjectWriteDTO{" +
-            "id=" + id +
-            ", name='" + name + '\'' +
-            ", path='" + path + '\'' +
-            ", documentPolicy=" + documentPolicy +
-            '}';
+        return (
+            "DocumentObjectWriteDTO{" +
+            "id=" +
+            id +
+            ", name='" +
+            name +
+            '\'' +
+            ", path='" +
+            path +
+            '\'' +
+            ", documentPolicy=" +
+            documentPolicy +
+            '}'
+        );
     }
 }

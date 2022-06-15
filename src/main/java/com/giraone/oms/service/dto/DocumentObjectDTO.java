@@ -1,16 +1,17 @@
 package com.giraone.oms.service.dto;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import java.time.Instant;
-import javax.validation.constraints.*;
-import java.io.Serializable;
-import java.util.Objects;
+
 import com.giraone.oms.domain.enumeration.DocumentPolicy;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * A DTO for the {@link com.giraone.oms.domain.DocumentObject} entity.
  */
-@ApiModel(description = "A document entity.")
+@Schema(description = "A document entity.")
 public class DocumentObjectDTO implements Serializable {
 
     private Long id;
@@ -19,85 +20,84 @@ public class DocumentObjectDTO implements Serializable {
      * The folder structure of the object using human readable path components
      */
     @NotNull
-    @ApiModelProperty(value = "The folder structure of the object using human readable path components", required = true)
+    @Schema(description = "The folder structure of the object using human readable path components", required = true)
     private String path;
 
     /**
      * The human readable name of the document
      */
     @NotNull
-    @ApiModelProperty(value = "The human readable name of the document", required = true)
+    @Schema(description = "The human readable name of the document", required = true)
     private String name;
 
     /**
      * The folder structure as an internal UUID
      */
-    @ApiModelProperty(value = "The folder structure as an internal UUID", required = true)
+    @Schema(description = "The folder structure as an internal UUID", required = true)
     private String pathUuid;
 
     /**
      * The name of the document as an internal UUID
      */
-    @ApiModelProperty(value = "The name of the document as an internal UUID", required = true)
+    @Schema(description = "The name of the document as an internal UUID", required = true)
     private String nameUuid;
 
     /**
      * The MIME type of the document
      */
-    @ApiModelProperty(value = "The MIME type of the document")
+    @Schema(description = "The MIME type of the document")
     private String mimeType;
 
     /**
      * The S3 object key to access the document (read access)
      */
     @Size(max = 1024)
-    @ApiModelProperty(value = "The S3 object key to access the document")
+    @Schema(description = "The S3 object key to access the document")
     private String objectUrl;
 
     /**
      * The S3 object key to create/update the document (write access)
      */
     @Size(max = 1024)
-    @ApiModelProperty(value = "The S3 object key to update the document")
+    @Schema(description = "The S3 object key to update the document")
     private String objectWriteUrl;
 
     /**
      * The S3 object key to access a thumbnail of the document
      */
     @Size(max = 1024)
-    @ApiModelProperty(value = "The S3 object key to access a thumbnail of the document")
+    @Schema(description = "The S3 object key to access a thumbnail of the document")
     private String thumbnailUrl;
 
     /**
      * Size in bytes of the document
      */
-    @ApiModelProperty(value = "Size in bytes of the document")
+    @Schema(description = "Size in bytes of the document")
     private Long byteSize;
 
     /**
      * Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented
      */
-    @ApiModelProperty(value = "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented")
+    @Schema(description = "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented")
     private Integer numberOfPages;
 
     /**
      * Timestamp of creation
      */
-    @ApiModelProperty(value = "Timestamp of creation")
+    @Schema(description = "Timestamp of creation")
     private Instant creation;
 
     /**
      * Timestamp of last content modification
      */
-    @ApiModelProperty(value = "Timestamp of last content modification")
+    @Schema(description = "Timestamp of last content modification")
     private Instant lastContentModification;
 
     /**
      * Simple policy to show attribute based access control
      */
-    @ApiModelProperty(value = "Simple policy to show attribute based access control")
+    @Schema(description = "Simple policy to show attribute based access control")
     private DocumentPolicy documentPolicy;
-
 
     private Long ownerId;
 
@@ -244,22 +244,48 @@ public class DocumentObjectDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "DocumentObjectDTO{" +
-            "id=" + getId() +
-            ", path='" + getPath() + "'" +
-            ", name='" + getName() + "'" +
-            ", pathUuid='" + getPathUuid() + "'" +
-            ", nameUuid='" + getNameUuid() + "'" +
-            ", mimeType='" + getMimeType() + "'" +
-            ", objectUrl='" + getObjectUrl() + "'" +
-            ", getObjectWriteUrl='" + getObjectWriteUrl() + "'" +
-            ", thumbnailUrl='" + getThumbnailUrl() + "'" +
-            ", byteSize=" + getByteSize() +
-            ", numberOfPages=" + getNumberOfPages() +
-            ", creation='" + getCreation() + "'" +
-            ", lastContentModification='" + getLastContentModification() + "'" +
-            ", owner=" + getOwnerId() +
-            "}";
+        return (
+            "DocumentObjectDTO{" +
+            "id=" +
+            getId() +
+            ", path='" +
+            getPath() +
+            "'" +
+            ", name='" +
+            getName() +
+            "'" +
+            ", pathUuid='" +
+            getPathUuid() +
+            "'" +
+            ", nameUuid='" +
+            getNameUuid() +
+            "'" +
+            ", mimeType='" +
+            getMimeType() +
+            "'" +
+            ", objectUrl='" +
+            getObjectUrl() +
+            "'" +
+            ", getObjectWriteUrl='" +
+            getObjectWriteUrl() +
+            "'" +
+            ", thumbnailUrl='" +
+            getThumbnailUrl() +
+            "'" +
+            ", byteSize=" +
+            getByteSize() +
+            ", numberOfPages=" +
+            getNumberOfPages() +
+            ", creation='" +
+            getCreation() +
+            "'" +
+            ", lastContentModification='" +
+            getLastContentModification() +
+            "'" +
+            ", owner=" +
+            getOwnerId() +
+            "}"
+        );
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -289,15 +315,31 @@ public class DocumentObjectDTO implements Serializable {
     }
 
     public String dump() {
-        return "{" +
-            "id=" + getId() +
-            ", path='" + getPath() + "'" +
-            ", name='" + getName() + "'" +
-            ", pathUuid='" + getPathUuid() + "'" +
-            ", nameUuid='" + getNameUuid() + "'" +
-            ", objectUrl='" + getObjectUrl() + "'" +
-            ", thumbnailUrl='" + getThumbnailUrl() + "'" +
-            ", owner=" + getOwnerId() +
-            "}";
+        return (
+            "{" +
+            "id=" +
+            getId() +
+            ", path='" +
+            getPath() +
+            "'" +
+            ", name='" +
+            getName() +
+            "'" +
+            ", pathUuid='" +
+            getPathUuid() +
+            "'" +
+            ", nameUuid='" +
+            getNameUuid() +
+            "'" +
+            ", objectUrl='" +
+            getObjectUrl() +
+            "'" +
+            ", thumbnailUrl='" +
+            getThumbnailUrl() +
+            "'" +
+            ", owner=" +
+            getOwnerId() +
+            "}"
+        );
     }
 }

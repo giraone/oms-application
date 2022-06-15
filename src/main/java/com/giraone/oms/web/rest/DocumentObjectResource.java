@@ -1,28 +1,32 @@
 package com.giraone.oms.web.rest;
 
 import com.giraone.oms.service.DocumentObjectService;
-import com.giraone.oms.web.rest.errors.BadRequestAlertException;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
-
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import com.giraone.oms.web.rest.errors.BadRequestAlertException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
@@ -52,13 +56,15 @@ public class DocumentObjectResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/document-objects")
-    public ResponseEntity<DocumentObjectDTO> createDocumentObject(@Valid @RequestBody DocumentObjectDTO documentObjectDTO) throws URISyntaxException {
+    public ResponseEntity<DocumentObjectDTO> createDocumentObject(@Valid @RequestBody DocumentObjectDTO documentObjectDTO)
+        throws URISyntaxException {
         log.debug("REST request to save DocumentObject : {}", documentObjectDTO);
         if (documentObjectDTO.getId() != null) {
             throw new BadRequestAlertException("A new documentObject cannot already have an ID", ENTITY_NAME, "idexists");
         }
         DocumentObjectDTO result = documentObjectService.save(documentObjectDTO);
-        return ResponseEntity.created(new URI("/api/document-objects/" + result.getId()))
+        return ResponseEntity
+            .created(new URI("/api/document-objects/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
@@ -73,13 +79,15 @@ public class DocumentObjectResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/document-objects")
-    public ResponseEntity<DocumentObjectDTO> updateDocumentObject(@Valid @RequestBody DocumentObjectDTO documentObjectDTO) throws URISyntaxException {
+    public ResponseEntity<DocumentObjectDTO> updateDocumentObject(@Valid @RequestBody DocumentObjectDTO documentObjectDTO)
+        throws URISyntaxException {
         log.debug("REST request to update DocumentObject : {}", documentObjectDTO);
         if (documentObjectDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         DocumentObjectDTO result = documentObjectService.save(documentObjectDTO);
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentObjectDTO.getId().toString()))
             .body(result);
     }
@@ -121,6 +129,9 @@ public class DocumentObjectResource {
     public ResponseEntity<Void> deleteDocumentObject(@PathVariable Long id) {
         log.debug("REST request to delete DocumentObject : {}", id);
         documentObjectService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+            .build();
     }
 }

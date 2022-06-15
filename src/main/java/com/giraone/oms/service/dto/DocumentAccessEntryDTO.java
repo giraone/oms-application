@@ -1,17 +1,17 @@
 package com.giraone.oms.service.dto;
 
-import io.swagger.annotations.ApiModel;
-import java.time.Instant;
-import javax.validation.constraints.*;
-import java.io.Serializable;
 import com.giraone.oms.domain.enumeration.AccessType;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
+import java.time.Instant;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the {@link com.giraone.oms.domain.DocumentAccessEntry} entity.
  */
-@ApiModel(description = "A document access entry (access control entry)")
+@Schema(description = "A document access entry (access control entry)")
 public class DocumentAccessEntryDTO implements Serializable {
-    
+
     private Long id;
 
     @NotNull
@@ -19,11 +19,10 @@ public class DocumentAccessEntryDTO implements Serializable {
 
     private Instant until;
 
-
     private Long documentId;
 
     private Long granteeId;
-    
+
     public Long getId() {
         return id;
     }

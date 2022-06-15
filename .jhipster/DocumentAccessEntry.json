@@ -1,46 +1,42 @@
 {
-  "name": "DocumentAccessEntry",
+  "applications": "*",
+  "changelogDate": "20220615211054",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "document_access_entry",
   "fields": [
     {
       "fieldName": "access",
       "fieldType": "AccessType",
-      "fieldValues": "READ_CONTENT,READ_METADATA,CHANGE_CONTENT",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": ["required"],
+      "fieldValues": "READ_CONTENT,READ_METADATA,CHANGE_CONTENT"
     },
     {
       "fieldName": "until",
       "fieldType": "Instant"
     }
   ],
+  "fluentMethods": true,
+  "javadoc": "A document access entry (access control entry)",
+  "jpaMetamodelFiltering": false,
+  "name": "DocumentAccessEntry",
+  "pagination": "pagination",
+  "readOnly": false,
   "relationships": [
     {
-      "relationshipType": "many-to-one",
       "otherEntityName": "documentObject",
       "otherEntityRelationshipName": "documentAccessEntry",
-      "relationshipValidateRules": "required",
       "relationshipName": "document",
-      "otherEntityField": "id"
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
     },
     {
-      "relationshipType": "many-to-one",
       "otherEntityName": "user",
       "otherEntityRelationshipName": "documentAccessEntry",
-      "relationshipValidateRules": "required",
       "relationshipName": "grantee",
-      "otherEntityField": "id"
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
     }
   ],
-  "changelogDate": "20191017090803",
-  "javadoc": "A document access entry (access control entry)",
-  "entityTableName": "document_access_entry",
-  "dto": "mapstruct",
-  "pagination": "pagination",
-  "service": "serviceImpl",
-  "jpaMetamodelFiltering": false,
-  "fluentMethods": true,
-  "readOnly": false,
-  "clientRootFolder": "",
-  "applications": "*",
-  "embedded": false,
-  "paginate": true
+  "service": "serviceImpl"
 }

@@ -1,29 +1,33 @@
 {
-  "name": "DocumentObject",
+  "applications": "*",
+  "changelogDate": "20220615211053",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "document_object",
   "fields": [
     {
       "fieldName": "path",
       "fieldType": "String",
-      "javadoc": "The folder structure of the object using human readable path components",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": ["required"],
+      "javadoc": "The folder structure of the object using human readable path components"
     },
     {
       "fieldName": "name",
       "fieldType": "String",
-      "javadoc": "The human readable name of the document",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": ["required"],
+      "javadoc": "The human readable name of the document"
     },
     {
       "fieldName": "pathUuid",
       "fieldType": "String",
-      "javadoc": "The folder structure as an internal UUID",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": ["required"],
+      "javadoc": "The folder structure as an internal UUID"
     },
     {
       "fieldName": "nameUuid",
       "fieldType": "String",
-      "javadoc": "The name of the document as an internal UUID",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": ["required"],
+      "javadoc": "The name of the document as an internal UUID"
     },
     {
       "fieldName": "mimeType",
@@ -33,16 +37,16 @@
     {
       "fieldName": "objectUrl",
       "fieldType": "String",
-      "javadoc": "The S3 object key to access the document",
       "fieldValidateRules": ["maxlength"],
-      "fieldValidateRulesMaxlength": "1024"
+      "fieldValidateRulesMaxlength": "1024",
+      "javadoc": "The S3 object key to access the document"
     },
     {
       "fieldName": "thumbnailUrl",
       "fieldType": "String",
-      "javadoc": "The S3 object key to access a thumbnail of the document",
       "fieldValidateRules": ["maxlength"],
-      "fieldValidateRulesMaxlength": "1024"
+      "fieldValidateRulesMaxlength": "1024",
+      "javadoc": "The S3 object key to access a thumbnail of the document"
     },
     {
       "fieldName": "byteSize",
@@ -67,31 +71,24 @@
     {
       "fieldName": "documentPolicy",
       "fieldType": "DocumentPolicy",
-      "javadoc": "Simple policy to show attribute based access controls",
-      "fieldValues": "PRIVATE,PUBLIC,LOCKED"
+      "fieldValues": "PRIVATE,PUBLIC,LOCKED",
+      "javadoc": "Simple policy to show attribute based access control"
     }
   ],
+  "fluentMethods": true,
+  "javadoc": "A document entity.",
+  "jpaMetamodelFiltering": false,
+  "name": "DocumentObject",
+  "pagination": "pagination",
+  "readOnly": false,
   "relationships": [
     {
-      "relationshipType": "many-to-one",
       "otherEntityName": "user",
       "otherEntityRelationshipName": "documentObject",
-      "relationshipValidateRules": "required",
       "relationshipName": "owner",
-      "otherEntityField": "id"
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
     }
   ],
-  "changelogDate": "20191017090802",
-  "javadoc": "A document entity.",
-  "entityTableName": "document_object",
-  "dto": "mapstruct",
-  "pagination": "pagination",
-  "service": "serviceImpl",
-  "jpaMetamodelFiltering": false,
-  "fluentMethods": true,
-  "readOnly": false,
-  "clientRootFolder": "",
-  "applications": "*",
-  "embedded": false,
-  "paginate": true
+  "service": "serviceImpl"
 }
