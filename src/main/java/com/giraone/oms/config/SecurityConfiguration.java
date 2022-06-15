@@ -67,9 +67,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(problemSupport)
         .and()
             .headers()
+            // ADAPTED-START
             .contentSecurityPolicy("default-src 'self' http://localhost:9060 " + s3Configuration.getEndpointUrl()
                 + "; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: "
                 + s3Configuration.getEndpointUrl() + "; font-src 'self' data:")
+            // ADAPTED-END
         .and()
             .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.ORIGIN_WHEN_CROSS_ORIGIN) // (hs) CHANGED FROM STRICT_ORIGIN_WHEN_CROSS_ORIGIN
         .and()
