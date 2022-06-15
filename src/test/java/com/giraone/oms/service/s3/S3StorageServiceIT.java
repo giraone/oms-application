@@ -89,7 +89,7 @@ class S3StorageServiceIT {
     }
 
     @Test
-    void ransferToStream_worksBasically() {
+    void transferToStream_worksBasically() {
 
         // arrange
         byte[] bytesToStore = "abcdefghijklmnopqrstuvwxyzäöü".getBytes(StandardCharsets.UTF_8);
