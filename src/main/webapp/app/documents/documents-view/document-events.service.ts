@@ -4,22 +4,19 @@ import { Location } from '@angular/common';
 
 import { AuthServerProvider } from '../../core/auth/auth-jwt.service';
 
-import * as SockJS from 'sockjs-client';
+import SockJS from 'sockjs-client';
 import * as Stomp from 'webstomp-client';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentEventsService {
-  stompClient: Stomp.Client|undefined;
-  subscriber: Stomp.Subscription|undefined;
+  stompClient: Stomp.Client | undefined;
+  subscriber: Stomp.Subscription | undefined;
   connection: Promise<any>;
   connectedPromise: any;
   listener: Observable<any>;
-  listenerObserver: Observer<any>|undefined;
+  listenerObserver: Observer<any> | undefined;
 
-  constructor(
-    private authServerProvider: AuthServerProvider,
-    private location: Location
-  ) {
+  constructor(private authServerProvider: AuthServerProvider, private location: Location) {
     this.connection = this.createConnection();
     this.listener = this.createListener();
   }
@@ -36,7 +33,6 @@ export class DocumentEventsService {
       url += '?access_token=' + authToken;
     }
     const socket = new SockJS(url);
-    // tslint:disable-next-line:no-console
     console.log('# # # # DocumentEventsService.connect VERSIONS = ' + JSON.stringify(Stomp.VERSIONS));
     this.stompClient = Stomp.over(socket, { protocols: ['v10.stomp', 'v11.stomp', 'v12.stomp'], binary: false });
     // TODO (hs): Google for Options
@@ -45,22 +41,22 @@ export class DocumentEventsService {
     // this.stompClient.reconnectDelay = 200; // wait in milliseconds before attempting auto reconnect
     const headers = {};
 
-    this.stompClient.connect(headers, () => {
-      // tslint:disable-next-line:no-console
-      console.log('# # # # DocumentEventsService CONNECTED');
-      this.subscribe();
-    },
-    (error) => {
-      // tslint:disable-next-line:no-console
-      console.log('# # # # DocumentEventsService CONNECT FAILED ' + JSON.stringify(error));
-    });
+    this.stompClient.connect(
+      headers,
+      () => {
+        console.log('# # # # DocumentEventsService CONNECTED');
+        this.subscribe();
+      },
+      error => {
+        console.log('# # # # DocumentEventsService CONNECT FAILED ' + JSON.stringify(error));
+      }
+    );
   }
 
   unsubcribeAndDisconnect(): void {
     if (this.stompClient) {
       this.unsubscribe();
       this.stompClient.disconnect();
-      // tslint:disable-next-line:no-console
       console.log('# # # # DocumentEventsService DISCONNECTED');
       this.stompClient = undefined;
     }
@@ -71,15 +67,13 @@ export class DocumentEventsService {
   }
 
   send(payloadText: string): void {
-
-    if (this.stompClient && this.stompClient.connected) {
+    if (this.stompClient?.connected) {
       this.stompClient.send(
         '/topic/s3-queue', // destination
         JSON.stringify({ payload: payloadText }), // body
         {} // header
       );
     } else {
-      // tslint:disable-next-line:no-console
       console.log('DocumentEventsService.send ERROR: no stompClient!');
     }
   }
@@ -89,15 +83,13 @@ export class DocumentEventsService {
       return;
     }
     this.subscriber = this.stompClient.subscribe('/topic/s3-event', data => {
-      // tslint:disable-next-line:no-console
       console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
       const response = JSON.parse(data.body);
-      if (response.payload.startsWith("connect")) {
-        // tslint:disable-next-line:no-console
+      if (response.payload.startsWith('connect')) {
         console.log('# # # # DocumentEventsService RECEIVED CONNECT');
       } else if (this.listenerObserver) {
-        // tslint:disable-next-line:no-console
-        console.log('# # # # DocumentEventsService PASS_TO_OBSERVER ' + response.payload);
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`# # # # DocumentEventsService PASS_TO_OBSERVER ${response.payload}`);
         this.listenerObserver.next(response.payload);
       }
     });
@@ -105,7 +97,6 @@ export class DocumentEventsService {
 
   private unsubscribe(): void {
     if (this.subscriber) {
-      // tslint:disable-next-line:no-console
       console.log('# # # # DocumentEventsService UNSUBSCRIBE');
       this.subscriber.unsubscribe();
     }
@@ -119,6 +110,6 @@ export class DocumentEventsService {
   }
 
   private createConnection(): Promise<any> {
-    return new Promise((resolve) => (this.connectedPromise = resolve));
+    return new Promise(resolve => (this.connectedPromise = resolve));
   }
 }

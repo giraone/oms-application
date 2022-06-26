@@ -8,7 +8,10 @@ import { AlertErrorComponent } from './alert/alert-error.component';
 import { HasAnyAuthorityDirective } from './auth/has-any-authority.directive';
 import { DurationPipe } from './date/duration.pipe';
 import { FormatMediumDatetimePipe } from './date/format-medium-datetime.pipe';
+import { FormatShortDatetimePipe } from './date/format-short-datetime.pipe';
 import { FormatMediumDatePipe } from './date/format-medium-date.pipe';
+import { FormatShortDatePipe } from './date/format-short-date.pipe';
+import { FormatShortTimePipe } from './date/format-short-time.pipe';
 import { SortByDirective } from './sort/sort-by.directive';
 import { SortDirective } from './sort/sort.directive';
 import { ItemCountComponent } from './pagination/item-count.component';
@@ -23,7 +26,10 @@ import { ItemCountComponent } from './pagination/item-count.component';
     HasAnyAuthorityDirective,
     DurationPipe,
     FormatMediumDatetimePipe,
+    FormatShortDatetimePipe, // OMS-Adapted: new
     FormatMediumDatePipe,
+    FormatShortDatePipe, // OMS-Adapted: new
+    FormatShortTimePipe, // OMS-Adapted: new
     SortByDirective,
     SortDirective,
     ItemCountComponent,
@@ -37,7 +43,10 @@ import { ItemCountComponent } from './pagination/item-count.component';
     HasAnyAuthorityDirective,
     DurationPipe,
     FormatMediumDatetimePipe,
+    FormatShortDatetimePipe, // OMS-Adapted: new
     FormatMediumDatePipe,
+    FormatShortDatePipe, // OMS-Adapted: new
+    FormatShortTimePipe, // OMS-Adapted: new
     SortByDirective,
     SortDirective,
     ItemCountComponent,

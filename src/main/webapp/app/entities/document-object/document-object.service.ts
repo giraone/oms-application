@@ -2,19 +2,20 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { createRequestOption } from 'app/core/request/request-util';
+import dayjs from 'dayjs/esm';
 
-import { SERVER_API_URL } from 'app/app.constants';
-import { createRequestOption } from 'app/shared/util/request-util';
-import { IDocumentObject } from 'app/shared/model/document-object.model';
+import { IDocumentObject } from '../model/document-object.model';
 
 type EntityResponseType = HttpResponse<IDocumentObject>;
 type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
 
 @Injectable({ providedIn: 'root' })
 export class DocumentObjectService {
-  public resourceUrl = SERVER_API_URL + 'api/document-objects';
+  protected resourceUrl = this.applicationConfigService.getEndpointFor('api/document-objects');
 
-  constructor(protected http: HttpClient) {}
+  constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
 
   create(documentObject: IDocumentObject): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
@@ -48,20 +49,18 @@ export class DocumentObjectService {
   }
 
   protected convertDateFromClient(documentObject: IDocumentObject): IDocumentObject {
-    const copy: IDocumentObject = Object.assign({}, documentObject, {
-      creation: documentObject.creation && documentObject.creation.isValid() ? documentObject.creation.toJSON() : undefined,
-      lastContentModification:
-        documentObject.lastContentModification && documentObject.lastContentModification.isValid()
-          ? documentObject.lastContentModification.toJSON()
-          : undefined,
+    return Object.assign({}, documentObject, {
+      creation: documentObject.creation?.isValid() ? documentObject.creation.toJSON() : undefined,
+      letzterAenderungszeitpunkt: documentObject.lastContentModification?.isValid()
+        ? documentObject.lastContentModification.toJSON()
+        : undefined,
     });
-    return copy;
   }
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.creation = res.body.creation ? moment(res.body.creation) : undefined;
-      res.body.lastContentModification = res.body.lastContentModification ? moment(res.body.lastContentModification) : undefined;
+      res.body.creation = res.body.creation ? dayjs(res.body.creation) : undefined;
+      res.body.lastContentModification = res.body.lastContentModification ? dayjs(res.body.lastContentModification) : undefined;
     }
     return res;
   }
@@ -69,9 +68,9 @@ export class DocumentObjectService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((documentObject: IDocumentObject) => {
-        documentObject.creation = documentObject.creation ? moment(documentObject.creation) : undefined;
+        documentObject.creation = documentObject.creation ? dayjs(documentObject.creation) : undefined;
         documentObject.lastContentModification = documentObject.lastContentModification
-          ? moment(documentObject.lastContentModification)
+          ? dayjs(documentObject.lastContentModification)
           : undefined;
       });
     }

@@ -2,26 +2,25 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { filter, map } from 'rxjs/operators';
-import { JhiEventManager, JhiParseLinks } from 'ng-jhipster';
-import { IDocumentObject } from 'app/shared/model/document-object.model';
-import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.model';
 import { AccountService } from 'app/core/auth/account.service';
 
 import { DocumentsService } from './documents.service';
 import { DocumentEventsService } from './document-events.service';
+import { IDocumentObject } from 'app/entities/model/document-object.model';
+import { DocumentPolicy } from 'app/entities/model/enumerations/document-policy.model';
+import { EventManager } from 'app/core/util/event-manager.service';
+import { ParseLinks } from 'app/core/util/parse-links.service';
 
 @Component({
   selector: 'jhi-documents-viewer',
-  templateUrl: './documents-viewer.component.html'
+  templateUrl: './documents-viewer.component.html',
 })
 export class DocumentsViewerComponent implements OnInit, OnDestroy {
   currentAccount: any;
   documentObjects: IDocumentObject[];
   error: any;
   success: any;
-  eventSubscriber: Subscription|undefined;
+  eventSubscriber: Subscription | undefined;
   routeData: any;
   links: any;
   totalItems: any;
@@ -34,13 +33,12 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
   constructor(
     protected documentsService: DocumentsService,
     protected documentEventsService: DocumentEventsService,
-    protected parseLinks: JhiParseLinks,
+    protected parseLinks: ParseLinks,
     protected accountService: AccountService,
     protected activatedRoute: ActivatedRoute,
     protected router: Router,
-    protected eventManager: JhiEventManager
+    protected eventManager: EventManager
   ) {
-    // tslint:disable-next-line:no-console
     console.log('DocumentsViewerComponent # # # # CTOR');
     this.documentObjects = [];
     this.itemsPerPage = 100;
@@ -52,70 +50,84 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAll() {
+  loadAll(): void {
     this.documentsService
       .query({
         page: this.page - 1,
         size: this.itemsPerPage,
-        sort: ['id,desc']
+        sort: ['id,desc'],
       })
       .subscribe((res: HttpResponse<IDocumentObject[]>) => res.body && this.useResponse(res.body, res.headers));
   }
 
-  display(document: IDocumentObject) {
+  display(document: IDocumentObject): void {
     window.open(document.objectUrl, '_new');
   }
 
-  publishDocument(document: IDocumentObject) {
+  publishDocument(document: IDocumentObject): void {
     this.documentsService
-    .update({
-      id: document.id,
-      name: document.name,
-      path: document.path,
-      documentPolicy: DocumentPolicy.PUBLIC
-    }).subscribe(() => { this.loadAll(); });
+      .update({
+        id: document.id,
+        name: document.name,
+        path: document.path,
+        documentPolicy: DocumentPolicy.PUBLIC,
+      })
+      .subscribe(() => {
+        this.loadAll();
+      });
   }
 
-  unPublishDocument(document: IDocumentObject) {
+  unPublishDocument(document: IDocumentObject): void {
     this.documentsService
-    .update({
-      id: document.id,
-      name: document.name,
-      path: document.path,
-      documentPolicy: DocumentPolicy.PRIVATE
-    }).subscribe(() => { this.loadAll(); });
+      .update({
+        id: document.id,
+        name: document.name,
+        path: document.path,
+        documentPolicy: DocumentPolicy.PRIVATE,
+      })
+      .subscribe(() => {
+        this.loadAll();
+      });
   }
 
-  lockDocument(document: IDocumentObject) {
+  lockDocument(document: IDocumentObject): void {
     this.documentsService
-    .update({
-      id: document.id,
-      name: document.name,
-      path: document.path,
-      documentPolicy: DocumentPolicy.LOCKED
-    }).subscribe(() => { this.loadAll(); });
+      .update({
+        id: document.id,
+        name: document.name,
+        path: document.path,
+        documentPolicy: DocumentPolicy.LOCKED,
+      })
+      .subscribe(() => {
+        this.loadAll();
+      });
   }
 
-  rename(document: IDocumentObject) {
+  rename(document: IDocumentObject): void {
     const promptText = 'New name of document:';
     const newName = window.prompt(promptText, document.name);
-    if (!newName) return;
+    if (!newName) {
+      return;
+    }
     this.documentsService
       .update({
         id: document.id,
         name: newName,
-        path: document.path // TODO: Implement rename path
-      }).subscribe(() => { this.loadAll(); });
+        path: document.path, // TODO: Implement rename path
+      })
+      .subscribe(() => {
+        this.loadAll();
+      });
   }
 
-  delete(document: IDocumentObject) {
-    document.id && this.documentsService.delete(document.id)
-      .subscribe(() => { this.loadAll(); }
-    );
+  delete(document: IDocumentObject): void {
+    document.id &&
+      this.documentsService.delete(document.id).subscribe(() => {
+        this.loadAll();
+      });
   }
 
-  ngOnInit() {
-    // tslint:disable-next-line:no-console
+  ngOnInit(): void {
     console.log('DocumentsViewerComponent # # # # ON_INIT');
     this.loadAll();
     this.accountService.identity().subscribe(account => {
@@ -123,23 +135,21 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     });
     this.documentEventsService.connectAndSubscribe();
     this.documentEventsService.receive().subscribe(s3Event => {
-      // tslint:disable-next-line:no-console
       console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
       this.loadAll();
     });
   }
 
-  ngOnDestroy() {
-    // tslint:disable-next-line:no-console
+  ngOnDestroy(): void {
     console.log('DocumentsViewerComponent # # # # ON_DESTROY');
     this.documentEventsService.unsubcribeAndDisconnect();
   }
 
-  trackId(index: number, item: IDocumentObject) {
+  trackId(index: number, item: IDocumentObject): number | undefined {
     return item.id;
   }
 
-  protected useResponse(data: IDocumentObject[], headers: HttpHeaders) {
+  protected useResponse(data: IDocumentObject[], headers: HttpHeaders): void {
     const linkHeader = headers.get('link');
     this.links = linkHeader ? this.parseLinks.parse(linkHeader) : undefined;
     const totalItemsHeader = headers.get('X-Total-Count');

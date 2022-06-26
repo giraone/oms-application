@@ -11,13 +11,13 @@ REST service. The S3 storage is used directly by the clients (browser) using **p
 
 Screenshot of the application's user interface
 
-![User-Interface](docs/images/screenshot-of-user-interface.png) 
+![User-Interface](docs/images/screenshot-of-user-interface.png)
 
 ## Architecture
 
 Flow for upoad of documents:
 
-![Upload Flow](docs/images/Using-S3-Right-Upload.svg) 
+![Upload Flow](docs/images/Using-S3-Right-Upload.svg)
 
 1. Client sends meta-data of document to application service (POST)
    and saves it to the application's database
@@ -37,10 +37,10 @@ Flow for upoad of documents:
 
 - the frontend uses [sockjs-client](https://www.npmjs.com/package/sockjs-client) to allow websockets also on older (non ES5) browsers
 - the frontend uses [webstomp-client](https://www.npmjs.com/package/webstomp-client)
-- currently *Spring Boot* offers STOMP with `V1.0`, *webstomp-client* offers `V1.0, V1.1, V1.2`
+- currently _Spring Boot_ offers STOMP with `V1.0`, _webstomp-client_ offers `V1.0, V1.1, V1.2`
 - STOMP heart beats are on default rate for incoming / outcoming at 10 seconds / 10 seconds
 - The data returned by the application to the browser client on receiving an S3 event is currently a simple JSON with one
-  string *payload* argument, like `{ "payload": "ready" }`.
+  string _payload_ argument, like `{ "payload": "ready" }`.
 
 ## Local Setup with Minio
 
@@ -49,7 +49,7 @@ The default setting
 - assumes minio runs on port `9999`
 - is using a bucket named `bucket-001`
 - uses `minio-local` as an alias
-- uses *WebHook* for bucket event notification
+- uses _WebHook_ for bucket event notification
 
 Start minio (here on a local IP 192.168.178.45):
 
@@ -82,8 +82,8 @@ export MINIO_REGION_NAME=default
 # Restart server
 ./mc admin service restart minio-local/
 # Will show
-AccessKey: minio 
-SecretKey: miniosecret 
+AccessKey: minio
+SecretKey: miniosecret
 Region:    default
 SQS ARNs:  arn:minio:sqs:default:1:webhook
 
@@ -105,9 +105,6 @@ arn:minio:sqs:default:1:webhook   s3:ObjectCreated:*   Filter:
 Temporary or permanent switch off rules per line or per file:
 
 ```
-// tslint:disable-next-line:no-console
-// tslint:disable:no-console
-
 // eslint:disable-next-line:no-console
 // eslint:disable:no-console
 
@@ -118,6 +115,3 @@ Temporary or permanent switch off rules per line or per file:
 ## Change log
 
 - 31.07.2020 - Upgrade to JHipster 6.10.1, Upgrade to AWS SDK 1.11.831
-
-
-

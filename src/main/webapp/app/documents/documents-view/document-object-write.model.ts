@@ -1,4 +1,4 @@
-import { DocumentPolicy } from 'app/shared/model/enumerations/document-policy.model';
+import { DocumentPolicy } from 'app/entities/model/enumerations/document-policy.model';
 
 export interface IDocumentObjectWrite {
   id?: number;

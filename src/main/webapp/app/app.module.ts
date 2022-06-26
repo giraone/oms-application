@@ -26,7 +26,7 @@ import { PageRibbonComponent } from './layouts/profiles/page-ribbon.component';
 import { ActiveMenuDirective } from './layouts/navbar/active-menu.directive';
 import { ErrorComponent } from './layouts/error/error.component';
 
-import { OmsDocumentsViewModule } from './documents/documents-view/documents-view.module';
+import { OmsDocumentsViewModule } from './documents/documents-view/documents-view.module'; // OMS-Adapted
 
 @NgModule({
   imports: [
@@ -40,7 +40,7 @@ import { OmsDocumentsViewModule } from './documents/documents-view/documents-vie
     HttpClientModule,
     NgxWebstorageModule.forRoot({ prefix: 'jhi', separator: '-', caseSensitive: true }),
     TranslationModule,
-    OmsDocumentsViewModule,
+    OmsDocumentsViewModule, // OMS-Adapted
   ],
   providers: [
     Title,

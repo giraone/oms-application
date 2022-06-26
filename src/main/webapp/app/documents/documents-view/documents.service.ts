@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import * as moment from 'moment';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
+import dayjs from 'dayjs/esm';
+import { DATE_FORMAT } from 'app/config/input.constants';
+import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { createRequestOption } from 'app/core/request/request-util';
 
-import { SERVER_API_URL } from 'app/app.constants';
-import { createRequestOption } from 'app/shared/util/request-util';
-import { IDocumentObject } from 'app/shared/model/document-object.model';
+import { IDocumentObject } from 'app/entities/model/document-object.model';
 import { IDocumentObjectWrite } from './document-object-write.model';
 
 type EntityResponseType = HttpResponse<IDocumentObject>;
@@ -16,9 +15,9 @@ type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
 
 @Injectable({ providedIn: 'root' })
 export class DocumentsService {
-  public resourceUrl = SERVER_API_URL + 'api/documents';
+  protected resourceUrl = this.applicationConfigService.getEndpointFor('api/documents');
 
-  constructor(protected http: HttpClient) {}
+  constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
@@ -30,11 +29,11 @@ export class DocumentsService {
   }
 
   // TODO: Response type
+  // eslint-disable-next-line @typescript-eslint/ban-types
   uploadToS3UsingMultipart(fileToUpload: File, targetUrl: string): Observable<Object> {
     const formData: FormData = new FormData();
     formData.append('fileKey', fileToUpload, fileToUpload.name);
-    return this.http
-      .post(targetUrl, formData);
+    return this.http.post(targetUrl, formData);
   }
 
   /**
@@ -45,16 +44,15 @@ export class DocumentsService {
    * @returns An Observable containing the full HttpResponse. The response will be null, but HTTP headers
    * might be of interest.
    */
-  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string|undefined, targetUrl: string): Observable<HttpResponse<Object>> {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  uploadToS3UsingPut(bytes: string | ArrayBuffer, mimeType: string | undefined, targetUrl: string): Observable<HttpResponse<Object>> {
     let httpHeaders = new HttpHeaders();
     if (mimeType == null) {
       mimeType = 'application/octet-stream';
     }
     httpHeaders = httpHeaders.append('content-type', mimeType);
-    // eslint-disable-next-line no-console
     console.log('uploadToS3UsingPut ' + targetUrl + ' ' + mimeType);
-    return this.http
-      .put(targetUrl, bytes, { headers : httpHeaders, observe: 'response'});
+    return this.http.put(targetUrl, bytes, { headers: httpHeaders, observe: 'response' });
   }
 
   update(documentObject: IDocumentObjectWrite): Observable<EntityResponseType> {
@@ -72,23 +70,19 @@ export class DocumentsService {
     return this.http.get<IDocumentObject[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
   }
 
-
   protected convertDateFromClient(documentObject: IDocumentObject): IDocumentObject {
-    const copy: IDocumentObject = Object.assign({}, documentObject, {
-      creation: documentObject.creation != null && documentObject.creation.isValid() ? documentObject.creation.toJSON() : null,
-      lastContentModification:
-        documentObject.lastContentModification != null && documentObject.lastContentModification.isValid()
-          ? documentObject.lastContentModification.toJSON()
-          : null
+    return Object.assign({}, documentObject, {
+      creation: documentObject.creation?.isValid() ? documentObject.creation.format(DATE_FORMAT) : undefined,
+      lastContentModification: documentObject.lastContentModification?.isValid()
+        ? documentObject.lastContentModification.format(DATE_FORMAT)
+        : undefined,
     });
-    return copy;
   }
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.creation = res.body.creation != null ? moment(res.body.creation) : undefined;
-      res.body.lastContentModification = res.body.lastContentModification != null ?
-        moment(res.body.lastContentModification) : undefined;
+      res.body.creation = res.body.creation != null ? dayjs(res.body.creation) : undefined;
+      res.body.lastContentModification = res.body.lastContentModification != null ? dayjs(res.body.lastContentModification) : undefined;
     }
     return res;
   }
@@ -96,9 +90,9 @@ export class DocumentsService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((documentObject: IDocumentObject) => {
-        documentObject.creation = documentObject.creation != null ? moment(documentObject.creation) : undefined;
+        documentObject.creation = documentObject.creation != null ? dayjs(documentObject.creation) : undefined;
         documentObject.lastContentModification =
-          documentObject.lastContentModification != null ? moment(documentObject.lastContentModification) : undefined;
+          documentObject.lastContentModification != null ? dayjs(documentObject.lastContentModification) : undefined;
       });
     }
     return res;
