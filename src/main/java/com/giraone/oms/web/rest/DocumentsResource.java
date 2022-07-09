@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
@@ -70,7 +71,7 @@ public class DocumentsResource {
     }
 
     /**
-     * {@code GET  /documents} : get all documents
+     * {@code GET /documents} : get all documents
      *
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of documentObjects in body.
@@ -88,7 +89,20 @@ public class DocumentsResource {
     }
 
     /**
-     * {@code POST  /documents} : Prepare upload of a new document
+     * {@code GET /documents/:id} : get the "id" documentObject.
+     *
+     * @param id the id of the documentObjectDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the documentObjectDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/documents/{id}")
+    public ResponseEntity<DocumentObjectDTO> getDocumentObject(@PathVariable Long id) {
+        log.debug("REST request to get DocumentObject : {}", id);
+        Optional<DocumentObjectDTO> documentObjectDTO = documentObjectService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(documentObjectDTO);
+    }
+
+    /**
+     * {@code POST /documents} : Prepare upload of a new document
      *
      * @param documentObjectWriteDTO the documentObjectWriteDTO data to create a new DocumentObject.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new documentObjectDTO,
@@ -106,7 +120,7 @@ public class DocumentsResource {
 
         if (documentObjectWriteDTO.getId() != null) {
             Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectWriteDTO.getId());
-            if (!existingDocumentObject.isPresent()) {
+            if (existingDocumentObject.isEmpty()) {
                 throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
             }
             documentObjectDTO = existingDocumentObject.get();
@@ -146,7 +160,7 @@ public class DocumentsResource {
     }
 
     /**
-     * {@code PUT  /documents} : Change meta-data of an existing document.
+     * {@code PUT /documents} : Change meta-data of an existing document.
      *
      * @param documentObjectWriteDTO the documentObjectDTO to update (currently only name is updated)
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentObjectDTO,
@@ -160,11 +174,16 @@ public class DocumentsResource {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectWriteDTO.getId());
-        if (!existingDocumentObject.isPresent()) {
+        if (existingDocumentObject.isEmpty()) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "notfound");
         }
 
-        existingDocumentObject.get().setName(documentObjectWriteDTO.getName());
+        if (documentObjectWriteDTO.getName() != null) {
+            existingDocumentObject.get().setName(documentObjectWriteDTO.getName());
+        }
+        if (documentObjectWriteDTO.getDocumentPolicy() != null) {
+            existingDocumentObject.get().setDocumentPolicy(documentObjectWriteDTO.getDocumentPolicy());
+        }
 
         DocumentObjectDTO result = documentObjectService.save(existingDocumentObject.get());
         return ResponseEntity
@@ -174,7 +193,7 @@ public class DocumentsResource {
     }
 
     /**
-     * {@code DELETE  /documents/:id} : delete a document
+     * {@code DELETE /documents/:id} : delete a document
      *
      * @param id the id of the documentObjectDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
@@ -184,7 +203,7 @@ public class DocumentsResource {
         log.debug("REST request to delete document : {}", id);
 
         Optional<DocumentObjectDTO> document = documentObjectService.findOne(id);
-        if (!document.isPresent()) {
+        if (document.isEmpty()) {
             log.warn("Attempt to delete non-existing document {}", id);
             return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Document not found!", null)).build();
         }
@@ -245,12 +264,12 @@ public class DocumentsResource {
 
     private User getUser() {
         Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        if (!userLogin.isPresent()) {
+        if (userLogin.isEmpty()) {
             throw new BadRequestAlertException("Cannot get user login", ENTITY_NAME, "no_user");
         }
 
         Optional<User> user = userService.getUserWithAuthoritiesByLogin(userLogin.get());
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             throw new BadRequestAlertException("Cannot get user account", ENTITY_NAME, "no_user_account");
         }
         return user.get();

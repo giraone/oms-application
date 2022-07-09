@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { IDocumentObject } from 'app/shared/model/document-object.model';
+import { IDocumentObject } from '../document-object.model';
 
 @Component({
   selector: 'jhi-document-object-detail',
@@ -13,7 +13,9 @@ export class DocumentObjectDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ documentObject }) => (this.documentObject = documentObject));
+    this.activatedRoute.data.subscribe(({ documentObject }) => {
+      this.documentObject = documentObject;
+    });
   }
 
   previousState(): void {

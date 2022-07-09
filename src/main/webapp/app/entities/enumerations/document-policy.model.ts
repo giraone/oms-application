@@ -1,4 +1,4 @@
-export const enum DocumentPolicy {
+export enum DocumentPolicy {
   PRIVATE = 'PRIVATE',
 
   PUBLIC = 'PUBLIC',

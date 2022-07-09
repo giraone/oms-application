@@ -7,11 +7,10 @@ import { DATE_FORMAT } from 'app/config/input.constants';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 
-import { IDocumentObject } from 'app/entities/model/document-object.model';
-import { IDocumentObjectWrite } from './document-object-write.model';
+import { IDocumentObjectRead, IDocumentObjectWrite } from './document-read-write.model';
 
-type EntityResponseType = HttpResponse<IDocumentObject>;
-type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
+type EntityResponseType = HttpResponse<IDocumentObjectRead>;
+type EntityArrayResponseType = HttpResponse<IDocumentObjectRead[]>;
 
 @Injectable({ providedIn: 'root' })
 export class DocumentsService {
@@ -19,13 +18,21 @@ export class DocumentsService {
 
   constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
 
+  find(id: number): Observable<EntityResponseType> {
+    return this.http
+      .get<IDocumentObjectRead>(`${this.resourceUrl}/${id}`, { observe: 'response' })
+      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+  }
+
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
-    return this.http.get<IDocumentObject[]>(this.resourceUrl, { params: options, observe: 'response' });
+    return this.http
+      .get<IDocumentObjectRead[]>(this.resourceUrl, { params: options, observe: 'response' })
+      .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
   reservePutUrl(documentObject: IDocumentObjectWrite): Observable<EntityResponseType> {
-    return this.http.post<IDocumentObject>(this.resourceUrl, documentObject, { observe: 'response' });
+    return this.http.post<IDocumentObjectRead>(this.resourceUrl, documentObject, { observe: 'response' });
   }
 
   // TODO: Response type
@@ -58,7 +65,7 @@ export class DocumentsService {
   update(documentObject: IDocumentObjectWrite): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
-      .put<IDocumentObject>(this.resourceUrl, copy, { observe: 'response' })
+      .put<IDocumentObjectRead>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
@@ -67,10 +74,10 @@ export class DocumentsService {
   }
 
   maintenanceThumbnails(): Observable<EntityArrayResponseType> {
-    return this.http.get<IDocumentObject[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
+    return this.http.get<IDocumentObjectRead[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
   }
 
-  protected convertDateFromClient(documentObject: IDocumentObject): IDocumentObject {
+  protected convertDateFromClient(documentObject: IDocumentObjectRead): IDocumentObjectRead {
     return Object.assign({}, documentObject, {
       creation: documentObject.creation?.isValid() ? documentObject.creation.format(DATE_FORMAT) : undefined,
       lastContentModification: documentObject.lastContentModification?.isValid()
@@ -89,7 +96,7 @@ export class DocumentsService {
 
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
-      res.body.forEach((documentObject: IDocumentObject) => {
+      res.body.forEach((documentObject: IDocumentObjectRead) => {
         documentObject.creation = documentObject.creation != null ? dayjs(documentObject.creation) : undefined;
         documentObject.lastContentModification =
           documentObject.lastContentModification != null ? dayjs(documentObject.lastContentModification) : undefined;

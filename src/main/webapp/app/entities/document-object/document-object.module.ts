@@ -1,15 +1,13 @@
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { OmsSharedModule } from 'app/shared/shared.module';
-import { DocumentObjectComponent } from './document-object.component';
-import { DocumentObjectDetailComponent } from './document-object-detail.component';
-import { DocumentObjectUpdateComponent } from './document-object-update.component';
-import { DocumentObjectDeleteDialogComponent } from './document-object-delete-dialog.component';
-import { documentObjectRoute } from './document-object.route';
+import { SharedModule } from 'app/shared/shared.module';
+import { DocumentObjectComponent } from './list/document-object.component';
+import { DocumentObjectDetailComponent } from './detail/document-object-detail.component';
+import { DocumentObjectUpdateComponent } from './update/document-object-update.component';
+import { DocumentObjectDeleteDialogComponent } from './delete/document-object-delete-dialog.component';
+import { DocumentObjectRoutingModule } from './route/document-object-routing.module';
 
 @NgModule({
-  imports: [OmsSharedModule, RouterModule.forChild(documentObjectRoute)],
+  imports: [SharedModule, DocumentObjectRoutingModule],
   declarations: [
     DocumentObjectComponent,
     DocumentObjectDetailComponent,
@@ -18,4 +16,4 @@ import { documentObjectRoute } from './document-object.route';
   ],
   entryComponents: [DocumentObjectDeleteDialogComponent],
 })
-export class OmsDocumentObjectModule {}
+export class DocumentObjectModule {}

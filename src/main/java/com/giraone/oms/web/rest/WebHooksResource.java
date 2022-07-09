@@ -7,18 +7,19 @@ import com.giraone.oms.service.ImagingService;
 import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.web.websocket.dto.S3ClientEventDTO;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
@@ -34,8 +35,12 @@ public class WebHooksResource {
     private final UserService userService;
     private final SimpMessageSendingOperations messagingTemplate;
 
-    public WebHooksResource(ImagingService imagingService, DocumentObjectService documentObjectService,
-                            UserService userService, SimpMessageSendingOperations messagingTemplate) {
+    public WebHooksResource(
+        ImagingService imagingService,
+        DocumentObjectService documentObjectService,
+        UserService userService,
+        SimpMessageSendingOperations messagingTemplate
+    ) {
         this.imagingService = imagingService;
         this.documentObjectService = documentObjectService;
         this.messagingTemplate = messagingTemplate;
@@ -44,10 +49,12 @@ public class WebHooksResource {
 
     @PostMapping("/s3")
     public ResponseEntity<Void> receiveEventPost(@RequestBody(required = false) S3EventNotification eventNotification) {
-
         long start = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
-            log.debug("# # # # # # # # # # # # # # # # # # # CONVERTED S3 EVENT: {}", eventNotification == null ? "null" : eventNotification.toJson());
+            log.debug(
+                "# # # # # # # # # # # # # # # # # # # CONVERTED S3 EVENT: {}",
+                eventNotification == null ? "null" : eventNotification.toJson()
+            );
         }
         if (eventNotification == null) {
             return ResponseEntity.accepted().build();
@@ -55,19 +62,13 @@ public class WebHooksResource {
 
         eventNotification.getRecords().forEach(this::processOneEvent);
         long end = System.currentTimeMillis();
-        log.info("# # # # # # # # # # # # # # # # # # # PROCESSING S3 EVENT took {} msecs", (end-start));
+        log.info("# # # # # # # # # # # # # # # # # # # PROCESSING S3 EVENT took {} msecs", (end - start));
         return ResponseEntity.accepted().build();
     }
 
     private void processOneEvent(S3EventNotification.S3EventNotificationRecord eventRecord) {
         String objectKey = eventRecord.getS3().getObject().getKey();
-        try {
-            objectKey = URLDecoder.decode(objectKey, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("Received event for objectKey {}, but cannot decode", objectKey);
-            return;
-        }
-
+        objectKey = URLDecoder.decode(objectKey, StandardCharsets.UTF_8);
         if (!objectKey.endsWith("/content")) {
             if (!objectKey.contains("/thumb-")) {
                 log.warn("Received event for objectKey {} not matching /content or /thumb-* - skipped", objectKey);
@@ -76,7 +77,7 @@ public class WebHooksResource {
         }
 
         final Optional<DocumentObjectDTO> foundDocumentObject = documentObjectService.findByObjectKey(objectKey);
-        if (!foundDocumentObject.isPresent()) {
+        if (foundDocumentObject.isEmpty()) {
             log.error("Received event for objectKey {}, but no object found!", objectKey);
             return;
         }
@@ -85,11 +86,11 @@ public class WebHooksResource {
         documentObject.buildThumbnailUrl();
 
         // we perform this asynchronously, because when WebHooks are used, there is a timeout,
-        // so the generation of thumbnails in larger documents may be to slow.
+        // so the generation of thumbnails in larger documents may be too slow.
         long start = System.currentTimeMillis();
         createThumbnailAsynchronously(documentObject);
         long end = System.currentTimeMillis();
-        log.info("# # # # # # # # # # # # # # # # # # # createThumbnailAsynchronously took {} msecs", (end-start));
+        log.info("# # # # # # # # # # # # # # # # # # # createThumbnailAsynchronously took {} msecs", (end - start));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -115,9 +116,8 @@ public class WebHooksResource {
     }
 
     private boolean publishReadyEventToUser(long userId) {
-
         Optional<User> user = userService.getUserWithAuthorities(userId);
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             log.error("User with id {} NOT FOUND!", userId);
             return false;
         }

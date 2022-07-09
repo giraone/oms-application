@@ -4,12 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
 
+import { IDocumentObjectRead } from './document-read-write.model';
 import { DocumentsService } from './documents.service';
 import { DocumentEventsService } from './document-events.service';
-import { IDocumentObject } from 'app/entities/model/document-object.model';
-import { DocumentPolicy } from 'app/entities/model/enumerations/document-policy.model';
+import { DocumentPolicy } from 'app/entities/enumerations/document-policy.model';
 import { EventManager } from 'app/core/util/event-manager.service';
-import { ParseLinks } from 'app/core/util/parse-links.service';
 
 @Component({
   selector: 'jhi-documents-viewer',
@@ -17,54 +16,41 @@ import { ParseLinks } from 'app/core/util/parse-links.service';
 })
 export class DocumentsViewerComponent implements OnInit, OnDestroy {
   currentAccount: any;
-  documentObjects: IDocumentObject[];
+  documentObjects: IDocumentObjectRead[] = [];
   error: any;
   success: any;
   eventSubscriber: Subscription | undefined;
   routeData: any;
-  links: any;
-  totalItems: any;
-  itemsPerPage: any;
-  page: any;
-  predicate: any;
-  previousPage: any;
-  reverse: any;
+  totalItems = 0;
+  itemsPerPage = 100;
 
   constructor(
     protected documentsService: DocumentsService,
     protected documentEventsService: DocumentEventsService,
-    protected parseLinks: ParseLinks,
     protected accountService: AccountService,
     protected activatedRoute: ActivatedRoute,
     protected router: Router,
     protected eventManager: EventManager
-  ) {
-    console.log('DocumentsViewerComponent # # # # CTOR');
-    this.documentObjects = [];
-    this.itemsPerPage = 100;
-    this.routeData = this.activatedRoute.data.subscribe(data => {
-      this.page = data.pagingParams.page;
-      this.previousPage = data.pagingParams.page;
-      this.reverse = true;
-      this.predicate = data.pagingParams.predicate;
-    });
-  }
+  ) {}
 
   loadAll(): void {
     this.documentsService
       .query({
-        page: this.page - 1,
+        page: 0,
         size: this.itemsPerPage,
         sort: ['id,desc'],
       })
-      .subscribe((res: HttpResponse<IDocumentObject[]>) => res.body && this.useResponse(res.body, res.headers));
+      .subscribe((res: HttpResponse<IDocumentObjectRead[]>) => res.body && this.useResponse(res.body, res.headers));
   }
 
-  display(document: IDocumentObject): void {
+  display(document: IDocumentObjectRead): void {
+    if (!document.objectUrl) {
+      return;
+    }
     window.open(document.objectUrl, '_new');
   }
 
-  publishDocument(document: IDocumentObject): void {
+  publishDocument(document: IDocumentObjectRead): void {
     this.documentsService
       .update({
         id: document.id,
@@ -77,7 +63,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       });
   }
 
-  unPublishDocument(document: IDocumentObject): void {
+  unPublishDocument(document: IDocumentObjectRead): void {
     this.documentsService
       .update({
         id: document.id,
@@ -90,7 +76,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       });
   }
 
-  lockDocument(document: IDocumentObject): void {
+  lockDocument(document: IDocumentObjectRead): void {
     this.documentsService
       .update({
         id: document.id,
@@ -103,7 +89,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       });
   }
 
-  rename(document: IDocumentObject): void {
+  rename(document: IDocumentObjectRead): void {
     const promptText = 'New name of document:';
     const newName = window.prompt(promptText, document.name);
     if (!newName) {
@@ -120,7 +106,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
       });
   }
 
-  delete(document: IDocumentObject): void {
+  delete(document: IDocumentObjectRead): void {
     document.id &&
       this.documentsService.delete(document.id).subscribe(() => {
         this.loadAll();
@@ -145,13 +131,7 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     this.documentEventsService.unsubcribeAndDisconnect();
   }
 
-  trackId(index: number, item: IDocumentObject): number | undefined {
-    return item.id;
-  }
-
-  protected useResponse(data: IDocumentObject[], headers: HttpHeaders): void {
-    const linkHeader = headers.get('link');
-    this.links = linkHeader ? this.parseLinks.parse(linkHeader) : undefined;
+  protected useResponse(data: IDocumentObjectRead[], headers: HttpHeaders): void {
     const totalItemsHeader = headers.get('X-Total-Count');
     this.totalItems = totalItemsHeader ? parseInt(totalItemsHeader, 10) : 0;
     this.documentObjects = data;

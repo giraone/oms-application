@@ -22,7 +22,7 @@ class TechnicalStructureTest {
         .layer("Persistence").definedBy("..repository..")
         .layer("Domain").definedBy("..domain..")
 
-        .whereLayer("Config").mayNotBeAccessedByAnyLayer()
+        .whereLayer("Config").mayOnlyBeAccessedByLayers("Service")
         .whereLayer("Web").mayOnlyBeAccessedByLayers("Config")
         .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config")
         .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web")

@@ -5,16 +5,16 @@ import { filter, map } from 'rxjs/operators';
 import { IUser } from 'app/entities/user/user.model';
 import { UserService } from 'app/entities/user/user.service';
 import { AlertService } from 'app/core/util/alert.service';
-import { DocumentObjectService } from '../../entities/document-object/document-object.service';
+import { DocumentObjectService } from 'app/entities/document-object/service/document-object.service';
 import { DocumentsService } from './documents.service';
-import { IDocumentObject } from 'app/entities/model/document-object.model';
+import { IDocumentObjectWrite } from './document-read-write.model';
 
 @Component({
   selector: 'jhi-document-update',
   templateUrl: './document-update.component.html',
 })
 export class DocumentUpdateComponent implements OnInit {
-  documentObject: IDocumentObject | null = null;
+  documentObject: IDocumentObjectWrite | null = null;
   isSaving = false;
   fileToUpload: File | null = null;
   users: IUser[] | null = null;

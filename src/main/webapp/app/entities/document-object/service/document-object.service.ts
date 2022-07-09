@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApplicationConfigService } from 'app/core/config/application-config.service';
-import { createRequestOption } from 'app/core/request/request-util';
 import dayjs from 'dayjs/esm';
 
-import { IDocumentObject } from '../model/document-object.model';
+import { isPresent } from 'app/core/util/operators';
+import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { createRequestOption } from 'app/core/request/request-util';
+import { IDocumentObject, getDocumentObjectIdentifier } from '../document-object.model';
 
-type EntityResponseType = HttpResponse<IDocumentObject>;
-type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
+export type EntityResponseType = HttpResponse<IDocumentObject>;
+export type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
 
 @Injectable({ providedIn: 'root' })
 export class DocumentObjectService {
@@ -27,7 +28,14 @@ export class DocumentObjectService {
   update(documentObject: IDocumentObject): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
-      .put<IDocumentObject>(this.resourceUrl, copy, { observe: 'response' })
+      .put<IDocumentObject>(`${this.resourceUrl}/${getDocumentObjectIdentifier(documentObject) as number}`, copy, { observe: 'response' })
+      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+  }
+
+  partialUpdate(documentObject: IDocumentObject): Observable<EntityResponseType> {
+    const copy = this.convertDateFromClient(documentObject);
+    return this.http
+      .patch<IDocumentObject>(`${this.resourceUrl}/${getDocumentObjectIdentifier(documentObject) as number}`, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
@@ -48,10 +56,32 @@ export class DocumentObjectService {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
+  addDocumentObjectToCollectionIfMissing(
+    documentObjectCollection: IDocumentObject[],
+    ...documentObjectsToCheck: (IDocumentObject | null | undefined)[]
+  ): IDocumentObject[] {
+    const documentObjects: IDocumentObject[] = documentObjectsToCheck.filter(isPresent);
+    if (documentObjects.length > 0) {
+      const documentObjectCollectionIdentifiers = documentObjectCollection.map(
+        documentObjectItem => getDocumentObjectIdentifier(documentObjectItem)!
+      );
+      const documentObjectsToAdd = documentObjects.filter(documentObjectItem => {
+        const documentObjectIdentifier = getDocumentObjectIdentifier(documentObjectItem);
+        if (documentObjectIdentifier == null || documentObjectCollectionIdentifiers.includes(documentObjectIdentifier)) {
+          return false;
+        }
+        documentObjectCollectionIdentifiers.push(documentObjectIdentifier);
+        return true;
+      });
+      return [...documentObjectsToAdd, ...documentObjectCollection];
+    }
+    return documentObjectCollection;
+  }
+
   protected convertDateFromClient(documentObject: IDocumentObject): IDocumentObject {
     return Object.assign({}, documentObject, {
       creation: documentObject.creation?.isValid() ? documentObject.creation.toJSON() : undefined,
-      letzterAenderungszeitpunkt: documentObject.lastContentModification?.isValid()
+      lastContentModification: documentObject.lastContentModification?.isValid()
         ? documentObject.lastContentModification.toJSON()
         : undefined,
     });

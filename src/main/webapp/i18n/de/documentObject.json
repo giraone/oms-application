@@ -3,6 +3,7 @@
     "documentObject": {
       "home": {
         "title": "Document Objects",
+        "refreshListLabel": "Liste aktualisieren",
         "createLabel": "Document Object erstellen",
         "createOrEditLabel": "Document Object erstellen oder bearbeiten",
         "notFound": "No Document Objects found"

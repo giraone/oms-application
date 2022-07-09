@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import * as moment from 'moment';
-import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
+import { finalize } from 'rxjs/operators';
 
-import { IDocumentObject, DocumentObject } from 'app/shared/model/document-object.model';
-import { DocumentObjectService } from './document-object.service';
-import { IUser } from 'app/core/user/user.model';
-import { UserService } from 'app/core/user/user.service';
+import dayjs from 'dayjs/esm';
+import { DATE_TIME_FORMAT } from 'app/config/input.constants';
+
+import { IDocumentObject, DocumentObject } from '../document-object.model';
+import { DocumentObjectService } from '../service/document-object.service';
+import { DocumentPolicy } from 'app/entities/enumerations/document-policy.model';
 
 @Component({
   selector: 'jhi-document-object-update',
@@ -18,7 +18,7 @@ import { UserService } from 'app/core/user/user.service';
 })
 export class DocumentObjectUpdateComponent implements OnInit {
   isSaving = false;
-  users: IUser[] = [];
+  documentPolicyValues = Object.keys(DocumentPolicy);
 
   editForm = this.fb.group({
     id: [],
@@ -34,48 +34,23 @@ export class DocumentObjectUpdateComponent implements OnInit {
     creation: [],
     lastContentModification: [],
     documentPolicy: [],
-    ownerId: [null, Validators.required],
   });
 
   constructor(
     protected documentObjectService: DocumentObjectService,
-    protected userService: UserService,
     protected activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
+    protected fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ documentObject }) => {
-      if (!documentObject.id) {
-        const today = moment().startOf('day');
+      if (documentObject.id === undefined) {
+        const today = dayjs().startOf('day');
         documentObject.creation = today;
         documentObject.lastContentModification = today;
       }
 
       this.updateForm(documentObject);
-
-      this.userService.query().subscribe((res: HttpResponse<IUser[]>) => (this.users = res.body || []));
-    });
-  }
-
-  updateForm(documentObject: IDocumentObject): void {
-    this.editForm.patchValue({
-      id: documentObject.id,
-      path: documentObject.path,
-      name: documentObject.name,
-      pathUuid: documentObject.pathUuid,
-      nameUuid: documentObject.nameUuid,
-      mimeType: documentObject.mimeType,
-      objectUrl: documentObject.objectUrl,
-      thumbnailUrl: documentObject.thumbnailUrl,
-      byteSize: documentObject.byteSize,
-      numberOfPages: documentObject.numberOfPages,
-      creation: documentObject.creation ? documentObject.creation.format(DATE_TIME_FORMAT) : null,
-      lastContentModification: documentObject.lastContentModification
-        ? documentObject.lastContentModification.format(DATE_TIME_FORMAT)
-        : null,
-      documentPolicy: documentObject.documentPolicy,
-      ownerId: documentObject.ownerId,
     });
   }
 
@@ -93,7 +68,46 @@ export class DocumentObjectUpdateComponent implements OnInit {
     }
   }
 
-  private createFromForm(): IDocumentObject {
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IDocumentObject>>): void {
+    result.pipe(finalize(() => this.onSaveFinalize())).subscribe({
+      next: () => this.onSaveSuccess(),
+      error: () => this.onSaveError(),
+    });
+  }
+
+  protected onSaveSuccess(): void {
+    this.previousState();
+  }
+
+  protected onSaveError(): void {
+    // Api for inheritance.
+  }
+
+  protected onSaveFinalize(): void {
+    this.isSaving = false;
+  }
+
+  protected updateForm(documentObject: IDocumentObject): void {
+    this.editForm.patchValue({
+      id: documentObject.id,
+      path: documentObject.path,
+      name: documentObject.name,
+      pathUuid: documentObject.pathUuid,
+      nameUuid: documentObject.nameUuid,
+      mimeType: documentObject.mimeType,
+      objectUrl: documentObject.objectUrl,
+      thumbnailUrl: documentObject.thumbnailUrl,
+      byteSize: documentObject.byteSize,
+      numberOfPages: documentObject.numberOfPages,
+      creation: documentObject.creation ? documentObject.creation.format(DATE_TIME_FORMAT) : null,
+      lastContentModification: documentObject.lastContentModification
+        ? documentObject.lastContentModification.format(DATE_TIME_FORMAT)
+        : null,
+      documentPolicy: documentObject.documentPolicy,
+    });
+  }
+
+  protected createFromForm(): IDocumentObject {
     return {
       ...new DocumentObject(),
       id: this.editForm.get(['id'])!.value,
@@ -106,32 +120,11 @@ export class DocumentObjectUpdateComponent implements OnInit {
       thumbnailUrl: this.editForm.get(['thumbnailUrl'])!.value,
       byteSize: this.editForm.get(['byteSize'])!.value,
       numberOfPages: this.editForm.get(['numberOfPages'])!.value,
-      creation: this.editForm.get(['creation'])!.value ? moment(this.editForm.get(['creation'])!.value, DATE_TIME_FORMAT) : undefined,
+      creation: this.editForm.get(['creation'])!.value ? dayjs(this.editForm.get(['creation'])!.value, DATE_TIME_FORMAT) : undefined,
       lastContentModification: this.editForm.get(['lastContentModification'])!.value
-        ? moment(this.editForm.get(['lastContentModification'])!.value, DATE_TIME_FORMAT)
+        ? dayjs(this.editForm.get(['lastContentModification'])!.value, DATE_TIME_FORMAT)
         : undefined,
       documentPolicy: this.editForm.get(['documentPolicy'])!.value,
-      ownerId: this.editForm.get(['ownerId'])!.value,
     };
-  }
-
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IDocumentObject>>): void {
-    result.subscribe(
-      () => this.onSaveSuccess(),
-      () => this.onSaveError()
-    );
-  }
-
-  protected onSaveSuccess(): void {
-    this.isSaving = false;
-    this.previousState();
-  }
-
-  protected onSaveError(): void {
-    this.isSaving = false;
-  }
-
-  trackById(index: number, item: IUser): any {
-    return item.id;
   }
 }
