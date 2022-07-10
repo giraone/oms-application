@@ -1,16 +1,13 @@
 package com.giraone.oms.web.rest;
 
 import com.amazonaws.HttpMethod;
-import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.domain.User;
 import com.giraone.oms.domain.enumeration.DocumentPolicy;
 import com.giraone.oms.security.SecurityUtils;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
-import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
 import com.giraone.oms.service.dto.DocumentObjectWriteDTO;
-import com.giraone.oms.service.s3.S3StorageService;
 import com.giraone.oms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,7 +26,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -51,23 +55,11 @@ public class DocumentsResource {
     private String applicationName;
 
     private final DocumentObjectService documentObjectService;
-    private final S3StorageService s3StorageService;
-    private final UserService userService;
     private final ImagingService imagingService;
-    private final ApplicationProperties applicationProperties;
 
-    public DocumentsResource(
-        DocumentObjectService documentObjectService,
-        S3StorageService s3StorageService,
-        UserService userService,
-        ImagingService imagingService,
-        ApplicationProperties applicationProperties
-    ) {
+    public DocumentsResource(DocumentObjectService documentObjectService, ImagingService imagingService) {
         this.documentObjectService = documentObjectService;
-        this.s3StorageService = s3StorageService;
-        this.userService = userService;
         this.imagingService = imagingService;
-        this.applicationProperties = applicationProperties;
     }
 
     /**
@@ -80,10 +72,9 @@ public class DocumentsResource {
     public ResponseEntity<List<DocumentObjectDTO>> getAllDocuments(Pageable pageable) {
         log.debug("REST request to get document list by user={}", SecurityUtils.getCurrentUserLogin());
 
-        User user = getUser();
-        Page<DocumentObjectDTO> page = documentObjectService.findAll(user, pageable);
+        Page<DocumentObjectDTO> page = documentObjectService.findAllForCurrentUser(pageable);
         // prepare the possible pre-signed URLs based on the access policy
-        page.get().forEach(d -> preparePolicyBasedUrls(d, user));
+        page.get().forEach(d -> this.documentObjectService.preparePolicyBasedUrls(d));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -116,7 +107,6 @@ public class DocumentsResource {
 
         DocumentObjectDTO documentObjectDTO;
         final Instant now = Instant.now();
-        User user = getUser();
 
         if (documentObjectWriteDTO.getId() != null) {
             Optional<DocumentObjectDTO> existingDocumentObject = documentObjectService.findOne(documentObjectWriteDTO.getId());
@@ -136,7 +126,6 @@ public class DocumentsResource {
                     : "/"
             );
             // The rest is added by the service
-            documentObjectDTO.setOwnerId(user.getId());
             // TODO: Multiple path defined by creator with multiple path UUIDs
             documentObjectDTO.setPathUuid(ROOT_UUID);
             documentObjectDTO.setNameUuid(UUID.randomUUID().toString());
@@ -150,7 +139,7 @@ public class DocumentsResource {
 
         // Reserve a pre-signed URL for a POST upload and patch the objectWriteUrl for the browser client
         documentObjectDTO.setObjectWriteUrl(
-            s3StorageService.createPreSignedUrl(documentObjectDTO.getObjectKey(), HttpMethod.PUT, 1, 0).toExternalForm()
+            documentObjectService.createPreSignedUrl(documentObjectDTO.getObjectKey(), HttpMethod.PUT).toExternalForm()
         );
 
         return ResponseEntity
@@ -202,27 +191,16 @@ public class DocumentsResource {
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
         log.debug("REST request to delete document : {}", id);
 
-        Optional<DocumentObjectDTO> document = documentObjectService.findOne(id);
-        if (document.isEmpty()) {
+        boolean ok = documentObjectService.delete(id);
+        if (ok) {
+            return ResponseEntity
+                .noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                .build();
+        } else {
             log.warn("Attempt to delete non-existing document {}", id);
             return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Document not found!", null)).build();
         }
-
-        final String objectKey = document.get().getObjectUrl();
-        if (s3StorageService.exists(objectKey)) {
-            log.debug("Try to delete object with object key {} in S3", objectKey);
-            boolean success = s3StorageService.delete(objectKey);
-            log.info("Delete object with object key {} in S3: success = {}", objectKey, success);
-        } else {
-            log.debug("No document with object key {} in S3", objectKey);
-        }
-
-        documentObjectService.delete(id);
-
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -258,45 +236,5 @@ public class DocumentsResource {
 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(ret);
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    private User getUser() {
-        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        if (userLogin.isEmpty()) {
-            throw new BadRequestAlertException("Cannot get user login", ENTITY_NAME, "no_user");
-        }
-
-        Optional<User> user = userService.getUserWithAuthoritiesByLogin(userLogin.get());
-        if (user.isEmpty()) {
-            throw new BadRequestAlertException("Cannot get user account", ENTITY_NAME, "no_user_account");
-        }
-        return user.get();
-    }
-
-    private void preparePolicyBasedUrls(DocumentObjectDTO d, User user) {
-        // everybody, who has access can read the content
-        d.setObjectUrl(
-            s3StorageService
-                .createPreSignedUrl(d.getObjectKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlContentRead())
-                .toExternalForm()
-        );
-        // everybody, who has access can read the thumbnail
-        if (d.getThumbnailUrl() != null) {
-            d.setThumbnailUrl(
-                s3StorageService
-                    .createPreSignedUrl(d.getThumbnailKey(), HttpMethod.GET, 1, applicationProperties.getCacheControlThumbnail())
-                    .toExternalForm()
-            );
-        }
-        // if the document is not locked and if the caller is the owner write access is possible
-        if (d.getDocumentPolicy() != DocumentPolicy.LOCKED && d.getOwnerId().longValue() == user.getId().longValue()) {
-            d.setObjectWriteUrl(
-                s3StorageService
-                    .createPreSignedUrl(d.getObjectKey(), HttpMethod.PUT, 1, applicationProperties.getCacheControlContentWrite())
-                    .toExternalForm()
-            );
-        }
     }
 }

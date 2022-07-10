@@ -8,6 +8,8 @@ import { IUser } from 'app/entities/user/user.model';
 import { UserService } from 'app/entities/user/user.service';
 import { AlertService } from 'app/core/util/alert.service';
 import { DocumentEventsService } from './document-events.service';
+import { Subscription } from 'rxjs';
+import { S3Event } from './s3-event.model';
 
 @Component({
   selector: 'jhi-document-tools',
@@ -15,6 +17,7 @@ import { DocumentEventsService } from './document-events.service';
 })
 export class DocumentToolsComponent implements OnInit {
   users: IUser[] | null = null;
+  subscription?: Subscription;
 
   constructor(
     protected alertService: AlertService,
@@ -31,17 +34,17 @@ export class DocumentToolsComponent implements OnInit {
         filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
         map((response: HttpResponse<IUser[]>) => response.body)
       )
-      .subscribe(
-        (res: IUser[] | null) => {
+      .subscribe({
+        next: (res: IUser[] | null) => {
           this.users = res;
         },
-        (res: HttpErrorResponse) => {
+        error: (res: HttpErrorResponse) => {
           this.alertService.addAlert({
             type: 'warning',
             message: res.message,
           });
-        }
-      );
+        },
+      });
   }
 
   recreateThumbnails(): void {
@@ -60,24 +63,37 @@ export class DocumentToolsComponent implements OnInit {
 
   stompConnect(): void {
     console.log('DocumentToolsComponent.stompConnect');
-    this.documentEventsService.connectAndSubscribe();
+    this.documentEventsService.connect(
+      () => alert('CONNECTED'),
+      error => alert('ERROR ' + JSON.stringify(error))
+    );
   }
 
   stompDisconnect(): void {
     console.log('DocumentToolsComponent.stompDisconnect');
-    this.documentEventsService.unsubcribeAndDisconnect();
+    this.documentEventsService.disconnect();
   }
 
-  stompSend(payloadText: string): void {
+  stompSend(command: string): void {
     console.log('DocumentToolsComponent.stompSend');
-    this.documentEventsService.send(payloadText);
+    this.documentEventsService.send(new S3Event(command));
   }
 
-  stompListenToReceive(): void {
-    console.log('DocumentToolsComponent.stompListenToReceive');
-    this.documentEventsService.receive().subscribe(s3Event => {
+  stompSubscribe(): void {
+    console.log('DocumentToolsComponent.stompSubscribe');
+    this.documentEventsService.subscribe();
+    this.subscription = this.documentEventsService.receive().subscribe((s3Event: S3Event) => {
       console.log(`DocumentToolsComponent # # # # received s3Event = ${JSON.stringify(s3Event)}`);
       alert(JSON.stringify(s3Event));
     });
+  }
+
+  stompUnsubscribe(): void {
+    console.log('DocumentToolsComponent.stompUnsubscribe');
+    this.documentEventsService.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 }

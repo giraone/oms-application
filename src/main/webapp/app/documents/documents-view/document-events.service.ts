@@ -1,115 +1,124 @@
 import { Injectable } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
 import { Location } from '@angular/common';
+import { Subscription, ReplaySubject, Subject } from 'rxjs';
+import SockJS from 'sockjs-client';
+import Stomp, { Client, Subscription as StompSubscription, ConnectionHeaders, Message } from 'webstomp-client';
 
 import { AuthServerProvider } from '../../core/auth/auth-jwt.service';
-
-import SockJS from 'sockjs-client';
-import * as Stomp from 'webstomp-client';
+import { S3Event } from './s3-event.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentEventsService {
-  stompClient: Stomp.Client | undefined;
-  subscriber: Stomp.Subscription | undefined;
-  connection: Promise<any>;
-  connectedPromise: any;
-  listener: Observable<any>;
-  listenerObserver: Observer<any> | undefined;
+  private stompClient: Client | null = null;
+  private connectionSubject: ReplaySubject<void> = new ReplaySubject(1);
+  private connectionSubscription: Subscription | null = null;
+  private stompSubscription: StompSubscription | null = null;
+  private stompSubscription2: StompSubscription | null = null;
+  private listenerSubject: Subject<S3Event> = new Subject();
 
-  constructor(private authServerProvider: AuthServerProvider, private location: Location) {
-    this.connection = this.createConnection();
-    this.listener = this.createListener();
-  }
+  constructor(private authServerProvider: AuthServerProvider, private location: Location) {}
 
-  connectAndSubscribe(): void {
-    if (this.connectedPromise === null) {
-      this.connection = this.createConnection();
+  connect(connectCallback?: () => void, errorCallback?: (error: any) => void): void {
+    console.log(`# # # # DocumentEventsService connect connected=${this.stompClient?.connected}`);
+
+    if (this.stompClient?.connected) {
+      connectCallback?.();
+      return;
     }
+
     // building absolute path so that websocket doesn't fail when deploying with a context path
-    let url = '/websocket/s3-event';
+    let url = '/websocket/document-events';
     url = this.location.prepareExternalUrl(url);
     const authToken = this.authServerProvider.getToken();
     if (authToken) {
       url += '?access_token=' + authToken;
     }
-    const socket = new SockJS(url);
-    console.log('# # # # DocumentEventsService.connect VERSIONS = ' + JSON.stringify(Stomp.VERSIONS));
-    this.stompClient = Stomp.over(socket, { protocols: ['v10.stomp', 'v11.stomp', 'v12.stomp'], binary: false });
+    const socket: WebSocket = new SockJS(url);
+    this.stompClient = Stomp.over(socket, { protocols: ['v12.stomp'] });
     // TODO (hs): Google for Options
     // this.stompClient.heartbeat.outgoing = 10000; // send outgoing heart beat every 10 seconds (default)
     // this.stompClient.heartbeat.incoming = 10000; // request incoming heart beat every 10 seconds (default)
     // this.stompClient.reconnectDelay = 200; // wait in milliseconds before attempting auto reconnect
-    const headers = {};
-
+    const headers: ConnectionHeaders = {};
     this.stompClient.connect(
       headers,
       () => {
-        console.log('# # # # DocumentEventsService CONNECTED');
-        this.subscribe();
+        this.connectionSubject.next();
+        console.log('# # # # DocumentEventsService CONNECTED OK');
+        connectCallback?.();
       },
       error => {
         console.log('# # # # DocumentEventsService CONNECT FAILED ' + JSON.stringify(error));
+        errorCallback?.(error);
       }
     );
   }
 
-  unsubcribeAndDisconnect(): void {
+  disconnect(): void {
+    console.log('# # # # DocumentEventsService disconnect');
+
+    this.unsubscribe();
+
+    this.connectionSubject = new ReplaySubject(1);
+
     if (this.stompClient) {
-      this.unsubscribe();
-      this.stompClient.disconnect();
-      console.log('# # # # DocumentEventsService DISCONNECTED');
-      this.stompClient = undefined;
+      if (this.stompClient.connected) {
+        this.stompClient.disconnect();
+      }
+      this.stompClient = null;
     }
   }
 
-  receive(): Observable<any> {
-    return this.listener;
+  receive(): Subject<S3Event> {
+    return this.listenerSubject;
   }
 
-  send(payloadText: string): void {
+  subscribe(): void {
+    console.log('# # # # DocumentEventsService subscribe');
+
+    this.connect();
+
+    if (this.connectionSubscription) {
+      return;
+    }
+
+    this.connectionSubscription = this.connectionSubject.subscribe(() => {
+      if (this.stompClient) {
+        this.stompSubscription = this.stompClient.subscribe('/topic/s3-event', (data: Message) => {
+          console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
+          const response = JSON.parse(data.body);
+          console.log(`# # # # DocumentEventsService PASS_TO_OBSERVER ${response.event}`);
+          this.listenerSubject.next(response);
+        });
+      }
+    });
+    console.log(`# # # # DocumentEventsService subscribed connectionSubscription=${this.connectionSubscription}`);
+  }
+
+  unsubscribe(): void {
+    console.log('# # # # DocumentEventsService unsubscribe');
+    if (this.stompSubscription) {
+      this.stompSubscription.unsubscribe();
+      this.stompSubscription = null;
+    }
+
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
+      this.connectionSubscription = null;
+    }
+  }
+
+  send(event: S3Event): void {
+    this.connect();
+
     if (this.stompClient?.connected) {
       this.stompClient.send(
         '/topic/s3-queue', // destination
-        JSON.stringify({ payload: payloadText }), // body
+        JSON.stringify(event), // body
         {} // header
       );
     } else {
-      console.log('DocumentEventsService.send ERROR: no stompClient!');
+      console.log('DocumentEventsService.send ERROR: no stompClient or not connected!');
     }
-  }
-
-  private subscribe(): void {
-    if (!this.stompClient) {
-      return;
-    }
-    this.subscriber = this.stompClient.subscribe('/topic/s3-event', data => {
-      console.log('# # # # DocumentEventsService RECEIVED ' + data.body);
-      const response = JSON.parse(data.body);
-      if (response.payload.startsWith('connect')) {
-        console.log('# # # # DocumentEventsService RECEIVED CONNECT');
-      } else if (this.listenerObserver) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`# # # # DocumentEventsService PASS_TO_OBSERVER ${response.payload}`);
-        this.listenerObserver.next(response.payload);
-      }
-    });
-  }
-
-  private unsubscribe(): void {
-    if (this.subscriber) {
-      console.log('# # # # DocumentEventsService UNSUBSCRIBE');
-      this.subscriber.unsubscribe();
-    }
-    this.listener = this.createListener();
-  }
-
-  private createListener(): Observable<any> {
-    return new Observable(observer => {
-      this.listenerObserver = observer;
-    });
-  }
-
-  private createConnection(): Promise<any> {
-    return new Promise(resolve => (this.connectedPromise = resolve));
   }
 }

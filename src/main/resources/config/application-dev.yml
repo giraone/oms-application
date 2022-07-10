@@ -127,7 +127,7 @@ jhipster:
 # S3 Connection properties
 s3-properties:
   log-configuration-on-startup: true
-  endpoint-url: http://127.0.0.1:9999
+  endpoint-url: http://192.168.178.45:9999
   access-key: minio
   secret-key: miniosecret
   client-region: default

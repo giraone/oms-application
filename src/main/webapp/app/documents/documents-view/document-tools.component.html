@@ -1,12 +1,13 @@
 <div class="row justify-content-center">
-    <div class="col-8">
-        <h4>Imaging</h4>
-        <button class="btn btn-primary" (click)="recreateThumbnails()">Recreate Thumbnails</button>
-        <br />
-        <h4>STOMP</h4>
-        <button class="btn btn-primary" (click)="stompConnect()">Connect</button>
-        <button class="btn btn-primary" (click)="stompDisconnect()">Disconnect</button>
-        <button class="btn btn-primary" (click)="stompSend('ready')">Send READY</button>
-        <button class="btn btn-primary" (click)="stompListenToReceive()">Listen to receive</button>
-    </div>
+  <div class="col-8">
+    <h4>Imaging</h4>
+    <button class="btn btn-primary" (click)="recreateThumbnails()">Recreate Thumbnails</button>
+    <br />
+    <h4>STOMP</h4>
+    <button class="btn btn-primary" (click)="stompConnect()">Connect</button>
+    <button class="btn btn-primary" (click)="stompDisconnect()">Disconnect</button>
+    <button class="btn btn-primary" (click)="stompSend('clientReady')">Send clientReady</button>
+    <button class="btn btn-primary" (click)="stompSubscribe()">Subscribe</button>
+    <button class="btn btn-primary" (click)="stompUnsubscribe()">Unsubscribe</button>
+  </div>
 </div>

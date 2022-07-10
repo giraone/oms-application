@@ -17,6 +17,7 @@ public class ApplicationProperties {
     private final Logger log = LoggerFactory.getLogger(ApplicationProperties.class);
 
     private boolean showConfigOnStartup = true;
+    private boolean userBasedWebSocket = false;
     private int thumbWidthAndHeight = 180;
     private int cacheControlThumbnail = 600;
     private int cacheControlContentRead = 600;
@@ -35,6 +36,14 @@ public class ApplicationProperties {
 
     public void setShowConfigOnStartup(boolean showConfigOnStartup) {
         this.showConfigOnStartup = showConfigOnStartup;
+    }
+
+    public boolean isUserBasedWebSocket() {
+        return userBasedWebSocket;
+    }
+
+    public void setUserBasedWebSocket(boolean userBasedWebSocket) {
+        this.userBasedWebSocket = userBasedWebSocket;
     }
 
     public int getThumbWidthAndHeight() {

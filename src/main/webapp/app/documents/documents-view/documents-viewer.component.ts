@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
 
@@ -9,6 +8,7 @@ import { DocumentsService } from './documents.service';
 import { DocumentEventsService } from './document-events.service';
 import { DocumentPolicy } from 'app/entities/enumerations/document-policy.model';
 import { EventManager } from 'app/core/util/event-manager.service';
+import { S3Event } from './s3-event.model';
 
 @Component({
   selector: 'jhi-documents-viewer',
@@ -17,10 +17,7 @@ import { EventManager } from 'app/core/util/event-manager.service';
 export class DocumentsViewerComponent implements OnInit, OnDestroy {
   currentAccount: any;
   documentObjects: IDocumentObjectRead[] = [];
-  error: any;
-  success: any;
-  eventSubscriber: Subscription | undefined;
-  routeData: any;
+  subscription?: Subscription;
   totalItems = 0;
   itemsPerPage = 100;
 
@@ -28,8 +25,6 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     protected documentsService: DocumentsService,
     protected documentEventsService: DocumentEventsService,
     protected accountService: AccountService,
-    protected activatedRoute: ActivatedRoute,
-    protected router: Router,
     protected eventManager: EventManager
   ) {}
 
@@ -119,21 +114,49 @@ export class DocumentsViewerComponent implements OnInit, OnDestroy {
     this.accountService.identity().subscribe(account => {
       this.currentAccount = account;
     });
-    this.documentEventsService.connectAndSubscribe();
-    this.documentEventsService.receive().subscribe(s3Event => {
-      console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
-      this.loadAll();
-    });
+
+    if (!this.subscription) {
+      this.documentEventsService.connect(() => {
+        console.log('DocumentsViewerComponent # # # # connected, now subscribe.');
+        this.documentEventsService.subscribe();
+        this.subscription = this.documentEventsService.receive().subscribe((s3Event: S3Event) => {
+          console.log('DocumentsViewerComponent # # # # receive s3Event = ' + JSON.stringify(s3Event));
+          if (s3Event.event === 'reloadThumbnail') {
+            this.updateDocument(s3Event.payload);
+          }
+        });
+        console.log(`DocumentsViewerComponent # # # # subscribed ${this.subscription}`);
+        setTimeout(() => {
+          this.documentEventsService.send(new S3Event('clientReady'));
+          console.log('DocumentsViewerComponent # # # # ready sent');
+        }, 100);
+      });
+    } else {
+      console.log(`DocumentsViewerComponent # # # # already subscribed ${this.subscription}`);
+    }
   }
 
   ngOnDestroy(): void {
     console.log('DocumentsViewerComponent # # # # ON_DESTROY');
-    this.documentEventsService.unsubcribeAndDisconnect();
+    this.documentEventsService.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 
   protected useResponse(data: IDocumentObjectRead[], headers: HttpHeaders): void {
     const totalItemsHeader = headers.get('X-Total-Count');
     this.totalItems = totalItemsHeader ? parseInt(totalItemsHeader, 10) : 0;
     this.documentObjects = data;
+  }
+
+  private updateDocument(document: IDocumentObjectRead): void {
+    const i = this.documentObjects.findIndex(o => o.id === document.id);
+    if (i !== -1) {
+      console.log(`DocumentsViewerComponent # # # # replacing ${document.name}`);
+      this.documentsService.convertDateFromServerInPlace(document);
+      this.documentObjects[i] = document;
+    }
   }
 }

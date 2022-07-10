@@ -1,28 +1,30 @@
 package com.giraone.oms.web.rest;
 
 import com.amazonaws.services.s3.event.S3EventNotification;
+import com.giraone.oms.config.ApplicationProperties;
 import com.giraone.oms.domain.User;
 import com.giraone.oms.service.DocumentObjectService;
 import com.giraone.oms.service.ImagingService;
 import com.giraone.oms.service.UserService;
 import com.giraone.oms.service.dto.DocumentObjectDTO;
-import com.giraone.oms.web.websocket.dto.S3ClientEventDTO;
+import com.giraone.oms.web.websocket.dto.DocumentStompMessageDTO;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for managing {@link com.giraone.oms.domain.DocumentObject}.
+ * REST controller for the S3 event API of minio (sending updates on an upload).
  */
 @RestController
 @RequestMapping("/event-api")
@@ -34,21 +36,24 @@ public class WebHooksResource {
     private final DocumentObjectService documentObjectService;
     private final UserService userService;
     private final SimpMessageSendingOperations messagingTemplate;
+    private final ApplicationProperties applicationProperties;
 
     public WebHooksResource(
         ImagingService imagingService,
         DocumentObjectService documentObjectService,
         UserService userService,
-        SimpMessageSendingOperations messagingTemplate
+        SimpMessageSendingOperations messagingTemplate,
+        ApplicationProperties applicationProperties
     ) {
         this.imagingService = imagingService;
         this.documentObjectService = documentObjectService;
         this.messagingTemplate = messagingTemplate;
         this.userService = userService;
+        this.applicationProperties = applicationProperties;
     }
 
     @PostMapping("/s3")
-    public ResponseEntity<Void> receiveEventPost(@RequestBody(required = false) S3EventNotification eventNotification) {
+    public ResponseEntity<Void> handleS3Event(@RequestBody(required = false) S3EventNotification eventNotification) {
         long start = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug(
@@ -63,6 +68,25 @@ public class WebHooksResource {
         eventNotification.getRecords().forEach(this::processOneEvent);
         long end = System.currentTimeMillis();
         log.info("# # # # # # # # # # # # # # # # # # # PROCESSING S3 EVENT took {} msecs", (end - start));
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/proxy/{topic}/{userLogin}")
+    public ResponseEntity<Void> proxy(
+        @PathVariable String topic,
+        @PathVariable String userLogin,
+        @RequestBody Map<String, Object> message
+    ) {
+        log.info("# # # # # # # # # # # # # # # # # # # receiveProxyPost {} {} {}", topic, userLogin, message);
+
+        if ("ALL".equals(userLogin)) {
+            // Goes to /topic/<topic>
+            messagingTemplate.convertAndSend("/topic/" + topic, message);
+        } else {
+            // Goes to /user/<user-name>/topic/<topic>
+            messagingTemplate.convertAndSendToUser(userLogin, "/topic/" + topic, message);
+        }
+        log.info("> > > > > > > > > STOMP Client send user={}, message={}", userLogin, message);
         return ResponseEntity.accepted().build();
     }
 
@@ -90,7 +114,7 @@ public class WebHooksResource {
         long start = System.currentTimeMillis();
         createThumbnailAsynchronously(documentObject);
         long end = System.currentTimeMillis();
-        log.info("# # # # # # # # # # # # # # # # # # # createThumbnailAsynchronously took {} msecs", (end - start));
+        log.info("# # # # # # # # # # # # # # # # # # # createThumbnailAsynchronously took {} milliseconds", (end - start));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -105,17 +129,15 @@ public class WebHooksResource {
             return;
         }
 
-        documentObject.setLastContentModification(Instant.now());
-        documentObject.setMimeType(metaData.getMimeType());
-        documentObject.setByteSize(metaData.getByteSizeOriginal());
-        documentObject.setNumberOfPages(metaData.getNumberOfPages());
+        documentObject = documentObjectService.saveMetaData(documentObject.getId(), metaData);
+        documentObjectService.preparePolicyBasedUrls(documentObject);
 
-        documentObjectService.save(documentObject);
-
-        publishReadyEventToUser(documentObject.getOwnerId());
+        // we pass the owner, so that it is possible in the future to send only to the owner
+        publishThumbnailReadyEventToUser(documentObject.getOwnerId(), documentObject);
     }
 
-    private boolean publishReadyEventToUser(long userId) {
+    @SuppressWarnings("UnusedReturnValue")
+    private boolean publishThumbnailReadyEventToUser(long userId, DocumentObjectDTO documentObject) {
         Optional<User> user = userService.getUserWithAuthorities(userId);
         if (user.isEmpty()) {
             log.error("User with id {} NOT FOUND!", userId);
@@ -123,10 +145,14 @@ public class WebHooksResource {
         }
         final String userLogin = user.get().getLogin();
 
-        S3ClientEventDTO s3ClientEventDTO = new S3ClientEventDTO();
-        s3ClientEventDTO.setPayload("ready");
-        messagingTemplate.convertAndSendToUser(userLogin, "/topic/s3-event", s3ClientEventDTO);
-        log.info("> > > > > > > > > STOMP Client send user={}, payload={}", userLogin, s3ClientEventDTO.getPayload());
+        DocumentStompMessageDTO documentStompMessageDTO = new DocumentStompMessageDTO("reloadThumbnail", documentObject);
+
+        if (applicationProperties.isUserBasedWebSocket()) {
+            messagingTemplate.convertAndSendToUser(userLogin, "/topic/s3-event", documentStompMessageDTO);
+        } else {
+            messagingTemplate.convertAndSend("/topic/s3-event", documentStompMessageDTO);
+        }
+        log.info("> > > > > > > > > STOMP Client send user={}, event={}", userLogin, documentStompMessageDTO);
 
         return true;
     }

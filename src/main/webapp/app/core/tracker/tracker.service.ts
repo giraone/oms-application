@@ -18,9 +18,17 @@ export class TrackerService {
   private stompSubscription: StompSubscription | null = null;
   private listenerSubject: Subject<TrackerActivity> = new Subject();
 
+  private trackingEnabled = false; // OMS-Adapted: set to false to disable JHipster tracking example
+
   constructor(private router: Router, private authServerProvider: AuthServerProvider, private location: Location) {}
 
   connect(): void {
+    if (!this.trackingEnabled) {
+      return;
+    }
+
+    console.log(`# # # # TrackerService connect connected=${this.stompClient?.connected}`);
+
     if (this.stompClient?.connected) {
       return;
     }
@@ -36,6 +44,7 @@ export class TrackerService {
     this.stompClient = Stomp.over(socket, { protocols: ['v12.stomp'] });
     const headers: ConnectionHeaders = {};
     this.stompClient.connect(headers, () => {
+      console.log('# # # # TrackerService CONNECTED OK');
       this.connectionSubject.next();
 
       this.sendActivity();
@@ -47,6 +56,12 @@ export class TrackerService {
   }
 
   disconnect(): void {
+    if (!this.trackingEnabled) {
+      return;
+    }
+
+    console.log('# # # # TrackerService disconnect');
+
     this.unsubscribe();
 
     this.connectionSubject = new ReplaySubject(1);
@@ -69,6 +84,11 @@ export class TrackerService {
   }
 
   subscribe(): void {
+    if (!this.trackingEnabled) {
+      return;
+    }
+
+    console.log('# # # # TrackerService subscribe');
     if (this.connectionSubscription) {
       return;
     }
@@ -83,6 +103,11 @@ export class TrackerService {
   }
 
   unsubscribe(): void {
+    if (!this.trackingEnabled) {
+      return;
+    }
+
+    console.log('# # # # TrackerService unsubscribe');
     if (this.stompSubscription) {
       this.stompSubscription.unsubscribe();
       this.stompSubscription = null;
@@ -95,6 +120,11 @@ export class TrackerService {
   }
 
   private sendActivity(): void {
+    if (!this.trackingEnabled) {
+      return;
+    }
+
+    console.log('# # # # TrackerService sendActivity');
     if (this.stompClient?.connected) {
       this.stompClient.send(
         '/topic/activity', // destination

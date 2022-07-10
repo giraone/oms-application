@@ -77,6 +77,11 @@ export class DocumentsService {
     return this.http.get<IDocumentObjectRead[]>(SERVER_API_URL + 'api/maintenance/thumbnails', { observe: 'response' });
   }
 
+  convertDateFromServerInPlace(document: IDocumentObjectRead): void {
+    document.creation = document.creation != null ? dayjs(document.creation) : undefined;
+    document.lastContentModification = document.lastContentModification != null ? dayjs(document.lastContentModification) : undefined;
+  }
+
   protected convertDateFromClient(documentObject: IDocumentObjectRead): IDocumentObjectRead {
     return Object.assign({}, documentObject, {
       creation: documentObject.creation?.isValid() ? documentObject.creation.format(DATE_FORMAT) : undefined,
@@ -88,8 +93,7 @@ export class DocumentsService {
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.creation = res.body.creation != null ? dayjs(res.body.creation) : undefined;
-      res.body.lastContentModification = res.body.lastContentModification != null ? dayjs(res.body.lastContentModification) : undefined;
+      this.convertDateFromServerInPlace(res.body);
     }
     return res;
   }
@@ -97,9 +101,7 @@ export class DocumentsService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((documentObject: IDocumentObjectRead) => {
-        documentObject.creation = documentObject.creation != null ? dayjs(documentObject.creation) : undefined;
-        documentObject.lastContentModification =
-          documentObject.lastContentModification != null ? dayjs(documentObject.lastContentModification) : undefined;
+        this.convertDateFromServerInPlace(documentObject);
       });
     }
     return res;
