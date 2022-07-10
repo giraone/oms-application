@@ -1,0 +1,41 @@
+{
+  "Records": [
+    {
+      "awsRegion": "default",
+      "eventName": "s3:ObjectCreated:Put",
+      "eventSource": "minio:s3",
+      "eventTime": "2022-07-10T13:44:11.794Z",
+      "eventVersion": "2.0",
+      "requestParameters": {
+        "sourceIPAddress": "192.168.178.45"
+      },
+      "responseElements": {
+        "x-amz-id-2": null,
+        "x-amz-request-id": "17007BAE627ECACC"
+      },
+      "s3": {
+        "configurationId": "Config",
+        "bucket": {
+          "name": "bucket-01",
+          "ownerIdentity": {
+            "principalId": "minio"
+          },
+          "arn": "arn:aws:s3:::bucket-01"
+        },
+        "object": {
+          "key": "adef7792-f275-11e9-ab54-bf6dab9bc95c%2F1f454812-bffb-418a-97e5-ff62ed8028bb%2Fcontent",
+          "size": 553472,
+          "eTag": "efd3203887aeda510ba516ed72354548",
+          "versionId": null,
+          "sequencer": "17007BAE6363A19C",
+          "urlDecodedKey": "adef7792-f275-11e9-ab54-bf6dab9bc95c/1f454812-bffb-418a-97e5-ff62ed8028bb/content"
+        },
+        "s3SchemaVersion": "1.0"
+      },
+      "userIdentity": {
+        "principalId": "minio"
+      },
+      "glacierEventData": null
+    }
+  ]
+}
