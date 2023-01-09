@@ -7,7 +7,20 @@ import dayjs from 'dayjs/esm';
 import { isPresent } from 'app/core/util/operators';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
-import { IDocumentObject, getDocumentObjectIdentifier } from '../document-object.model';
+import { IDocumentObject, NewDocumentObject } from '../document-object.model';
+
+export type PartialUpdateDocumentObject = Partial<IDocumentObject> & Pick<IDocumentObject, 'id'>;
+
+type RestOf<T extends IDocumentObject | NewDocumentObject> = Omit<T, 'creation' | 'lastContentModification'> & {
+  creation?: string | null;
+  lastContentModification?: string | null;
+};
+
+export type RestDocumentObject = RestOf<IDocumentObject>;
+
+export type NewRestDocumentObject = RestOf<NewDocumentObject>;
+
+export type PartialUpdateRestDocumentObject = RestOf<PartialUpdateDocumentObject>;
 
 export type EntityResponseType = HttpResponse<IDocumentObject>;
 export type EntityArrayResponseType = HttpResponse<IDocumentObject[]>;
@@ -18,56 +31,64 @@ export class DocumentObjectService {
 
   constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
 
-  create(documentObject: IDocumentObject): Observable<EntityResponseType> {
+  create(documentObject: NewDocumentObject): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
-      .post<IDocumentObject>(this.resourceUrl, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+      .post<RestDocumentObject>(this.resourceUrl, copy, { observe: 'response' })
+      .pipe(map(res => this.convertResponseFromServer(res)));
   }
 
   update(documentObject: IDocumentObject): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
-      .put<IDocumentObject>(`${this.resourceUrl}/${getDocumentObjectIdentifier(documentObject) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+      .put<RestDocumentObject>(`${this.resourceUrl}/${this.getDocumentObjectIdentifier(documentObject)}`, copy, { observe: 'response' })
+      .pipe(map(res => this.convertResponseFromServer(res)));
   }
 
-  partialUpdate(documentObject: IDocumentObject): Observable<EntityResponseType> {
+  partialUpdate(documentObject: PartialUpdateDocumentObject): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(documentObject);
     return this.http
-      .patch<IDocumentObject>(`${this.resourceUrl}/${getDocumentObjectIdentifier(documentObject) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+      .patch<RestDocumentObject>(`${this.resourceUrl}/${this.getDocumentObjectIdentifier(documentObject)}`, copy, { observe: 'response' })
+      .pipe(map(res => this.convertResponseFromServer(res)));
   }
 
   find(id: number): Observable<EntityResponseType> {
     return this.http
-      .get<IDocumentObject>(`${this.resourceUrl}/${id}`, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+      .get<RestDocumentObject>(`${this.resourceUrl}/${id}`, { observe: 'response' })
+      .pipe(map(res => this.convertResponseFromServer(res)));
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http
-      .get<IDocumentObject[]>(this.resourceUrl, { params: options, observe: 'response' })
-      .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
+      .get<RestDocumentObject[]>(this.resourceUrl, { params: options, observe: 'response' })
+      .pipe(map(res => this.convertResponseArrayFromServer(res)));
   }
 
   delete(id: number): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
-  addDocumentObjectToCollectionIfMissing(
-    documentObjectCollection: IDocumentObject[],
-    ...documentObjectsToCheck: (IDocumentObject | null | undefined)[]
-  ): IDocumentObject[] {
-    const documentObjects: IDocumentObject[] = documentObjectsToCheck.filter(isPresent);
+  getDocumentObjectIdentifier(documentObject: Pick<IDocumentObject, 'id'>): number {
+    return documentObject.id;
+  }
+
+  compareDocumentObject(o1: Pick<IDocumentObject, 'id'> | null, o2: Pick<IDocumentObject, 'id'> | null): boolean {
+    return o1 && o2 ? this.getDocumentObjectIdentifier(o1) === this.getDocumentObjectIdentifier(o2) : o1 === o2;
+  }
+
+  addDocumentObjectToCollectionIfMissing<Type extends Pick<IDocumentObject, 'id'>>(
+    documentObjectCollection: Type[],
+    ...documentObjectsToCheck: (Type | null | undefined)[]
+  ): Type[] {
+    const documentObjects: Type[] = documentObjectsToCheck.filter(isPresent);
     if (documentObjects.length > 0) {
       const documentObjectCollectionIdentifiers = documentObjectCollection.map(
-        documentObjectItem => getDocumentObjectIdentifier(documentObjectItem)!
+        documentObjectItem => this.getDocumentObjectIdentifier(documentObjectItem)!
       );
       const documentObjectsToAdd = documentObjects.filter(documentObjectItem => {
-        const documentObjectIdentifier = getDocumentObjectIdentifier(documentObjectItem);
-        if (documentObjectIdentifier == null || documentObjectCollectionIdentifiers.includes(documentObjectIdentifier)) {
+        const documentObjectIdentifier = this.getDocumentObjectIdentifier(documentObjectItem);
+        if (documentObjectCollectionIdentifiers.includes(documentObjectIdentifier)) {
           return false;
         }
         documentObjectCollectionIdentifiers.push(documentObjectIdentifier);
@@ -78,32 +99,33 @@ export class DocumentObjectService {
     return documentObjectCollection;
   }
 
-  protected convertDateFromClient(documentObject: IDocumentObject): IDocumentObject {
-    return Object.assign({}, documentObject, {
-      creation: documentObject.creation?.isValid() ? documentObject.creation.toJSON() : undefined,
-      lastContentModification: documentObject.lastContentModification?.isValid()
-        ? documentObject.lastContentModification.toJSON()
-        : undefined,
+  protected convertDateFromClient<T extends IDocumentObject | NewDocumentObject | PartialUpdateDocumentObject>(
+    documentObject: T
+  ): RestOf<T> {
+    return {
+      ...documentObject,
+      creation: documentObject.creation?.toJSON() ?? null,
+      lastContentModification: documentObject.lastContentModification?.toJSON() ?? null,
+    };
+  }
+
+  protected convertDateFromServer(restDocumentObject: RestDocumentObject): IDocumentObject {
+    return {
+      ...restDocumentObject,
+      creation: restDocumentObject.creation ? dayjs(restDocumentObject.creation) : undefined,
+      lastContentModification: restDocumentObject.lastContentModification ? dayjs(restDocumentObject.lastContentModification) : undefined,
+    };
+  }
+
+  protected convertResponseFromServer(res: HttpResponse<RestDocumentObject>): HttpResponse<IDocumentObject> {
+    return res.clone({
+      body: res.body ? this.convertDateFromServer(res.body) : null,
     });
   }
 
-  protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
-    if (res.body) {
-      res.body.creation = res.body.creation ? dayjs(res.body.creation) : undefined;
-      res.body.lastContentModification = res.body.lastContentModification ? dayjs(res.body.lastContentModification) : undefined;
-    }
-    return res;
-  }
-
-  protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
-    if (res.body) {
-      res.body.forEach((documentObject: IDocumentObject) => {
-        documentObject.creation = documentObject.creation ? dayjs(documentObject.creation) : undefined;
-        documentObject.lastContentModification = documentObject.lastContentModification
-          ? dayjs(documentObject.lastContentModification)
-          : undefined;
-      });
-    }
-    return res;
+  protected convertResponseArrayFromServer(res: HttpResponse<RestDocumentObject[]>): HttpResponse<IDocumentObject[]> {
+    return res.clone({
+      body: res.body ? res.body.map(item => this.convertDateFromServer(item)) : null,
+    });
   }
 }

@@ -1,19 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import dayjs from 'dayjs/esm';
 
-import { DATE_TIME_FORMAT } from 'app/config/input.constants';
-import { DocumentPolicy } from 'app/entities/enumerations/document-policy.model';
-import { IDocumentObject, DocumentObject } from '../document-object.model';
+import { IDocumentObject } from '../document-object.model';
+import { sampleWithRequiredData, sampleWithNewData, sampleWithPartialData, sampleWithFullData } from '../document-object.test-samples';
 
-import { DocumentObjectService } from './document-object.service';
+import { DocumentObjectService, RestDocumentObject } from './document-object.service';
+
+const requireRestSample: RestDocumentObject = {
+  ...sampleWithRequiredData,
+  creation: sampleWithRequiredData.creation?.toJSON(),
+  lastContentModification: sampleWithRequiredData.lastContentModification?.toJSON(),
+};
 
 describe('DocumentObject Service', () => {
   let service: DocumentObjectService;
   let httpMock: HttpTestingController;
-  let elemDefault: IDocumentObject;
   let expectedResult: IDocumentObject | IDocumentObject[] | boolean | null;
-  let currentDate: dayjs.Dayjs;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,61 +24,27 @@ describe('DocumentObject Service', () => {
     expectedResult = null;
     service = TestBed.inject(DocumentObjectService);
     httpMock = TestBed.inject(HttpTestingController);
-    currentDate = dayjs();
-
-    elemDefault = {
-      id: 0,
-      path: 'AAAAAAA',
-      name: 'AAAAAAA',
-      pathUuid: 'AAAAAAA',
-      nameUuid: 'AAAAAAA',
-      mimeType: 'AAAAAAA',
-      objectUrl: 'AAAAAAA',
-      thumbnailUrl: 'AAAAAAA',
-      byteSize: 0,
-      numberOfPages: 0,
-      creation: currentDate,
-      lastContentModification: currentDate,
-      documentPolicy: DocumentPolicy.PRIVATE,
-    };
   });
 
   describe('Service methods', () => {
     it('should find an element', () => {
-      const returnedFromService = Object.assign(
-        {
-          creation: currentDate.format(DATE_TIME_FORMAT),
-          lastContentModification: currentDate.format(DATE_TIME_FORMAT),
-        },
-        elemDefault
-      );
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
 
       service.find(123).subscribe(resp => (expectedResult = resp.body));
 
       const req = httpMock.expectOne({ method: 'GET' });
       req.flush(returnedFromService);
-      expect(expectedResult).toMatchObject(elemDefault);
+      expect(expectedResult).toMatchObject(expected);
     });
 
     it('should create a DocumentObject', () => {
-      const returnedFromService = Object.assign(
-        {
-          id: 0,
-          creation: currentDate.format(DATE_TIME_FORMAT),
-          lastContentModification: currentDate.format(DATE_TIME_FORMAT),
-        },
-        elemDefault
-      );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const documentObject = { ...sampleWithNewData };
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
 
-      const expected = Object.assign(
-        {
-          creation: currentDate,
-          lastContentModification: currentDate,
-        },
-        returnedFromService
-      );
-
-      service.create(new DocumentObject()).subscribe(resp => (expectedResult = resp.body));
+      service.create(documentObject).subscribe(resp => (expectedResult = resp.body));
 
       const req = httpMock.expectOne({ method: 'POST' });
       req.flush(returnedFromService);
@@ -84,34 +52,11 @@ describe('DocumentObject Service', () => {
     });
 
     it('should update a DocumentObject', () => {
-      const returnedFromService = Object.assign(
-        {
-          id: 1,
-          path: 'BBBBBB',
-          name: 'BBBBBB',
-          pathUuid: 'BBBBBB',
-          nameUuid: 'BBBBBB',
-          mimeType: 'BBBBBB',
-          objectUrl: 'BBBBBB',
-          thumbnailUrl: 'BBBBBB',
-          byteSize: 1,
-          numberOfPages: 1,
-          creation: currentDate.format(DATE_TIME_FORMAT),
-          lastContentModification: currentDate.format(DATE_TIME_FORMAT),
-          documentPolicy: 'BBBBBB',
-        },
-        elemDefault
-      );
+      const documentObject = { ...sampleWithRequiredData };
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
 
-      const expected = Object.assign(
-        {
-          creation: currentDate,
-          lastContentModification: currentDate,
-        },
-        returnedFromService
-      );
-
-      service.update(expected).subscribe(resp => (expectedResult = resp.body));
+      service.update(documentObject).subscribe(resp => (expectedResult = resp.body));
 
       const req = httpMock.expectOne({ method: 'PUT' });
       req.flush(returnedFromService);
@@ -119,27 +64,9 @@ describe('DocumentObject Service', () => {
     });
 
     it('should partial update a DocumentObject', () => {
-      const patchObject = Object.assign(
-        {
-          pathUuid: 'BBBBBB',
-          nameUuid: 'BBBBBB',
-          mimeType: 'BBBBBB',
-          thumbnailUrl: 'BBBBBB',
-          creation: currentDate.format(DATE_TIME_FORMAT),
-          lastContentModification: currentDate.format(DATE_TIME_FORMAT),
-        },
-        new DocumentObject()
-      );
-
-      const returnedFromService = Object.assign(patchObject, elemDefault);
-
-      const expected = Object.assign(
-        {
-          creation: currentDate,
-          lastContentModification: currentDate,
-        },
-        returnedFromService
-      );
+      const patchObject = { ...sampleWithPartialData };
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
 
       service.partialUpdate(patchObject).subscribe(resp => (expectedResult = resp.body));
 
@@ -149,87 +76,66 @@ describe('DocumentObject Service', () => {
     });
 
     it('should return a list of DocumentObject', () => {
-      const returnedFromService = Object.assign(
-        {
-          id: 1,
-          path: 'BBBBBB',
-          name: 'BBBBBB',
-          pathUuid: 'BBBBBB',
-          nameUuid: 'BBBBBB',
-          mimeType: 'BBBBBB',
-          objectUrl: 'BBBBBB',
-          thumbnailUrl: 'BBBBBB',
-          byteSize: 1,
-          numberOfPages: 1,
-          creation: currentDate.format(DATE_TIME_FORMAT),
-          lastContentModification: currentDate.format(DATE_TIME_FORMAT),
-          documentPolicy: 'BBBBBB',
-        },
-        elemDefault
-      );
+      const returnedFromService = { ...requireRestSample };
 
-      const expected = Object.assign(
-        {
-          creation: currentDate,
-          lastContentModification: currentDate,
-        },
-        returnedFromService
-      );
+      const expected = { ...sampleWithRequiredData };
 
       service.query().subscribe(resp => (expectedResult = resp.body));
 
       const req = httpMock.expectOne({ method: 'GET' });
       req.flush([returnedFromService]);
       httpMock.verify();
-      expect(expectedResult).toContainEqual(expected);
+      expect(expectedResult).toMatchObject([expected]);
     });
 
     it('should delete a DocumentObject', () => {
+      const expected = true;
+
       service.delete(123).subscribe(resp => (expectedResult = resp.ok));
 
       const req = httpMock.expectOne({ method: 'DELETE' });
       req.flush({ status: 200 });
-      expect(expectedResult);
+      expect(expectedResult).toBe(expected);
     });
 
     describe('addDocumentObjectToCollectionIfMissing', () => {
       it('should add a DocumentObject to an empty array', () => {
-        const documentObject: IDocumentObject = { id: 123 };
+        const documentObject: IDocumentObject = sampleWithRequiredData;
         expectedResult = service.addDocumentObjectToCollectionIfMissing([], documentObject);
         expect(expectedResult).toHaveLength(1);
         expect(expectedResult).toContain(documentObject);
       });
 
       it('should not add a DocumentObject to an array that contains it', () => {
-        const documentObject: IDocumentObject = { id: 123 };
+        const documentObject: IDocumentObject = sampleWithRequiredData;
         const documentObjectCollection: IDocumentObject[] = [
           {
             ...documentObject,
           },
-          { id: 456 },
+          sampleWithPartialData,
         ];
         expectedResult = service.addDocumentObjectToCollectionIfMissing(documentObjectCollection, documentObject);
         expect(expectedResult).toHaveLength(2);
       });
 
       it("should add a DocumentObject to an array that doesn't contain it", () => {
-        const documentObject: IDocumentObject = { id: 123 };
-        const documentObjectCollection: IDocumentObject[] = [{ id: 456 }];
+        const documentObject: IDocumentObject = sampleWithRequiredData;
+        const documentObjectCollection: IDocumentObject[] = [sampleWithPartialData];
         expectedResult = service.addDocumentObjectToCollectionIfMissing(documentObjectCollection, documentObject);
         expect(expectedResult).toHaveLength(2);
         expect(expectedResult).toContain(documentObject);
       });
 
       it('should add only unique DocumentObject to an array', () => {
-        const documentObjectArray: IDocumentObject[] = [{ id: 123 }, { id: 456 }, { id: 79838 }];
-        const documentObjectCollection: IDocumentObject[] = [{ id: 123 }];
+        const documentObjectArray: IDocumentObject[] = [sampleWithRequiredData, sampleWithPartialData, sampleWithFullData];
+        const documentObjectCollection: IDocumentObject[] = [sampleWithRequiredData];
         expectedResult = service.addDocumentObjectToCollectionIfMissing(documentObjectCollection, ...documentObjectArray);
         expect(expectedResult).toHaveLength(3);
       });
 
       it('should accept varargs', () => {
-        const documentObject: IDocumentObject = { id: 123 };
-        const documentObject2: IDocumentObject = { id: 456 };
+        const documentObject: IDocumentObject = sampleWithRequiredData;
+        const documentObject2: IDocumentObject = sampleWithPartialData;
         expectedResult = service.addDocumentObjectToCollectionIfMissing([], documentObject, documentObject2);
         expect(expectedResult).toHaveLength(2);
         expect(expectedResult).toContain(documentObject);
@@ -237,16 +143,60 @@ describe('DocumentObject Service', () => {
       });
 
       it('should accept null and undefined values', () => {
-        const documentObject: IDocumentObject = { id: 123 };
+        const documentObject: IDocumentObject = sampleWithRequiredData;
         expectedResult = service.addDocumentObjectToCollectionIfMissing([], null, documentObject, undefined);
         expect(expectedResult).toHaveLength(1);
         expect(expectedResult).toContain(documentObject);
       });
 
       it('should return initial array if no DocumentObject is added', () => {
-        const documentObjectCollection: IDocumentObject[] = [{ id: 123 }];
+        const documentObjectCollection: IDocumentObject[] = [sampleWithRequiredData];
         expectedResult = service.addDocumentObjectToCollectionIfMissing(documentObjectCollection, undefined, null);
         expect(expectedResult).toEqual(documentObjectCollection);
+      });
+    });
+
+    describe('compareDocumentObject', () => {
+      it('Should return true if both entities are null', () => {
+        const entity1 = null;
+        const entity2 = null;
+
+        const compareResult = service.compareDocumentObject(entity1, entity2);
+
+        expect(compareResult).toEqual(true);
+      });
+
+      it('Should return false if one entity is null', () => {
+        const entity1 = { id: 123 };
+        const entity2 = null;
+
+        const compareResult1 = service.compareDocumentObject(entity1, entity2);
+        const compareResult2 = service.compareDocumentObject(entity2, entity1);
+
+        expect(compareResult1).toEqual(false);
+        expect(compareResult2).toEqual(false);
+      });
+
+      it('Should return false if primaryKey differs', () => {
+        const entity1 = { id: 123 };
+        const entity2 = { id: 456 };
+
+        const compareResult1 = service.compareDocumentObject(entity1, entity2);
+        const compareResult2 = service.compareDocumentObject(entity2, entity1);
+
+        expect(compareResult1).toEqual(false);
+        expect(compareResult2).toEqual(false);
+      });
+
+      it('Should return false if primaryKey matches', () => {
+        const entity1 = { id: 123 };
+        const entity2 = { id: 123 };
+
+        const compareResult1 = service.compareDocumentObject(entity1, entity2);
+        const compareResult2 = service.compareDocumentObject(entity2, entity1);
+
+        expect(compareResult1).toEqual(true);
+        expect(compareResult2).toEqual(true);
       });
     });
   });

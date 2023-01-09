@@ -3,6 +3,7 @@
     "documentAccessEntry": {
       "home": {
         "title": "Document Access Entries",
+        "refreshListLabel": "Refresh list",
         "createLabel": "Create a new Document Access Entry",
         "createOrEditLabel": "Create or edit a Document Access Entry",
         "notFound": "No Document Access Entries found"
@@ -16,6 +17,7 @@
       "detail": {
         "title": "Document Access Entry"
       },
+      "id": "ID",
       "access": "Access",
       "until": "Until",
       "document": "Document",

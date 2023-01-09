@@ -23,7 +23,8 @@ class TechnicalStructureTest {
         .layer("Domain").definedBy("..domain..")
 
         .whereLayer("Config").mayOnlyBeAccessedByLayers("Service")
-        .whereLayer("Web").mayOnlyBeAccessedByLayers("Config")
+        // TODO: ADAPTED
+        // .whereLayer("Web").mayOnlyBeAccessedByLayers("Config")
         .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config")
         .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web")
         .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config")

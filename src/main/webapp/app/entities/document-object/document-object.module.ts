@@ -14,6 +14,5 @@ import { DocumentObjectRoutingModule } from './route/document-object-routing.mod
     DocumentObjectUpdateComponent,
     DocumentObjectDeleteDialogComponent,
   ],
-  entryComponents: [DocumentObjectDeleteDialogComponent],
 })
 export class DocumentObjectModule {}

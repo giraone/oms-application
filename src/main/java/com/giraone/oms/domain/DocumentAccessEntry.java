@@ -1,16 +1,13 @@
 package com.giraone.oms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
+import com.giraone.oms.domain.enumeration.AccessType;
 import java.io.Serializable;
 import java.time.Instant;
-
-import com.giraone.oms.domain.enumeration.AccessType;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A document access entry (access control entry)
@@ -18,6 +15,7 @@ import com.giraone.oms.domain.enumeration.AccessType;
 @Entity
 @Table(name = "document_access_entry")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class DocumentAccessEntry implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,6 +23,7 @@ public class DocumentAccessEntry implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
     private Long id;
 
     @NotNull
@@ -37,17 +36,22 @@ public class DocumentAccessEntry implements Serializable {
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties(value = "documentAccessEntries", allowSetters = true)
+    @JsonIgnoreProperties(value = { "owner" }, allowSetters = true)
     private DocumentObject document;
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties(value = "documentAccessEntries", allowSetters = true)
     private User grantee;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public DocumentAccessEntry id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
@@ -55,11 +59,11 @@ public class DocumentAccessEntry implements Serializable {
     }
 
     public AccessType getAccess() {
-        return access;
+        return this.access;
     }
 
     public DocumentAccessEntry access(AccessType access) {
-        this.access = access;
+        this.setAccess(access);
         return this;
     }
 
@@ -68,11 +72,11 @@ public class DocumentAccessEntry implements Serializable {
     }
 
     public Instant getUntil() {
-        return until;
+        return this.until;
     }
 
     public DocumentAccessEntry until(Instant until) {
-        this.until = until;
+        this.setUntil(until);
         return this;
     }
 
@@ -81,30 +85,31 @@ public class DocumentAccessEntry implements Serializable {
     }
 
     public DocumentObject getDocument() {
-        return document;
-    }
-
-    public DocumentAccessEntry document(DocumentObject documentObject) {
-        this.document = documentObject;
-        return this;
+        return this.document;
     }
 
     public void setDocument(DocumentObject documentObject) {
         this.document = documentObject;
     }
 
-    public User getGrantee() {
-        return grantee;
+    public DocumentAccessEntry document(DocumentObject documentObject) {
+        this.setDocument(documentObject);
+        return this;
     }
 
-    public DocumentAccessEntry grantee(User user) {
-        this.grantee = user;
-        return this;
+    public User getGrantee() {
+        return this.grantee;
     }
 
     public void setGrantee(User user) {
         this.grantee = user;
     }
+
+    public DocumentAccessEntry grantee(User user) {
+        this.setGrantee(user);
+        return this;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -120,7 +125,8 @@ public class DocumentAccessEntry implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

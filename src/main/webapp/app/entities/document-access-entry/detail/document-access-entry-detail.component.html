@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <div *ngIf="documentAccessEntry">
+      <h2 data-cy="documentAccessEntryDetailsHeading">
+        <span jhiTranslate="omsApp.documentAccessEntry.detail.title">Document Access Entry</span>
+      </h2>
+
+      <hr />
+
+      <jhi-alert-error></jhi-alert-error>
+
+      <jhi-alert></jhi-alert>
+
+      <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="global.field.id">ID</span></dt>
+        <dd>
+          <span>{{ documentAccessEntry.id }}</span>
+        </dd>
+        <dt><span jhiTranslate="omsApp.documentAccessEntry.access">Access</span></dt>
+        <dd>
+          <span jhiTranslate="{{ 'omsApp.AccessType.' + documentAccessEntry.access }}">{{ documentAccessEntry.access }}</span>
+        </dd>
+        <dt><span jhiTranslate="omsApp.documentAccessEntry.until">Until</span></dt>
+        <dd>
+          <span>{{ documentAccessEntry.until | formatMediumDatetime }}</span>
+        </dd>
+        <dt><span jhiTranslate="omsApp.documentAccessEntry.document">Document</span></dt>
+        <dd>
+          <div *ngIf="documentAccessEntry.document">
+            <a [routerLink]="['/document-object', documentAccessEntry.document.id, 'view']">{{ documentAccessEntry.document.id }}</a>
+          </div>
+        </dd>
+        <dt><span jhiTranslate="omsApp.documentAccessEntry.grantee">Grantee</span></dt>
+        <dd>
+          <span>{{ documentAccessEntry.grantee?.id }}</span>
+        </dd>
+      </dl>
+
+      <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+        <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+      </button>
+
+      <button type="button" [routerLink]="['/document-access-entry', documentAccessEntry.id, 'edit']" class="btn btn-primary">
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

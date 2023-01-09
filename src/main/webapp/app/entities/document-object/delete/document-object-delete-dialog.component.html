@@ -7,13 +7,12 @@
 
   <div class="modal-body">
     <jhi-alert-error></jhi-alert-error>
-
     <p
       id="jhi-delete-documentObject-heading"
       jhiTranslate="omsApp.documentObject.delete.question"
       [translateValues]="{ id: documentObject.id }"
     >
-      Are you sure you want to delete this Document Object?
+      Are you sure you want to delete Document Object {{ documentObject.id }}?
     </p>
   </div>
 

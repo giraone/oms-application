@@ -3,9 +3,9 @@
     <span jhiTranslate="omsApp.documentObject.home.title">Document Objects</span>
 
     <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="loadPage()" [disabled]="isLoading">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [spin]="isLoading"></fa-icon>
-        <span jhiTranslate="omsApp.documentObject.home.refreshListLabel">Refresh List</span>
+        <span jhiTranslate="omsApp.documentObject.home.refreshListLabel">Refresh list</span>
       </button>
 
       <button
@@ -25,46 +25,96 @@
   <jhi-alert></jhi-alert>
 
   <div class="alert alert-warning" id="no-result" *ngIf="documentObjects?.length === 0">
-    <span jhiTranslate="omsApp.documentObject.home.notFound">No documentObjects found</span>
+    <span jhiTranslate="omsApp.documentObject.home.notFound">No Document Objects found</span>
   </div>
 
-  <div class="table-responsive" id="entities" *ngIf="documentObjects && documentObjects.length > 0">
+  <div class="table-responsive table-entities" id="entities" *ngIf="documentObjects && documentObjects.length > 0">
     <table class="table table-striped" aria-describedby="page-heading">
       <thead>
-        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" (sortChange)="loadPage()">
-          <th scope="col" jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon icon="sort"></fa-icon></th>
-          <th scope="col" jhiSortBy="path"><span jhiTranslate="omsApp.documentObject.path">Path</span> <fa-icon icon="sort"></fa-icon></th>
-          <th scope="col" jhiSortBy="name"><span jhiTranslate="omsApp.documentObject.name">Name</span> <fa-icon icon="sort"></fa-icon></th>
+        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" (sortChange)="navigateToWithComponentValues()">
+          <th scope="col" jhiSortBy="id">
+            <div class="d-flex">
+              <span jhiTranslate="global.field.id">ID</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col" jhiSortBy="path">
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.path">Path</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col" jhiSortBy="name">
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.name">Name</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
           <th scope="col" jhiSortBy="pathUuid">
-            <span jhiTranslate="omsApp.documentObject.pathUuid">Path Uuid</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.pathUuid">Path Uuid</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="nameUuid">
-            <span jhiTranslate="omsApp.documentObject.nameUuid">Name Uuid</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.nameUuid">Name Uuid</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="mimeType">
-            <span jhiTranslate="omsApp.documentObject.mimeType">Mime Type</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.mimeType">Mime Type</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="objectUrl">
-            <span jhiTranslate="omsApp.documentObject.objectUrl">Object Url</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.objectUrl">Object Url</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="thumbnailUrl">
-            <span jhiTranslate="omsApp.documentObject.thumbnailUrl">Thumbnail Url</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.thumbnailUrl">Thumbnail Url</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="byteSize">
-            <span jhiTranslate="omsApp.documentObject.byteSize">Byte Size</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.byteSize">Byte Size</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="numberOfPages">
-            <span jhiTranslate="omsApp.documentObject.numberOfPages">Number Of Pages</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.numberOfPages">Number Of Pages</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="creation">
-            <span jhiTranslate="omsApp.documentObject.creation">Creation</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.creation">Creation</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="lastContentModification">
-            <span jhiTranslate="omsApp.documentObject.lastContentModification">Last Content Modification</span>
-            <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.lastContentModification">Last Content Modification</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col" jhiSortBy="documentPolicy">
-            <span jhiTranslate="omsApp.documentObject.documentPolicy">Document Policy</span> <fa-icon icon="sort"></fa-icon>
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.documentPolicy">Document Policy</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
+          </th>
+          <th scope="col" jhiSortBy="owner.id">
+            <div class="d-flex">
+              <span jhiTranslate="omsApp.documentObject.owner">Owner</span>
+              <fa-icon class="p-1" icon="sort"></fa-icon>
+            </div>
           </th>
           <th scope="col"></th>
         </tr>
@@ -86,6 +136,9 @@
           <td>{{ documentObject.creation | formatMediumDatetime }}</td>
           <td>{{ documentObject.lastContentModification | formatMediumDatetime }}</td>
           <td jhiTranslate="{{ 'omsApp.DocumentPolicy.' + documentObject.documentPolicy }}">{{ documentObject.documentPolicy }}</td>
+          <td>
+            {{ documentObject.owner?.id }}
+          </td>
           <td class="text-end">
             <div class="btn-group">
               <button
@@ -127,12 +180,12 @@
     <div class="d-flex justify-content-center">
       <ngb-pagination
         [collectionSize]="totalItems"
-        [(page)]="ngbPaginationPage"
+        [page]="page"
         [pageSize]="itemsPerPage"
         [maxSize]="5"
         [rotate]="true"
         [boundaryLinks]="true"
-        (pageChange)="loadPage($event)"
+        (pageChange)="navigateToPage($event)"
       ></ngb-pagination>
     </div>
   </div>

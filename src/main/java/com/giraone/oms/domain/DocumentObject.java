@@ -1,16 +1,12 @@
 package com.giraone.oms.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
+import com.giraone.oms.domain.enumeration.DocumentPolicy;
 import java.io.Serializable;
 import java.time.Instant;
-
-import com.giraone.oms.domain.enumeration.DocumentPolicy;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A document entity.
@@ -18,6 +14,7 @@ import com.giraone.oms.domain.enumeration.DocumentPolicy;
 @Entity
 @Table(name = "document_object")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class DocumentObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,6 +22,7 @@ public class DocumentObject implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
     private Long id;
 
     /**
@@ -100,7 +98,7 @@ public class DocumentObject implements Serializable {
     private Instant lastContentModification;
 
     /**
-     * Simple policy to show attribute based access controls
+     * Simple policy to show attribute based access control
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "document_policy")
@@ -108,12 +106,17 @@ public class DocumentObject implements Serializable {
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties(value = "documentObjects", allowSetters = true)
     private User owner;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public DocumentObject id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
@@ -121,11 +124,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public DocumentObject path(String path) {
-        this.path = path;
+        this.setPath(path);
         return this;
     }
 
@@ -134,11 +137,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public DocumentObject name(String name) {
-        this.name = name;
+        this.setName(name);
         return this;
     }
 
@@ -147,11 +150,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getPathUuid() {
-        return pathUuid;
+        return this.pathUuid;
     }
 
     public DocumentObject pathUuid(String pathUuid) {
-        this.pathUuid = pathUuid;
+        this.setPathUuid(pathUuid);
         return this;
     }
 
@@ -160,11 +163,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getNameUuid() {
-        return nameUuid;
+        return this.nameUuid;
     }
 
     public DocumentObject nameUuid(String nameUuid) {
-        this.nameUuid = nameUuid;
+        this.setNameUuid(nameUuid);
         return this;
     }
 
@@ -173,11 +176,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getMimeType() {
-        return mimeType;
+        return this.mimeType;
     }
 
     public DocumentObject mimeType(String mimeType) {
-        this.mimeType = mimeType;
+        this.setMimeType(mimeType);
         return this;
     }
 
@@ -186,11 +189,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getObjectUrl() {
-        return objectUrl;
+        return this.objectUrl;
     }
 
     public DocumentObject objectUrl(String objectUrl) {
-        this.objectUrl = objectUrl;
+        this.setObjectUrl(objectUrl);
         return this;
     }
 
@@ -199,11 +202,11 @@ public class DocumentObject implements Serializable {
     }
 
     public String getThumbnailUrl() {
-        return thumbnailUrl;
+        return this.thumbnailUrl;
     }
 
     public DocumentObject thumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+        this.setThumbnailUrl(thumbnailUrl);
         return this;
     }
 
@@ -212,11 +215,11 @@ public class DocumentObject implements Serializable {
     }
 
     public Long getByteSize() {
-        return byteSize;
+        return this.byteSize;
     }
 
     public DocumentObject byteSize(Long byteSize) {
-        this.byteSize = byteSize;
+        this.setByteSize(byteSize);
         return this;
     }
 
@@ -225,11 +228,11 @@ public class DocumentObject implements Serializable {
     }
 
     public Integer getNumberOfPages() {
-        return numberOfPages;
+        return this.numberOfPages;
     }
 
     public DocumentObject numberOfPages(Integer numberOfPages) {
-        this.numberOfPages = numberOfPages;
+        this.setNumberOfPages(numberOfPages);
         return this;
     }
 
@@ -238,11 +241,11 @@ public class DocumentObject implements Serializable {
     }
 
     public Instant getCreation() {
-        return creation;
+        return this.creation;
     }
 
     public DocumentObject creation(Instant creation) {
-        this.creation = creation;
+        this.setCreation(creation);
         return this;
     }
 
@@ -251,11 +254,11 @@ public class DocumentObject implements Serializable {
     }
 
     public Instant getLastContentModification() {
-        return lastContentModification;
+        return this.lastContentModification;
     }
 
     public DocumentObject lastContentModification(Instant lastContentModification) {
-        this.lastContentModification = lastContentModification;
+        this.setLastContentModification(lastContentModification);
         return this;
     }
 
@@ -264,11 +267,11 @@ public class DocumentObject implements Serializable {
     }
 
     public DocumentPolicy getDocumentPolicy() {
-        return documentPolicy;
+        return this.documentPolicy;
     }
 
     public DocumentObject documentPolicy(DocumentPolicy documentPolicy) {
-        this.documentPolicy = documentPolicy;
+        this.setDocumentPolicy(documentPolicy);
         return this;
     }
 
@@ -277,17 +280,18 @@ public class DocumentObject implements Serializable {
     }
 
     public User getOwner() {
-        return owner;
-    }
-
-    public DocumentObject owner(User user) {
-        this.owner = user;
-        return this;
+        return this.owner;
     }
 
     public void setOwner(User user) {
         this.owner = user;
     }
+
+    public DocumentObject owner(User user) {
+        this.setOwner(user);
+        return this;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -303,7 +307,8 @@ public class DocumentObject implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

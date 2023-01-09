@@ -1,28 +1,25 @@
 package com.giraone.oms.web.rest;
 
+import com.giraone.oms.repository.DocumentAccessEntryRepository;
 import com.giraone.oms.service.DocumentAccessEntryService;
 import com.giraone.oms.service.dto.DocumentAccessEntryDTO;
 import com.giraone.oms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -44,8 +41,14 @@ public class DocumentAccessEntryResource {
 
     private final DocumentAccessEntryService documentAccessEntryService;
 
-    public DocumentAccessEntryResource(DocumentAccessEntryService documentAccessEntryService) {
+    private final DocumentAccessEntryRepository documentAccessEntryRepository;
+
+    public DocumentAccessEntryResource(
+        DocumentAccessEntryService documentAccessEntryService,
+        DocumentAccessEntryRepository documentAccessEntryRepository
+    ) {
         this.documentAccessEntryService = documentAccessEntryService;
+        this.documentAccessEntryRepository = documentAccessEntryRepository;
     }
 
     /**
@@ -71,27 +74,73 @@ public class DocumentAccessEntryResource {
     }
 
     /**
-     * {@code PUT  /document-access-entries} : Updates an existing documentAccessEntry.
+     * {@code PUT  /document-access-entries/:id} : Updates an existing documentAccessEntry.
      *
+     * @param id the id of the documentAccessEntryDTO to save.
      * @param documentAccessEntryDTO the documentAccessEntryDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentAccessEntryDTO,
      * or with status {@code 400 (Bad Request)} if the documentAccessEntryDTO is not valid,
      * or with status {@code 500 (Internal Server Error)} if the documentAccessEntryDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/document-access-entries")
+    @PutMapping("/document-access-entries/{id}")
     public ResponseEntity<DocumentAccessEntryDTO> updateDocumentAccessEntry(
+        @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody DocumentAccessEntryDTO documentAccessEntryDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update DocumentAccessEntry : {}", documentAccessEntryDTO);
+        log.debug("REST request to update DocumentAccessEntry : {}, {}", id, documentAccessEntryDTO);
         if (documentAccessEntryDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        DocumentAccessEntryDTO result = documentAccessEntryService.save(documentAccessEntryDTO);
+        if (!Objects.equals(id, documentAccessEntryDTO.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!documentAccessEntryRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        DocumentAccessEntryDTO result = documentAccessEntryService.update(documentAccessEntryDTO);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentAccessEntryDTO.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * {@code PATCH  /document-access-entries/:id} : Partial updates given fields of an existing documentAccessEntry, field will ignore if it is null
+     *
+     * @param id the id of the documentAccessEntryDTO to save.
+     * @param documentAccessEntryDTO the documentAccessEntryDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated documentAccessEntryDTO,
+     * or with status {@code 400 (Bad Request)} if the documentAccessEntryDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the documentAccessEntryDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the documentAccessEntryDTO couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PatchMapping(value = "/document-access-entries/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    public ResponseEntity<DocumentAccessEntryDTO> partialUpdateDocumentAccessEntry(
+        @PathVariable(value = "id", required = false) final Long id,
+        @NotNull @RequestBody DocumentAccessEntryDTO documentAccessEntryDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to partial update DocumentAccessEntry partially : {}, {}", id, documentAccessEntryDTO);
+        if (documentAccessEntryDTO.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, documentAccessEntryDTO.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!documentAccessEntryRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        Optional<DocumentAccessEntryDTO> result = documentAccessEntryService.partialUpdate(documentAccessEntryDTO);
+
+        return ResponseUtil.wrapOrNotFound(
+            result,
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, documentAccessEntryDTO.getId().toString())
+        );
     }
 
     /**
@@ -101,7 +150,9 @@ public class DocumentAccessEntryResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of documentAccessEntries in body.
      */
     @GetMapping("/document-access-entries")
-    public ResponseEntity<List<DocumentAccessEntryDTO>> getAllDocumentAccessEntries(Pageable pageable) {
+    public ResponseEntity<List<DocumentAccessEntryDTO>> getAllDocumentAccessEntries(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable
+    ) {
         log.debug("REST request to get a page of DocumentAccessEntries");
         Page<DocumentAccessEntryDTO> page = documentAccessEntryService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);

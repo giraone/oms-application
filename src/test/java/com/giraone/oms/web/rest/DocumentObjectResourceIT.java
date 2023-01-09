@@ -1,40 +1,39 @@
 package com.giraone.oms.web.rest;
 
-import com.giraone.oms.OmsApp;
-import com.giraone.oms.domain.DocumentObject;
-import com.giraone.oms.domain.User;
-import com.giraone.oms.repository.DocumentObjectRepository;
-import com.giraone.oms.service.DocumentObjectService;
-import com.giraone.oms.service.dto.DocumentObjectDTO;
-import com.giraone.oms.service.mapper.DocumentObjectMapper;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityManager;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.giraone.oms.IntegrationTest;
+import com.giraone.oms.domain.DocumentObject;
+import com.giraone.oms.domain.User;
 import com.giraone.oms.domain.enumeration.DocumentPolicy;
+import com.giraone.oms.repository.DocumentObjectRepository;
+import com.giraone.oms.service.dto.DocumentObjectDTO;
+import com.giraone.oms.service.mapper.DocumentObjectMapper;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * Integration tests for the {@link DocumentObjectResource} REST controller.
  */
-@SpringBootTest(classes = OmsApp.class)
+@IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-public class DocumentObjectResourceIT {
+class DocumentObjectResourceIT {
 
     private static final String DEFAULT_PATH = "AAAAAAAAAA";
     private static final String UPDATED_PATH = "BBBBBBBBBB";
@@ -72,14 +71,17 @@ public class DocumentObjectResourceIT {
     private static final DocumentPolicy DEFAULT_DOCUMENT_POLICY = DocumentPolicy.PRIVATE;
     private static final DocumentPolicy UPDATED_DOCUMENT_POLICY = DocumentPolicy.PUBLIC;
 
+    private static final String ENTITY_API_URL = "/api/document-objects";
+    private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
+
+    private static Random random = new Random();
+    private static AtomicLong count = new AtomicLong(random.nextInt() + (2 * Integer.MAX_VALUE));
+
     @Autowired
     private DocumentObjectRepository documentObjectRepository;
 
     @Autowired
     private DocumentObjectMapper documentObjectMapper;
-
-    @Autowired
-    private DocumentObjectService documentObjectService;
 
     @Autowired
     private EntityManager em;
@@ -116,6 +118,7 @@ public class DocumentObjectResourceIT {
         documentObject.setOwner(user);
         return documentObject;
     }
+
     /**
      * Create an updated entity for this test.
      *
@@ -151,13 +154,14 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void createDocumentObject() throws Exception {
+    void createDocumentObject() throws Exception {
         int databaseSizeBeforeCreate = documentObjectRepository.findAll().size();
         // Create the DocumentObject
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isCreated());
 
         // Validate the DocumentObject in the database
@@ -180,17 +184,18 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void createDocumentObjectWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = documentObjectRepository.findAll().size();
-
+    void createDocumentObjectWithExistingId() throws Exception {
         // Create the DocumentObject with an existing ID
         documentObject.setId(1L);
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
+        int databaseSizeBeforeCreate = documentObjectRepository.findAll().size();
+
         // An entity with an existing ID cannot be created, so this API call must fail
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the DocumentObject in the database
@@ -198,10 +203,9 @@ public class DocumentObjectResourceIT {
         assertThat(documentObjectList).hasSize(databaseSizeBeforeCreate);
     }
 
-
     @Test
     @Transactional
-    public void checkPathIsRequired() throws Exception {
+    void checkPathIsRequired() throws Exception {
         int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
         // set the field null
         documentObject.setPath(null);
@@ -209,10 +213,10 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
-
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
@@ -221,7 +225,7 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void checkNameIsRequired() throws Exception {
+    void checkNameIsRequired() throws Exception {
         int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
         // set the field null
         documentObject.setName(null);
@@ -229,10 +233,10 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
-
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
@@ -241,7 +245,7 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void checkPathUuidIsRequired() throws Exception {
+    void checkPathUuidIsRequired() throws Exception {
         int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
         // set the field null
         documentObject.setPathUuid(null);
@@ -249,10 +253,10 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
-
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
@@ -261,7 +265,7 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void checkNameUuidIsRequired() throws Exception {
+    void checkNameUuidIsRequired() throws Exception {
         int databaseSizeBeforeTest = documentObjectRepository.findAll().size();
         // set the field null
         documentObject.setNameUuid(null);
@@ -269,10 +273,10 @@ public class DocumentObjectResourceIT {
         // Create the DocumentObject, which fails.
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
-
-        restDocumentObjectMockMvc.perform(post("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
@@ -281,12 +285,13 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void getAllDocumentObjects() throws Exception {
+    void getAllDocumentObjects() throws Exception {
         // Initialize the database
         documentObjectRepository.saveAndFlush(documentObject);
 
         // Get all the documentObjectList
-        restDocumentObjectMockMvc.perform(get("/api/document-objects?sort=id,desc"))
+        restDocumentObjectMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(documentObject.getId().intValue())))
@@ -303,15 +308,16 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.[*].lastContentModification").value(hasItem(DEFAULT_LAST_CONTENT_MODIFICATION.toString())))
             .andExpect(jsonPath("$.[*].documentPolicy").value(hasItem(DEFAULT_DOCUMENT_POLICY.toString())));
     }
-    
+
     @Test
     @Transactional
-    public void getDocumentObject() throws Exception {
+    void getDocumentObject() throws Exception {
         // Initialize the database
         documentObjectRepository.saveAndFlush(documentObject);
 
         // Get the documentObject
-        restDocumentObjectMockMvc.perform(get("/api/document-objects/{id}", documentObject.getId()))
+        restDocumentObjectMockMvc
+            .perform(get(ENTITY_API_URL_ID, documentObject.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(documentObject.getId().intValue()))
@@ -328,17 +334,17 @@ public class DocumentObjectResourceIT {
             .andExpect(jsonPath("$.lastContentModification").value(DEFAULT_LAST_CONTENT_MODIFICATION.toString()))
             .andExpect(jsonPath("$.documentPolicy").value(DEFAULT_DOCUMENT_POLICY.toString()));
     }
+
     @Test
     @Transactional
-    public void getNonExistingDocumentObject() throws Exception {
+    void getNonExistingDocumentObject() throws Exception {
         // Get the documentObject
-        restDocumentObjectMockMvc.perform(get("/api/document-objects/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restDocumentObjectMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    public void updateDocumentObject() throws Exception {
+    void putExistingDocumentObject() throws Exception {
         // Initialize the database
         documentObjectRepository.saveAndFlush(documentObject);
 
@@ -363,9 +369,12 @@ public class DocumentObjectResourceIT {
             .documentPolicy(UPDATED_DOCUMENT_POLICY);
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(updatedDocumentObject);
 
-        restDocumentObjectMockMvc.perform(put("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, documentObjectDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isOk());
 
         // Validate the DocumentObject in the database
@@ -388,16 +397,20 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void updateNonExistingDocumentObject() throws Exception {
+    void putNonExistingDocumentObject() throws Exception {
         int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
 
         // Create the DocumentObject
         DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restDocumentObjectMockMvc.perform(put("/api/document-objects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO)))
+        restDocumentObjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, documentObjectDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the DocumentObject in the database
@@ -407,15 +420,228 @@ public class DocumentObjectResourceIT {
 
     @Test
     @Transactional
-    public void deleteDocumentObject() throws Exception {
+    void putWithIdMismatchDocumentObject() throws Exception {
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
+
+        // Create the DocumentObject
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restDocumentObjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void putWithMissingIdPathParamDocumentObject() throws Exception {
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
+
+        // Create the DocumentObject
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restDocumentObjectMockMvc
+            .perform(
+                put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void partialUpdateDocumentObjectWithPatch() throws Exception {
+        // Initialize the database
+        documentObjectRepository.saveAndFlush(documentObject);
+
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+
+        // Update the documentObject using partial update
+        DocumentObject partialUpdatedDocumentObject = new DocumentObject();
+        partialUpdatedDocumentObject.setId(documentObject.getId());
+
+        partialUpdatedDocumentObject
+            .name(UPDATED_NAME)
+            .pathUuid(UPDATED_PATH_UUID)
+            .objectUrl(UPDATED_OBJECT_URL)
+            .thumbnailUrl(UPDATED_THUMBNAIL_URL)
+            .byteSize(UPDATED_BYTE_SIZE)
+            .numberOfPages(UPDATED_NUMBER_OF_PAGES)
+            .creation(UPDATED_CREATION)
+            .documentPolicy(UPDATED_DOCUMENT_POLICY);
+
+        restDocumentObjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedDocumentObject.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedDocumentObject))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+        DocumentObject testDocumentObject = documentObjectList.get(documentObjectList.size() - 1);
+        assertThat(testDocumentObject.getPath()).isEqualTo(DEFAULT_PATH);
+        assertThat(testDocumentObject.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testDocumentObject.getPathUuid()).isEqualTo(UPDATED_PATH_UUID);
+        assertThat(testDocumentObject.getNameUuid()).isEqualTo(DEFAULT_NAME_UUID);
+        assertThat(testDocumentObject.getMimeType()).isEqualTo(DEFAULT_MIME_TYPE);
+        assertThat(testDocumentObject.getObjectUrl()).isEqualTo(UPDATED_OBJECT_URL);
+        assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(UPDATED_THUMBNAIL_URL);
+        assertThat(testDocumentObject.getByteSize()).isEqualTo(UPDATED_BYTE_SIZE);
+        assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(UPDATED_NUMBER_OF_PAGES);
+        assertThat(testDocumentObject.getCreation()).isEqualTo(UPDATED_CREATION);
+        assertThat(testDocumentObject.getLastContentModification()).isEqualTo(DEFAULT_LAST_CONTENT_MODIFICATION);
+        assertThat(testDocumentObject.getDocumentPolicy()).isEqualTo(UPDATED_DOCUMENT_POLICY);
+    }
+
+    @Test
+    @Transactional
+    void fullUpdateDocumentObjectWithPatch() throws Exception {
+        // Initialize the database
+        documentObjectRepository.saveAndFlush(documentObject);
+
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+
+        // Update the documentObject using partial update
+        DocumentObject partialUpdatedDocumentObject = new DocumentObject();
+        partialUpdatedDocumentObject.setId(documentObject.getId());
+
+        partialUpdatedDocumentObject
+            .path(UPDATED_PATH)
+            .name(UPDATED_NAME)
+            .pathUuid(UPDATED_PATH_UUID)
+            .nameUuid(UPDATED_NAME_UUID)
+            .mimeType(UPDATED_MIME_TYPE)
+            .objectUrl(UPDATED_OBJECT_URL)
+            .thumbnailUrl(UPDATED_THUMBNAIL_URL)
+            .byteSize(UPDATED_BYTE_SIZE)
+            .numberOfPages(UPDATED_NUMBER_OF_PAGES)
+            .creation(UPDATED_CREATION)
+            .lastContentModification(UPDATED_LAST_CONTENT_MODIFICATION)
+            .documentPolicy(UPDATED_DOCUMENT_POLICY);
+
+        restDocumentObjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedDocumentObject.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedDocumentObject))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+        DocumentObject testDocumentObject = documentObjectList.get(documentObjectList.size() - 1);
+        assertThat(testDocumentObject.getPath()).isEqualTo(UPDATED_PATH);
+        assertThat(testDocumentObject.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testDocumentObject.getPathUuid()).isEqualTo(UPDATED_PATH_UUID);
+        assertThat(testDocumentObject.getNameUuid()).isEqualTo(UPDATED_NAME_UUID);
+        assertThat(testDocumentObject.getMimeType()).isEqualTo(UPDATED_MIME_TYPE);
+        assertThat(testDocumentObject.getObjectUrl()).isEqualTo(UPDATED_OBJECT_URL);
+        assertThat(testDocumentObject.getThumbnailUrl()).isEqualTo(UPDATED_THUMBNAIL_URL);
+        assertThat(testDocumentObject.getByteSize()).isEqualTo(UPDATED_BYTE_SIZE);
+        assertThat(testDocumentObject.getNumberOfPages()).isEqualTo(UPDATED_NUMBER_OF_PAGES);
+        assertThat(testDocumentObject.getCreation()).isEqualTo(UPDATED_CREATION);
+        assertThat(testDocumentObject.getLastContentModification()).isEqualTo(UPDATED_LAST_CONTENT_MODIFICATION);
+        assertThat(testDocumentObject.getDocumentPolicy()).isEqualTo(UPDATED_DOCUMENT_POLICY);
+    }
+
+    @Test
+    @Transactional
+    void patchNonExistingDocumentObject() throws Exception {
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
+
+        // Create the DocumentObject
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        restDocumentObjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, documentObjectDTO.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithIdMismatchDocumentObject() throws Exception {
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
+
+        // Create the DocumentObject
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restDocumentObjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithMissingIdPathParamDocumentObject() throws Exception {
+        int databaseSizeBeforeUpdate = documentObjectRepository.findAll().size();
+        documentObject.setId(count.incrementAndGet());
+
+        // Create the DocumentObject
+        DocumentObjectDTO documentObjectDTO = documentObjectMapper.toDto(documentObject);
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restDocumentObjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL)
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(documentObjectDTO))
+            )
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the DocumentObject in the database
+        List<DocumentObject> documentObjectList = documentObjectRepository.findAll();
+        assertThat(documentObjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void deleteDocumentObject() throws Exception {
         // Initialize the database
         documentObjectRepository.saveAndFlush(documentObject);
 
         int databaseSizeBeforeDelete = documentObjectRepository.findAll().size();
 
         // Delete the documentObject
-        restDocumentObjectMockMvc.perform(delete("/api/document-objects/{id}", documentObject.getId())
-            .accept(MediaType.APPLICATION_JSON))
+        restDocumentObjectMockMvc
+            .perform(delete(ENTITY_API_URL_ID, documentObject.getId()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item

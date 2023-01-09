@@ -1,0 +1,118 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2
+        id="jhi-document-access-entry-heading"
+        data-cy="DocumentAccessEntryCreateUpdateHeading"
+        jhiTranslate="omsApp.documentAccessEntry.home.createOrEditLabel"
+      >
+        Create or edit a Document Access Entry
+      </h2>
+
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+
+        <div class="row mb-3" *ngIf="editForm.controls.id.value !== null">
+          <label class="form-label" jhiTranslate="global.field.id" for="field_id">ID</label>
+          <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="omsApp.documentAccessEntry.access" for="field_access">Access</label>
+          <select class="form-control" name="access" formControlName="access" id="field_access" data-cy="access">
+            <option [ngValue]="null">{{ 'omsApp.AccessType.null' | translate }}</option>
+            <option *ngFor="let accessType of accessTypeValues" [value]="accessType">
+              {{ 'omsApp.AccessType.' + accessType | translate }}
+            </option>
+          </select>
+          <div *ngIf="editForm.get('access')!.invalid && (editForm.get('access')!.dirty || editForm.get('access')!.touched)">
+            <small class="form-text text-danger" *ngIf="editForm.get('access')?.errors?.required" jhiTranslate="entity.validation.required">
+              This field is required.
+            </small>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="omsApp.documentAccessEntry.until" for="field_until">Until</label>
+          <div class="d-flex">
+            <input
+              id="field_until"
+              data-cy="until"
+              type="datetime-local"
+              class="form-control"
+              name="until"
+              formControlName="until"
+              placeholder="YYYY-MM-DD HH:mm"
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="omsApp.documentAccessEntry.document" for="field_document">Document</label>
+          <select
+            class="form-control"
+            id="field_document"
+            data-cy="document"
+            name="document"
+            formControlName="document"
+            [compareWith]="compareDocumentObject"
+          >
+            <option *ngIf="!editForm.get('document')!.value" [ngValue]="null" selected></option>
+            <option [ngValue]="documentObjectOption" *ngFor="let documentObjectOption of documentObjectsSharedCollection">
+              {{ documentObjectOption.id }}
+            </option>
+          </select>
+        </div>
+        <div *ngIf="editForm.get(['document'])!.invalid && (editForm.get(['document'])!.dirty || editForm.get(['document'])!.touched)">
+          <small
+            class="form-text text-danger"
+            *ngIf="editForm.get(['document'])?.errors?.required"
+            jhiTranslate="entity.validation.required"
+          >
+            This field is required.
+          </small>
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="omsApp.documentAccessEntry.grantee" for="field_grantee">Grantee</label>
+          <select
+            class="form-control"
+            id="field_grantee"
+            data-cy="grantee"
+            name="grantee"
+            formControlName="grantee"
+            [compareWith]="compareUser"
+          >
+            <option *ngIf="!editForm.get('grantee')!.value" [ngValue]="null" selected></option>
+            <option [ngValue]="userOption" *ngFor="let userOption of usersSharedCollection">{{ userOption.id }}</option>
+          </select>
+        </div>
+        <div *ngIf="editForm.get(['grantee'])!.invalid && (editForm.get(['grantee'])!.dirty || editForm.get(['grantee'])!.touched)">
+          <small
+            class="form-text text-danger"
+            *ngIf="editForm.get(['grantee'])?.errors?.required"
+            jhiTranslate="entity.validation.required"
+          >
+            This field is required.
+          </small>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

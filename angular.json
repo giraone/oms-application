@@ -98,7 +98,6 @@
       }
     }
   },
-  "defaultProject": "oms",
   "cli": {
     "cache": {
       "enabled": true,

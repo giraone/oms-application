@@ -1,13 +1,14 @@
 package com.giraone.oms.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.giraone.oms.web.rest.TestUtil;
 
-public class DocumentObjectTest {
+import com.giraone.oms.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class DocumentObjectTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(DocumentObject.class);
         DocumentObject documentObject1 = new DocumentObject();
         documentObject1.setId(1L);

@@ -1,6 +1,6 @@
 {
   "applications": "*",
-  "changelogDate": "20220615211053",
+  "changelogDate": "20230108164714",
   "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "document_object",
@@ -84,7 +84,6 @@
   "relationships": [
     {
       "otherEntityName": "user",
-      "otherEntityRelationshipName": "documentObject",
       "relationshipName": "owner",
       "relationshipType": "many-to-one",
       "relationshipValidateRules": "required"

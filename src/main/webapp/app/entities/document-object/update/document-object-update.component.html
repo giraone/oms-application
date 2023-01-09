@@ -12,7 +12,7 @@
       <div>
         <jhi-alert-error></jhi-alert-error>
 
-        <div class="row mb-3" [hidden]="editForm.get('id')!.value == null">
+        <div class="row mb-3" *ngIf="editForm.controls.id.value !== null">
           <label class="form-label" jhiTranslate="global.field.id" for="field_id">ID</label>
           <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
         </div>
@@ -242,6 +242,19 @@
               {{ 'omsApp.DocumentPolicy.' + documentPolicy | translate }}
             </option>
           </select>
+        </div>
+
+        <div class="row mb-3">
+          <label class="form-label" jhiTranslate="omsApp.documentObject.owner" for="field_owner">Owner</label>
+          <select class="form-control" id="field_owner" data-cy="owner" name="owner" formControlName="owner" [compareWith]="compareUser">
+            <option *ngIf="!editForm.get('owner')!.value" [ngValue]="null" selected></option>
+            <option [ngValue]="userOption" *ngFor="let userOption of usersSharedCollection">{{ userOption.id }}</option>
+          </select>
+        </div>
+        <div *ngIf="editForm.get(['owner'])!.invalid && (editForm.get(['owner'])!.dirty || editForm.get(['owner'])!.touched)">
+          <small class="form-text text-danger" *ngIf="editForm.get(['owner'])?.errors?.required" jhiTranslate="entity.validation.required">
+            This field is required.
+          </small>
         </div>
       </div>
 

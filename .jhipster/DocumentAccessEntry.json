@@ -1,6 +1,6 @@
 {
   "applications": "*",
-  "changelogDate": "20220615211054",
+  "changelogDate": "20230108164715",
   "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "document_access_entry",
@@ -25,14 +25,12 @@
   "relationships": [
     {
       "otherEntityName": "documentObject",
-      "otherEntityRelationshipName": "documentAccessEntry",
       "relationshipName": "document",
       "relationshipType": "many-to-one",
       "relationshipValidateRules": "required"
     },
     {
       "otherEntityName": "user",
-      "otherEntityRelationshipName": "documentAccessEntry",
       "relationshipName": "grantee",
       "relationshipType": "many-to-one",
       "relationshipValidateRules": "required"

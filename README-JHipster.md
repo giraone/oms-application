@@ -1,243 +1,141 @@
-# oms
+# Object Storage based on Postgres and S3
 
-This application was generated using JHipster 7.8.1, you can find documentation and help at [https://www.jhipster.tech](https://www.jhipster.tech).
+This Spring Boot application shows, how documents and images can be managed using a combination of
+a relational database (e.g. PostgreSQL) and a S3 object storage (AWS S3, Minio), where the S3 storage
+is directly exposed as a tier-2 system.
 
-## Project Structure
+All the logic (e.g. authorization) is held in a relational database (tier-3) and served by a tier-2 Spring Boot
+REST service. The S3 storage is used directly by the clients (browser) using **pre-signed URLs**.
 
-Node is required for generation and recommended for development. `package.json` is always generated for a better development experience with prettier, commit hooks, scripts and so on.
+## The application
 
-In the project root, JHipster generates configuration files for tools like git, prettier, eslint, husk, and others that are well known and you can find references in the web.
+Screenshot of the application's user interface
 
-`/src/*` structure follows default Java structure.
+![User-Interface](docs/images/screenshot-of-user-interface.png)
 
-- `.yo-rc.json` - Yeoman configuration file
-  JHipster configuration is stored in this file at `generator-jhipster` key. You may find `generator-jhipster-*` for specific blueprints configuration.
-- `.yo-resolve` (optional) - Yeoman conflict resolver
-  Allows to use a specific action when conflicts are found skipping prompts for files that matches a pattern. Each line should match `[pattern] [action]` with pattern been a [Minimatch](https://github.com/isaacs/minimatch#minimatch) pattern and action been one of skip (default if ommited) or force. Lines starting with `#` are considered comments and are ignored.
-- `.jhipster/*.json` - JHipster entity configuration files
+## Architecture
 
-- `npmw` - wrapper to use locally installed npm.
-  JHipster installs Node and npm locally using the build tool by default. This wrapper makes sure npm is installed locally and uses it avoiding some differences different versions can cause. By using `./npmw` instead of the traditional `npm` you can configure a Node-less environment to develop or test your application.
-- `/src/main/docker` - Docker configurations for the application and services that the application depends on
+Flow for upload of documents:
 
-## Development
+![Upload Flow](docs/images/Using-S3-Right-Upload.svg)
 
-Before you can build this project, you must install and configure the following dependencies on your machine:
+1. Client sends meta-data of document to application service (POST) and saves it to the application's database
+2. Client receives pre-signed URL to write document content (PUT)
+3. Client uses PUT to upload document content to S3 object storage
+4. Client receives HTTP 200 on success
+5. Object Storage publishes PUT events (`s3:ObjectCreated:Put`) via
+   - AQMP, Kafka, WebHooks, ... in case of using private minio or Ceph
+   - SQS, Lambda (in case of using public AWS S3)
+6. Application service
+   - receives PUT event
+   - finalizes meta data (content length, mime type, ...) to database
+   - creates a thumbnail (not shown in diagram)
+   - and sends "ready" event back to browser client using WebSocket/STOMP
 
-1. [Node.js][]: We use Node to run a development web server and build the project.
-   Depending on your system, you can install Node either from source or as a pre-packaged bundle.
+## Web Socket and STOMP
 
-After installing Node, you should be able to run the following command to install development tools.
-You will only need to run this command when dependencies change in [package.json](package.json).
+- the frontend uses [sockjs-client](https://www.npmjs.com/package/sockjs-client) to allow websockets also on older (non ES5) browsers
+- the frontend uses [webstomp-client](https://www.npmjs.com/package/webstomp-client)
+- the used STOMP protocol is `V1.2`
+- STOMP heart beats are on default rate for incoming / outcoming at 10 seconds / 10 seconds
+- The data returned by the application to the browser client on receiving an S3 event is currently a simple JSON
+  with a command (`thumbnailReady` when the asynchronous thumbnail creation process is done) and the full document object.
 
-```
-npm install
-```
-
-We use npm scripts and [Angular CLI][] with [Webpack][] as our build system.
-
-Run the following commands in two separate terminals to create a blissful development experience where your browser
-auto-refreshes when files change on your hard drive.
-
-```
-./mvnw
-npm start
-```
-
-Npm is also used to manage CSS and JavaScript dependencies used in this application. You can upgrade dependencies by
-specifying a newer version in [package.json](package.json). You can also run `npm update` and `npm install` to manage dependencies.
-Add the `help` flag on any command to see how you can use it. For example, `npm help update`.
-
-The `npm run` command will list all of the scripts available to run for this project.
-
-### PWA Support
-
-JHipster ships with PWA (Progressive Web App) support, and it's turned off by default. One of the main components of a PWA is a service worker.
-
-The service worker initialization code is disabled by default. To enable it, uncomment the following code in `src/main/webapp/app/app.module.ts`:
-
-```typescript
-ServiceWorkerModule.register('ngsw-worker.js', { enabled: false }),
+```json
+{
+    "event": "thumbnailReady",
+    "document": {
+        "id": 123,
+        ...
+    }
+}
 ```
 
-### Managing dependencies
+###
 
-For example, to add [Leaflet][] library as a runtime dependency of your application, you would run following command:
+## Local Setup with Minio
 
-```
-npm install --save --save-exact leaflet
-```
+The default setting
 
-To benefit from TypeScript type definitions from [DefinitelyTyped][] repository in development, you would run following command:
+- assumes minio runs on port `9999`
+- is using a bucket named `bucket-001`
+- uses `minio-local` as an alias
+- uses _WebHook_ for bucket event notification
 
-```
-npm install --save-dev --save-exact @types/leaflet
-```
-
-Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
-Edit [src/main/webapp/app/app.module.ts](src/main/webapp/app/app.module.ts) file:
+Start minio. Here on a local IP 192.168.178.45 with port 9999 - this IP and port is also pre-configured
+in [application-dev.yml](src/main/resources/config/application-dev.yml) - **You have to chance this, matching your setup!**
 
 ```
-import 'leaflet/dist/leaflet.js';
+export MINIO_ACCESS_KEY=minio
+export MINIO_SECRET_KEY=miniosecret
+export MINIO_REGION_NAME=default
+./minio server --address 192.168.178.45:9999 data
 ```
 
-Edit [src/main/webapp/content/scss/vendor.scss](src/main/webapp/content/scss/vendor.scss) file:
+```
+# [Optional] Check existing server aliases
+./mc alias list
+# [Optional] Remove existing server alias
+./mc alias remove minio-local
+# Configure the server's new alias
+./mc alias set minio-local http://192.168.178.45:9999 minio miniosecret --api "S3v4"
+# Check minio content
+./mc ls minio-local
+# Remove the bucket, if it exists
+./mc rb minio-local/bucket-01 --force
+# Create bucket
+./mc mb minio-local/bucket-01 --region default
+# Check version
+./mc --version
+# Update minio to latest version
+./mc update
+
+# Add/Replace webhook
+./mc admin config set minio-local/ notify_webhook:1 enable="true" endpoint="http://localhost:8080/event-api/s3/"
+> Setting new key has been successful.
+> Please restart your server with `mc admin service restart minio-local/`.
+
+# Restart server
+./mc admin service restart minio-local/
+# Will show
+AccessKey: minio
+SecretKey: miniosecret
+Region:    default
+SQS ARNs:  arn:minio:sqs:default:1:webhook
+
+# Add event filter to configuration
+./mc event add minio-local/bucket-01 arn:minio:sqs:default:1:webhook --event put
+Successfully added arn:minio:sqs:default:1:webhook
+
+# Check events
+./mc event list minio-local/bucket-01
+arn:minio:sqs:default:1:webhook   s3:ObjectCreated:*   Filter:
+
+# Remove event
+./mc event remove minio-local/bucket-01 arn:minio:sqs:default:1:webhook
 
 ```
-@import '~leaflet/dist/leaflet.css';
-```
 
-Note: There are still a few other things remaining to do for Leaflet that we won't detail here.
+## TSLint/ESLint
 
-For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
-
-### Using Angular CLI
-
-You can also use [Angular CLI][] to generate some custom client code.
-
-For example, the following command:
+Temporary or permanent switch off rules per line or per file:
 
 ```
-ng generate component my-component
+// eslint:disable-next-line:no-console
+// eslint:disable:no-console
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable @typescript-eslint/no-unused-vars
 ```
 
-will generate few files:
+## Change log
 
-```
-create src/main/webapp/app/my-component/my-component.component.html
-create src/main/webapp/app/my-component/my-component.component.ts
-update src/main/webapp/app/app.module.ts
-```
-
-### JHipster Control Center
-
-JHipster Control Center can help you manage and control your application(s). You can start a local control center server (accessible on http://localhost:7419) with:
-
-```
-docker-compose -f src/main/docker/jhipster-control-center.yml up
-```
-
-## Building for production
-
-### Packaging as jar
-
-To build the final jar and optimize the oms application for production, run:
-
-```
-./mvnw -Pprod clean verify
-```
-
-This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
-To ensure everything worked, run:
-
-```
-java -jar target/*.jar
-```
-
-Then navigate to [http://localhost:8080](http://localhost:8080) in your browser.
-
-Refer to [Using JHipster in production][] for more details.
-
-### Packaging as war
-
-To package your application as a war in order to deploy it to an application server, run:
-
-```
-./mvnw -Pprod,war clean verify
-```
-
-## Testing
-
-To launch your application's tests, run:
-
-```
-./mvnw verify
-```
-
-### Client tests
-
-Unit tests are run by [Jest][]. They're located in [src/test/javascript/](src/test/javascript/) and can be run with:
-
-```
-npm test
-```
-
-For more information, refer to the [Running tests page][].
-
-### Code quality
-
-Sonar is used to analyse code quality. You can start a local Sonar server (accessible on http://localhost:9001) with:
-
-```
-docker-compose -f src/main/docker/sonar.yml up -d
-```
-
-Note: we have turned off authentication in [src/main/docker/sonar.yml](src/main/docker/sonar.yml) for out of the box experience while trying out SonarQube, for real use cases turn it back on.
-
-You can run a Sonar analysis with using the [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) or by using the maven plugin.
-
-Then, run a Sonar analysis:
-
-```
-./mvnw -Pprod clean verify sonar:sonar
-```
-
-If you need to re-run the Sonar phase, please be sure to specify at least the `initialize` phase since Sonar properties are loaded from the sonar-project.properties file.
-
-```
-./mvnw initialize sonar:sonar
-```
-
-For more information, refer to the [Code quality page][].
-
-## Using Docker to simplify development (optional)
-
-You can use Docker to improve your JHipster development experience. A number of docker-compose configuration are available in the [src/main/docker](src/main/docker) folder to launch required third party services.
-
-For example, to start a postgresql database in a docker container, run:
-
-```
-docker-compose -f src/main/docker/postgresql.yml up -d
-```
-
-To stop it and remove the container, run:
-
-```
-docker-compose -f src/main/docker/postgresql.yml down
-```
-
-You can also fully dockerize your application and all the services that it depends on.
-To achieve this, first build a docker image of your app by running:
-
-```
-./mvnw -Pprod verify jib:dockerBuild
-```
-
-Then run:
-
-```
-docker-compose -f src/main/docker/app.yml up -d
-```
-
-For more information refer to [Using Docker and Docker-Compose][], this page also contains information on the docker-compose sub-generator (`jhipster docker-compose`), which is able to generate docker configurations for one or several JHipster applications.
-
-## Continuous Integration (optional)
-
-To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
-
-[jhipster homepage and latest documentation]: https://www.jhipster.tech
-[jhipster 7.8.1 archive]: https://www.jhipster.tech
-[using jhipster in development]: https://www.jhipster.tech/development/
-[using docker and docker-compose]: https://www.jhipster.tech/docker-compose
-[using jhipster in production]: https://www.jhipster.tech/production/
-[running tests page]: https://www.jhipster.tech/running-tests/
-[code quality page]: https://www.jhipster.tech/code-quality/
-[setting up continuous integration]: https://www.jhipster.tech/setting-up-ci/
-[node.js]: https://nodejs.org/
-[npm]: https://www.npmjs.com/
-[webpack]: https://webpack.github.io/
-[browsersync]: https://www.browsersync.io/
-[jest]: https://facebook.github.io/jest/
-[leaflet]: https://leafletjs.com/
-[definitelytyped]: https://definitelytyped.org/
-[angular cli]: https://cli.angular.io/
+- 10.07.2022 (0.7.0-SNAPSHOT)
+  - Refactoring of the WebSocket/Stomp part
+  - Application property `userBasedWebSocket` (currently false) for future non-broadcast based solutions
+  - curl scripts for simulating S3 (minio) web hooks added
+- 09.07.2022 (0.6.0-SNAPSHOT)
+  - Upgrade to JHipster 7.8.1
+  - Dependency upgrades for all other dependencies
+- 31.07.2020
+  - Upgrade to JHipster 6.10.1, Upgrade to AWS SDK 1.11.831

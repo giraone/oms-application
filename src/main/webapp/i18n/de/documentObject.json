@@ -6,7 +6,7 @@
         "refreshListLabel": "Liste aktualisieren",
         "createLabel": "Document Object erstellen",
         "createOrEditLabel": "Document Object erstellen oder bearbeiten",
-        "notFound": "No Document Objects found"
+        "notFound": "Keine Document Objects gefunden"
       },
       "created": "Document Object erstellt mit ID {{ param }}",
       "updated": "Document Object aktualisiert mit ID {{ param }}",
@@ -17,6 +17,7 @@
       "detail": {
         "title": "Document Object"
       },
+      "id": "ID",
       "path": "Path",
       "name": "Name",
       "pathUuid": "Path Uuid",
@@ -42,7 +43,7 @@
         "numberOfPages": "Number of pages of the document (if e.g. PDF). If not given, the document is not page oriented",
         "creation": "Timestamp of creation",
         "lastContentModification": "Timestamp of last content modification",
-        "documentPolicy": "Simple policy to show attribute based access controls"
+        "documentPolicy": "Simple policy to show attribute based access control"
       }
     }
   }

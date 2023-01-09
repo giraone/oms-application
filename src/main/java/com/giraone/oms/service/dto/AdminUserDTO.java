@@ -3,6 +3,7 @@ package com.giraone.oms.service.dto;
 import com.giraone.oms.config.Constants;
 import com.giraone.oms.domain.Authority;
 import com.giraone.oms.domain.User;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,7 +12,9 @@ import javax.validation.constraints.*;
 /**
  * A DTO representing a user, with his authorities.
  */
-public class AdminUserDTO {
+public class AdminUserDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

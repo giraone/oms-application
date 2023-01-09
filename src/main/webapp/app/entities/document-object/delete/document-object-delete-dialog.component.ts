@@ -3,6 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { IDocumentObject } from '../document-object.model';
 import { DocumentObjectService } from '../service/document-object.service';
+import { ITEM_DELETED_EVENT } from 'app/config/navigation.constants';
 
 @Component({
   templateUrl: './document-object-delete-dialog.component.html',
@@ -18,7 +19,7 @@ export class DocumentObjectDeleteDialogComponent {
 
   confirmDelete(id: number): void {
     this.documentObjectService.delete(id).subscribe(() => {
-      this.activeModal.close('deleted');
+      this.activeModal.close(ITEM_DELETED_EVENT);
     });
   }
 }

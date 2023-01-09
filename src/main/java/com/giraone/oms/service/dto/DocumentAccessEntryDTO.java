@@ -4,12 +4,14 @@ import com.giraone.oms.domain.enumeration.AccessType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.time.Instant;
-import javax.validation.constraints.NotNull;
+import java.util.Objects;
+import javax.validation.constraints.*;
 
 /**
  * A DTO for the {@link com.giraone.oms.domain.DocumentAccessEntry} entity.
  */
 @Schema(description = "A document access entry (access control entry)")
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class DocumentAccessEntryDTO implements Serializable {
 
     private Long id;
@@ -19,9 +21,9 @@ public class DocumentAccessEntryDTO implements Serializable {
 
     private Instant until;
 
-    private Long documentId;
+    private DocumentObjectDTO document;
 
-    private Long granteeId;
+    private UserDTO grantee;
 
     public Long getId() {
         return id;
@@ -47,20 +49,20 @@ public class DocumentAccessEntryDTO implements Serializable {
         this.until = until;
     }
 
-    public Long getDocumentId() {
-        return documentId;
+    public DocumentObjectDTO getDocument() {
+        return document;
     }
 
-    public void setDocumentId(Long documentObjectId) {
-        this.documentId = documentObjectId;
+    public void setDocument(DocumentObjectDTO document) {
+        this.document = document;
     }
 
-    public Long getGranteeId() {
-        return granteeId;
+    public UserDTO getGrantee() {
+        return grantee;
     }
 
-    public void setGranteeId(Long userId) {
-        this.granteeId = userId;
+    public void setGrantee(UserDTO grantee) {
+        this.grantee = grantee;
     }
 
     @Override
@@ -72,12 +74,16 @@ public class DocumentAccessEntryDTO implements Serializable {
             return false;
         }
 
-        return id != null && id.equals(((DocumentAccessEntryDTO) o).id);
+        DocumentAccessEntryDTO documentAccessEntryDTO = (DocumentAccessEntryDTO) o;
+        if (this.id == null) {
+            return false;
+        }
+        return Objects.equals(this.id, documentAccessEntryDTO.id);
     }
 
     @Override
     public int hashCode() {
-        return 31;
+        return Objects.hash(this.id);
     }
 
     // prettier-ignore
@@ -87,8 +93,8 @@ public class DocumentAccessEntryDTO implements Serializable {
             "id=" + getId() +
             ", access='" + getAccess() + "'" +
             ", until='" + getUntil() + "'" +
-            ", documentId=" + getDocumentId() +
-            ", granteeId=" + getGranteeId() +
+            ", document=" + getDocument() +
+            ", grantee=" + getGrantee() +
             "}";
     }
 }

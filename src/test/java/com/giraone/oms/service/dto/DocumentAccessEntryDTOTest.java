@@ -1,13 +1,14 @@
 package com.giraone.oms.service.dto;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.giraone.oms.web.rest.TestUtil;
 
-public class DocumentAccessEntryDTOTest {
+import com.giraone.oms.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class DocumentAccessEntryDTOTest {
 
     @Test
-    public void dtoEqualsVerifier() throws Exception {
+    void dtoEqualsVerifier() throws Exception {
         TestUtil.equalsVerifier(DocumentAccessEntryDTO.class);
         DocumentAccessEntryDTO documentAccessEntryDTO1 = new DocumentAccessEntryDTO();
         documentAccessEntryDTO1.setId(1L);

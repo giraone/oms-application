@@ -1,13 +1,14 @@
 package com.giraone.oms.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.giraone.oms.web.rest.TestUtil;
 
-public class DocumentAccessEntryTest {
+import com.giraone.oms.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class DocumentAccessEntryTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(DocumentAccessEntry.class);
         DocumentAccessEntry documentAccessEntry1 = new DocumentAccessEntry();
         documentAccessEntry1.setId(1L);

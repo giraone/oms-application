@@ -1,19 +1,17 @@
 package com.giraone.oms.service.impl;
 
-import com.giraone.oms.service.DocumentAccessEntryService;
 import com.giraone.oms.domain.DocumentAccessEntry;
 import com.giraone.oms.repository.DocumentAccessEntryRepository;
+import com.giraone.oms.service.DocumentAccessEntryService;
 import com.giraone.oms.service.dto.DocumentAccessEntryDTO;
 import com.giraone.oms.service.mapper.DocumentAccessEntryMapper;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 /**
  * Service Implementation for managing {@link DocumentAccessEntry}.
@@ -28,7 +26,10 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
 
     private final DocumentAccessEntryMapper documentAccessEntryMapper;
 
-    public DocumentAccessEntryServiceImpl(DocumentAccessEntryRepository documentAccessEntryRepository, DocumentAccessEntryMapper documentAccessEntryMapper) {
+    public DocumentAccessEntryServiceImpl(
+        DocumentAccessEntryRepository documentAccessEntryRepository,
+        DocumentAccessEntryMapper documentAccessEntryMapper
+    ) {
         this.documentAccessEntryRepository = documentAccessEntryRepository;
         this.documentAccessEntryMapper = documentAccessEntryMapper;
     }
@@ -42,20 +43,40 @@ public class DocumentAccessEntryServiceImpl implements DocumentAccessEntryServic
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<DocumentAccessEntryDTO> findAll(Pageable pageable) {
-        log.debug("Request to get all DocumentAccessEntries");
-        return documentAccessEntryRepository.findAll(pageable)
+    public DocumentAccessEntryDTO update(DocumentAccessEntryDTO documentAccessEntryDTO) {
+        log.debug("Request to update DocumentAccessEntry : {}", documentAccessEntryDTO);
+        DocumentAccessEntry documentAccessEntry = documentAccessEntryMapper.toEntity(documentAccessEntryDTO);
+        documentAccessEntry = documentAccessEntryRepository.save(documentAccessEntry);
+        return documentAccessEntryMapper.toDto(documentAccessEntry);
+    }
+
+    @Override
+    public Optional<DocumentAccessEntryDTO> partialUpdate(DocumentAccessEntryDTO documentAccessEntryDTO) {
+        log.debug("Request to partially update DocumentAccessEntry : {}", documentAccessEntryDTO);
+
+        return documentAccessEntryRepository
+            .findById(documentAccessEntryDTO.getId())
+            .map(existingDocumentAccessEntry -> {
+                documentAccessEntryMapper.partialUpdate(existingDocumentAccessEntry, documentAccessEntryDTO);
+
+                return existingDocumentAccessEntry;
+            })
+            .map(documentAccessEntryRepository::save)
             .map(documentAccessEntryMapper::toDto);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DocumentAccessEntryDTO> findAll(Pageable pageable) {
+        log.debug("Request to get all DocumentAccessEntries");
+        return documentAccessEntryRepository.findAll(pageable).map(documentAccessEntryMapper::toDto);
+    }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<DocumentAccessEntryDTO> findOne(Long id) {
         log.debug("Request to get DocumentAccessEntry : {}", id);
-        return documentAccessEntryRepository.findById(id)
-            .map(documentAccessEntryMapper::toDto);
+        return documentAccessEntryRepository.findById(id).map(documentAccessEntryMapper::toDto);
     }
 
     @Override

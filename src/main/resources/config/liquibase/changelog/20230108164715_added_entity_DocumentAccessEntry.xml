@@ -3,14 +3,13 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    
     <!--
         Added the entity DocumentAccessEntry.
     -->
-    <changeSet id="20191017090803-1" author="jhipster">
+    <changeSet id="20230108164715-1" author="jhipster">
         <createTable tableName="document_access_entry" remarks="A document access entry (access control entry)">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
@@ -18,7 +17,7 @@
             <column name="access" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="until" type="datetime">
+            <column name="until" type="${datetimeType}">
                 <constraints nullable="true" />
             </column>
             <column name="document_id" type="bigint">
@@ -29,12 +28,9 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="document_access_entry" columnName="until" columnDataType="datetime"/>
+        <dropDefaultValue tableName="document_access_entry" columnName="until" columnDataType="${datetimeType}"/>
     </changeSet>
 
-    <changeSet id="20191017090803-1-relations" author="jhipster">
-
-    </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
 
     <!--
@@ -45,18 +41,18 @@
           This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
           Spring Boot configuration key.
     -->
-    <changeSet id="20191017090803-1-data" author="jhipster" context="faker">
+    <changeSet id="20230108164715-1-data" author="jhipster" context="faker">
         <loadData
                   file="config/liquibase/fake-data/document_access_entry.csv"
                   separator=";"
-                  tableName="document_access_entry">
+                  tableName="document_access_entry"
+                  usePreparedStatements="true">
             <column name="id" type="numeric"/>
             <column name="access" type="string"/>
-            <column name="until" type="datetime"/>
+            <column name="until" type="date"/>
             <column name="document_id" type="numeric"/>
             <column name="grantee_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
     </changeSet>
-
 </databaseChangeLog>

@@ -20,7 +20,7 @@ export class DocumentsUploadComponent implements OnInit {
   users: IUser[] | null = null;
 
   editForm = this.fb.group({
-    name: [null, [Validators.required]],
+    name: [''],
   });
 
   constructor(
